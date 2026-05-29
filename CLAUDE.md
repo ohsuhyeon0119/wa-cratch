@@ -102,6 +102,44 @@ cd frontend && npx playwright test
 ### Knowledge Base
 GitHub Wiki에 유지. AI는 읽기만 하고 절대 수정하지 않는다.
 
+KB가 필요할 때는 Wiki 레포를 클론해서 읽는다:
+```bash
+git clone https://github.com/ohsuhyeon0119/cat-cratch.wiki.git /tmp/catcratch-wiki
+```
+
+---
+
+## AI 행동 지침
+
+### 작업 시작 시
+
+1. **이슈 파악**: GitHub MCP로 해당 이슈 읽기 → 스펙, 완료 조건 확인
+2. **KB 확인**: 관련 아키텍처/도메인 내용이 있으면 Wiki에서 읽기
+3. **라이브러리 문서**: 외부 라이브러리 코드 작성 전 Context7 MCP로 최신 API 확인
+
+### 구현 중
+
+- 테스트 파일(`backend/tests/hurl/`, `frontend/e2e/`)은 절대 수정하지 않는다
+- 커밋은 작업 단위로, 반드시 이슈 번호를 포함한다
+  ```
+  feat: 로그인 API 구현 (#3)
+  fix: 스프라이트 이동 오차 수정 (#7)
+  ```
+- 커밋 전 테스트 통과 여부는 Hook이 자동 검증한다 (실패 시 차단됨)
+
+### PR 생성 시
+
+- 개발자가 명시적으로 요청할 때만 PR을 생성한다
+- PR 본문에 관련 이슈 번호(`Closes #N`), 변경 내용, 테스트 방법을 포함한다
+- PR 생성 후 GitHub Actions 결과를 확인한다
+
+### 하지 말아야 할 것
+
+- 테스트 파일 수정 (Hook이 차단하지만 시도조차 하지 않는다)
+- `git push --force`
+- GitHub 이슈/칸반 상태 변경 (읽기만 가능)
+- Wiki 내용 수정 (읽기만 가능)
+
 ## MCP 사용 가이드
 
 ### Context7
