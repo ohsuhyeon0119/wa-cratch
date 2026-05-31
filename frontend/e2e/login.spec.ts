@@ -15,7 +15,7 @@ test('회원가입 탭 클릭 시 회원가입 폼으로 전환된다', async ({
   // When
   await page.getByRole('button', { name: /회원가입/ }).click();
   // Then
-  await expect(page.getByText('와피냥 친구 되기!')).toBeVisible();
+  await expect(page.getByText('와냥이 친구 되기!')).toBeVisible();
   await expect(page.getByPlaceholder(/닉네임/)).toBeVisible();
 });
 
