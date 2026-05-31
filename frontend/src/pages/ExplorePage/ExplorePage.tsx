@@ -1,24 +1,25 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import s from './ExplorePage.module.css'
+import { MOCK_PROJECTS, type Project } from '../../mock/projects'
 
 type Sort = 'latest' | 'views' | 'likes'
 
-const PROJECTS = [
-  { id: 1, emoji: '🐱', title: '냥이 점프', author: '코딩고양이', likes: 234, views: '1.2k', thumb: s.pt1 },
-  { id: 2, emoji: '🌊', title: '바다 탐험', author: '바다소녀', likes: 189, views: '876', thumb: s.pt2 },
-  { id: 3, emoji: '🌟', title: '별 수집하기', author: '별동이', likes: 312, views: '2.1k', thumb: s.pt3 },
-  { id: 4, emoji: '🦋', title: '나비 미로', author: '초등코더', likes: 156, views: '654', thumb: s.pt4 },
-  { id: 5, emoji: '🐰', title: '토끼 달리기', author: '토끼야', likes: 201, views: '920', thumb: s.pt5 },
-  { id: 6, emoji: '🌈', title: '무지개 그림판', author: '색깔왕', likes: 278, views: '1.5k', thumb: s.pt6 },
-  { id: 7, emoji: '🚀', title: '우주 여행', author: '우주선장', likes: 344, views: '2.8k', thumb: s.pt7 },
-  { id: 8, emoji: '🎵', title: '음악 연주', author: '피아노맨', likes: 198, views: '730', thumb: s.pt8 },
-  { id: 9, emoji: '🎪', title: '서커스 쇼', author: '마술사', likes: 167, views: '610', thumb: s.pt9 },
-  { id: 10, emoji: '🌿', title: '정원 가꾸기', author: '초록이', likes: 145, views: '523', thumb: s.pt10 },
-]
+const THUMB_CLASSES = [s.pt1, s.pt2, s.pt3, s.pt4, s.pt5, s.pt6, s.pt7, s.pt8, s.pt9, s.pt10]
 
 export default function ExplorePage() {
   const [sort, setSort] = useState<Sort>('latest')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filtered = MOCK_PROJECTS.filter((p: Project) =>
+    p.title.includes(searchQuery) || p.author.includes(searchQuery)
+  )
+
+  const sorted = [...filtered].sort((a: Project, b: Project) => {
+    if (sort === 'views') return b.views - a.views
+    if (sort === 'likes') return b.likes - a.likes
+    return b.id - a.id  // 'latest': id 내림차순
+  })
 
   return (
     <>
@@ -78,7 +79,12 @@ export default function ExplorePage() {
           <h1 className={s.phTitle}>작품을 <span className={s.cOrange}>구경</span>해봐요!</h1>
           <p className={s.phSub}>다른 친구들이 만든 멋진 프로젝트들이에요 🧇</p>
           <div className={s.phSearch}>
-            <input type="text" placeholder="작품 이름, 작가 이름으로 검색..."/>
+            <input
+              type="text"
+              placeholder="작품 이름, 작가 이름으로 검색..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
             <button className={s.phSearchBtn}>검색 🔍</button>
           </div>
         </div>
@@ -93,13 +99,13 @@ export default function ExplorePage() {
         </div>
 
         <div className={s.sectionTitle}>
-          모든 작품 <span className={s.titleBadge}>{PROJECTS.length}개</span>
+          모든 작품 <span className={s.titleBadge}>{sorted.length}개</span>
         </div>
 
         <div className={s.projectsGrid}>
-          {PROJECTS.map(p => (
+          {sorted.map((p: Project, index: number) => (
             <Link key={p.id} to={`/play/${p.id}`} className={s.projCard}>
-              <div className={`${s.projThumb} ${p.thumb}`}>
+              <div className={`${s.projThumb} ${THUMB_CLASSES[index % THUMB_CLASSES.length]}`}>
                 {p.emoji}
                 <div className={s.projHover}><div className={s.projPlayBtn}>▶</div></div>
               </div>
