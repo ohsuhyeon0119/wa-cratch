@@ -1,0 +1,178 @@
+@keyframes floatRnd {
+  0%,100% { transform: translateY(0) rotate(-5deg); }
+  50%      { transform: translateY(-14px) rotate(5deg); }
+}
+@keyframes mascotBob {
+  0%,100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-16px) rotate(3deg); }
+}
+
+.page {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* LEFT PANEL */
+.left {
+  width: 52%;
+  background: linear-gradient(145deg, #E8A818 0%, #FFC947 55%, #FFE090 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 60px 56px; position: relative; overflow: hidden;
+}
+.left::after {
+  content: '';
+  position: absolute; top: 0; right: -48px; bottom: 0;
+  width: 96px;
+  background: var(--cream);
+  clip-path: ellipse(48px 60% at 100% 50%);
+  z-index: 1;
+}
+.left::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.25) 1.5px, transparent 1.5px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+.leftInner { position: relative; z-index: 0; text-align: center; }
+.pawFloat {
+  position: absolute; font-size: 28px; opacity: .22; pointer-events: none;
+  animation: floatRnd 4s ease-in-out infinite;
+}
+.pf1 { top: 8%;  left: 12%; animation-delay: 0s;   animation-duration: 3.6s; font-size: 32px; }
+.pf2 { top: 18%; right: 8%; animation-delay: 1s;   animation-duration: 4.2s; }
+.pf3 { bottom: 22%; left: 6%;  animation-delay: 0.5s; animation-duration: 3s; font-size: 22px; }
+.pf4 { bottom: 10%; right: 14%; animation-delay: 1.8s; animation-duration: 4.8s; font-size: 24px; }
+.pf5 { top: 44%; left: 4%;  animation-delay: 0.8s; animation-duration: 3.4s; font-size: 20px; }
+.mascotWrap {
+  width: 240px; height: 240px; margin: 0 auto 28px;
+  animation: mascotBob 3.5s ease-in-out infinite;
+}
+.leftTitle {
+  font-family: var(--font-d); font-size: 40px; font-weight: 800;
+  color: var(--dark); margin-bottom: 12px; letter-spacing: -.5px;
+}
+.leftSub {
+  font-size: 17px; color: rgba(44,24,16,.72); font-weight: 600;
+  line-height: 1.65;
+}
+
+/* RIGHT PANEL */
+.right {
+  flex: 1;
+  background: var(--cream);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 60px 56px 60px 80px; position: relative;
+}
+.right::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, #FF6B35 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: .04; pointer-events: none;
+}
+.formCard {
+  width: 100%; max-width: 420px;
+  position: relative; z-index: 1;
+}
+.backLink {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--mid); font-weight: 700; font-size: 14px;
+  text-decoration: none; margin-bottom: 32px;
+  transition: color .2s;
+}
+.backLink:hover { color: var(--orange); }
+
+/* TABS */
+.tabs {
+  display: flex; gap: 6px;
+  background: #F0E0D6; padding: 5px;
+  border-radius: var(--r-md); margin-bottom: 36px;
+}
+.tab {
+  flex: 1; font-family: var(--font-b); font-weight: 800; font-size: 15px;
+  padding: 11px; border-radius: var(--r-sm); border: none; cursor: pointer;
+  background: transparent; color: var(--mid); transition: all .2s;
+}
+.tab.active {
+  background: #fff; color: var(--orange);
+  box-shadow: 2px 3px 0 var(--orange-pale);
+}
+.tab:not(.active):hover { color: var(--orange); }
+
+/* FORM */
+.formTitle {
+  font-family: var(--font-d); font-size: 30px; font-weight: 800;
+  margin-bottom: 8px; color: var(--dark);
+}
+.formSub { font-size: 14px; color: var(--mid); font-weight: 600; margin-bottom: 28px; }
+.field { margin-bottom: 18px; }
+.field label {
+  display: block; font-weight: 800; font-size: 13px; color: var(--dark);
+  margin-bottom: 7px;
+}
+.fieldWrap { position: relative; }
+.fieldIcon {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  font-size: 17px; pointer-events: none;
+}
+.fieldInput {
+  width: 100%; font-family: var(--font-b); font-weight: 600; font-size: 15px;
+  padding: 13px 16px 13px 46px;
+  border: 2.5px solid #F0E0D6; border-radius: var(--r-md);
+  background: #fff; color: var(--dark); outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.fieldInput::placeholder { color: var(--mid); opacity: .7; }
+.fieldInput:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 4px var(--orange-pale);
+}
+.rememberRow {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px;
+}
+.rememberLeft { display: flex; align-items: center; gap: 8px; }
+.rememberLeft input[type=checkbox] {
+  width: 18px; height: 18px; accent-color: var(--orange); cursor: pointer;
+}
+.rememberLeft label { font-size: 13px; font-weight: 700; color: var(--mid); cursor: pointer; }
+.forgot { font-size: 13px; font-weight: 700; color: var(--orange); text-decoration: none; }
+.forgot:hover { text-decoration: underline; }
+
+/* BUTTONS */
+.btnSubmit {
+  width: 100%; font-family: var(--font-b); font-weight: 800; font-size: 17px;
+  padding: 15px; border-radius: var(--r-md); border: none; cursor: pointer;
+  background: var(--wf); color: var(--dark);
+  box-shadow: 3px 5px 0 var(--wf-dk);
+  transition: all .15s; margin-bottom: 20px;
+}
+.btnSubmit:hover  { transform: translateY(-2px); box-shadow: 3px 7px 0 var(--wf-dk); }
+.btnSubmit:active { transform: translateY(1px);  box-shadow: 2px 2px 0 var(--wf-dk); }
+.btnSubmitTeal {
+  background: var(--teal); color: #fff;
+  box-shadow: 3px 5px 0 var(--teal-dk);
+  margin-top: 8px;
+}
+.btnSubmitTeal:hover  { transform: translateY(-2px); box-shadow: 3px 7px 0 var(--teal-dk); }
+
+/* SWITCH HINT */
+.switchHint {
+  text-align: center; font-size: 14px; color: var(--mid); font-weight: 600;
+  margin-top: 8px;
+}
+.switchHint a { color: var(--orange); font-weight: 800; text-decoration: none; cursor: pointer; }
+.switchHint a:hover { text-decoration: underline; }
+
+/* PASSWORD STRENGTH */
+.pwStrength { margin-top: 8px; display: flex; gap: 5px; align-items: center; }
+.pwBar { flex: 1; height: 5px; border-radius: 3px; background: #F0E0D6; }
+.fill1 { background: #FF6B6B; }
+.fill2 { background: var(--yellow); }
+.fill3 { background: var(--teal); }
+.pwLabel { font-size: 11px; font-weight: 700; color: var(--mid); }
