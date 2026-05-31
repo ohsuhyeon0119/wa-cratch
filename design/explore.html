@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WaCratch — 작품 탐색</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --wf: #FFC947; --wf-dk: #C88010; --wf-pale: #FFF3C8;
+      --orange: #FF6B35; --orange-dk: #D44E1A; --orange-pale: #FFE8DC;
+      --teal: #2EC4B6; --teal-dk: #1A9E96; --teal-pale: #D6F5F2;
+      --yellow: #FFD23F; --yellow-dk: #D4A020;
+      --pink: #FF85A1; --pink-pale: #FFE5EC;
+      --purple: #A855F7;
+      --green: #22C55E; --green-pale: #DCFCE7;
+      --cream: #FFF8F2; --dark: #2C1810; --mid: #7B6B63; --border: #F0E0D6;
+      --font-d: 'Baloo 2', cursive; --font-b: 'Nunito', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-b); background: var(--cream); color: var(--dark); min-height: 100vh; overflow-x: hidden; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: radial-gradient(circle, #C88010 1px, transparent 1px);
+      background-size: 36px 36px; opacity: .05; pointer-events: none; z-index: 0;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(255,248,242,.94); backdrop-filter: blur(14px);
+      border-bottom: 3px solid var(--orange-pale);
+      padding: 10px 48px; display: flex; align-items: center; gap: 16px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+    .nav-logo-icon {
+      width: 40px; height: 40px; background: var(--orange); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+      box-shadow: 2px 3px 0 var(--orange-dk); transition: transform .2s;
+    }
+    .nav-logo-icon:hover { transform: rotate(-12deg) scale(1.08); }
+    .nav-logo-text { font-family: var(--font-d); font-size: 22px; font-weight: 800; color: var(--orange); }
+    .nav-logo-text em { color: var(--teal); font-style: normal; }
+    .nav-links { display: flex; gap: 4px; list-style: none; flex: 1; }
+    .nav-links a { font-weight: 700; font-size: 14px; color: var(--mid); text-decoration: none; padding: 7px 13px; border-radius: 10px; transition: all .2s; }
+    .nav-links a:hover, .nav-links a.active { background: var(--wf-pale); color: var(--wf-dk); }
+    .nav-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn { font-family: var(--font-b); font-weight: 800; font-size: 14px; padding: 9px 18px; border-radius: 10px; border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all .15s; }
+    .btn-ghost { background: transparent; border: 2.5px solid var(--orange); color: var(--orange); }
+    .btn-ghost:hover { background: var(--orange-pale); }
+    .btn-primary { background: var(--wf); color: var(--dark); box-shadow: 2px 3px 0 var(--wf-dk); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 2px 5px 0 var(--wf-dk); }
+
+    /* ── PAGE HEADER ── */
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes spin-slow { to { transform: rotate(360deg); } }
+    @keyframes wobble { 0%,100%{transform:rotate(-8deg)} 50%{transform:rotate(8deg)} }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    .page-header {
+      position: relative; overflow: hidden;
+      background: linear-gradient(130deg, #FFF3C8 0%, #D6F5F2 55%, #FFE5EC 100%);
+      padding: 52px 48px 48px;
+      border-bottom: 3px solid rgba(200,128,16,.15);
+    }
+
+    /* 헤더 장식 도형들 */
+    .hd-shape { position: absolute; pointer-events: none; z-index: 0; }
+    .hd-s1 { right: 2%;  top: -10%; animation: float 6s ease-in-out infinite; }
+    .hd-s2 { right: 18%; top: 10%;  animation: spin-slow 20s linear infinite; }
+    .hd-s3 { right: 32%; bottom: -5%; animation: float 5s ease-in-out infinite .4s; }
+    .hd-s4 { right: 8%;  bottom: 10%; animation: float 4s ease-in-out infinite .8s; }
+    .hd-s5 { left: 2%;   bottom: -8%; animation: wobble 6s ease-in-out infinite; }
+    .hd-s6 { right: 44%; top: 5%;    animation: float 7s ease-in-out infinite 1s; }
+
+    .header-inner { position: relative; z-index: 1; }
+    .ph-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--wf); color: var(--dark); font-weight: 800; font-size: 13px;
+      padding: 5px 14px; border-radius: 100px; box-shadow: 2px 3px 0 var(--wf-dk);
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+    .ph-title {
+      font-family: var(--font-d); font-size: 48px; font-weight: 800;
+      line-height: 1.1; margin-bottom: 10px; letter-spacing: -1.5px;
+      animation: fadeIn .6s .1s ease-out both;
+    }
+    .ph-title .c-orange { color: var(--orange); }
+    .ph-title .c-teal   { color: var(--teal); }
+    .ph-sub {
+      font-size: 17px; font-weight: 600; color: var(--mid);
+      margin-bottom: 28px;
+      animation: fadeIn .6s .2s ease-out both;
+    }
+
+    /* 검색창 */
+    .ph-search {
+      max-width: 520px; position: relative;
+      animation: fadeIn .6s .3s ease-out both;
+    }
+    .ph-search input {
+      width: 100%; font-family: var(--font-b); font-weight: 700; font-size: 15px;
+      padding: 14px 130px 14px 50px; border-radius: 100px;
+      border: 3px solid white; background: white; outline: none; color: var(--dark);
+      box-shadow: 4px 6px 0 rgba(200,128,16,.15);
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .ph-search input:focus { border-color: var(--wf-dk); box-shadow: 4px 6px 0 rgba(200,128,16,.25); }
+    .ph-search::before { content: '🔍'; position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 17px; pointer-events: none; }
+    .ph-search-btn {
+      position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+      background: var(--wf); color: var(--dark); border: none; border-radius: 100px;
+      padding: 9px 22px; font-family: var(--font-b); font-weight: 800; font-size: 14px;
+      cursor: pointer; transition: all .15s; box-shadow: 2px 3px 0 var(--wf-dk);
+    }
+    .ph-search-btn:hover { background: var(--wf-dk); color: #fff; transform: translateY(calc(-50% - 1px)); }
+
+    /* ── MAIN ── */
+    .main { padding: 32px 48px 80px; position: relative; z-index: 1; }
+
+    /* 정렬 탭 */
+    .sort-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; }
+    .sort-label { font-family: var(--font-d); font-size: 14px; font-weight: 800; color: var(--mid); margin-right: 4px; }
+    .sort-tab {
+      font-family: var(--font-b); font-weight: 800; font-size: 13px;
+      padding: 8px 18px; border-radius: 100px; cursor: pointer; border: 2.5px solid var(--border);
+      background: #fff; color: var(--mid); transition: all .2s;
+    }
+    .sort-tab:hover { border-color: var(--wf-dk); color: var(--wf-dk); background: var(--wf-pale); }
+    .sort-tab.active { background: var(--wf); color: var(--dark); border-color: var(--wf-dk); box-shadow: 2px 3px 0 var(--wf-dk); }
+
+    /* 섹션 제목 */
+    .section-title {
+      font-family: var(--font-d); font-size: 22px; font-weight: 800;
+      margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+    }
+    .title-badge {
+      font-size: 12px; font-weight: 800; padding: 3px 12px; border-radius: 100px;
+      background: var(--wf-pale); color: var(--wf-dk); box-shadow: 1px 2px 0 var(--wf-dk);
+      font-family: var(--font-b);
+    }
+
+    /* ── 프로젝트 그리드 ── */
+    .projects-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+    .proj-card {
+      background: #fff; border-radius: 20px; overflow: hidden;
+      border: 3px solid var(--border); cursor: pointer;
+      transition: all .25s; text-decoration: none; color: inherit;
+      display: block;
+      box-shadow: 4px 5px 0 var(--border);
+    }
+    .proj-card:hover { transform: translateY(-6px); }
+
+    /* 카드별 컬러 테마 */
+    .proj-card:nth-child(4n+1) { border-color: #FFD4B8; box-shadow: 4px 5px 0 #FFD4B8; }
+    .proj-card:nth-child(4n+1):hover { border-color: var(--orange); box-shadow: 4px 8px 0 var(--orange); }
+    .proj-card:nth-child(4n+2) { border-color: #B8EDEA; box-shadow: 4px 5px 0 #B8EDEA; }
+    .proj-card:nth-child(4n+2):hover { border-color: var(--teal); box-shadow: 4px 8px 0 var(--teal); }
+    .proj-card:nth-child(4n+3) { border-color: #FFE89C; box-shadow: 4px 5px 0 #FFE89C; }
+    .proj-card:nth-child(4n+3):hover { border-color: var(--wf-dk); box-shadow: 4px 8px 0 var(--wf-dk); }
+    .proj-card:nth-child(4n+4) { border-color: #DDBBFC; box-shadow: 4px 5px 0 #DDBBFC; }
+    .proj-card:nth-child(4n+4):hover { border-color: var(--purple); box-shadow: 4px 8px 0 var(--purple); }
+
+    .proj-thumb {
+      width: 100%; aspect-ratio: 4/3;
+      display: flex; align-items: center; justify-content: center; font-size: 52px;
+      position: relative; overflow: hidden;
+    }
+    /* 썸네일 배경 */
+    .pt1  { background: linear-gradient(135deg, #FFE8DC, #FFCBB0); }
+    .pt2  { background: linear-gradient(135deg, #D6F5F2, #A8EDE8); }
+    .pt3  { background: linear-gradient(135deg, #FFF5CC, #FFE070); }
+    .pt4  { background: linear-gradient(135deg, #F3E8FF, #DDB8FF); }
+    .pt5  { background: linear-gradient(135deg, #FFE5EC, #FFC0D0); }
+    .pt6  { background: linear-gradient(135deg, #DCFCE7, #A8E8BC); }
+    .pt7  { background: linear-gradient(135deg, #EFF6FF, #BFDBFE); }
+    .pt8  { background: linear-gradient(135deg, #FFF8DC, #FFE599); }
+    .pt9  { background: linear-gradient(135deg, #FCE7F3, #FBCFE8); }
+    .pt10 { background: linear-gradient(135deg, #F0FDF4, #BBF7D0); }
+
+    /* 썸네일 hover 오버레이 */
+    .proj-hover {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,.28);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity .2s;
+    }
+    .proj-card:hover .proj-hover { opacity: 1; }
+    .proj-play-btn {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: rgba(255,255,255,.95);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; box-shadow: 0 4px 16px rgba(0,0,0,.18);
+      transition: transform .2s;
+    }
+    .proj-card:hover .proj-play-btn { transform: scale(1.1); }
+
+    .proj-info { padding: 14px 16px 16px; }
+    .proj-title {
+      font-family: var(--font-d); font-weight: 800; font-size: 15px; margin-bottom: 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .proj-author { font-size: 12px; color: var(--mid); font-weight: 600; margin-bottom: 8px; }
+    .proj-stats { display: flex; gap: 10px; }
+    .proj-stat {
+      font-size: 12px; color: var(--mid); font-weight: 700;
+      display: flex; align-items: center; gap: 3px;
+      background: var(--cream); border-radius: 100px; padding: 2px 8px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon">🧇</div>
+    <span class="nav-logo-text">Wa<em>Cratch</em></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="explore.html" class="active">🔍 탐색하기</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="login.html" class="btn btn-ghost">로그인</a>
+    <a href="project.html" class="btn btn-primary">+ 만들기</a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+
+  <!-- 장식 도형 -->
+  <div class="hd-shape hd-s1">
+    <svg width="150" height="150" viewBox="0 0 150 150" fill="none">
+      <circle cx="75" cy="75" r="75" fill="#FF85A1" opacity=".65"/>
+    </svg>
+  </div>
+  <div class="hd-shape hd-s2">
+    <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+      <polygon points="28,3 34,20 52,20 38,31 43,49 28,38 13,49 18,31 4,20 22,20" fill="#FFD23F"/>
+    </svg>
+  </div>
+  <div class="hd-shape hd-s3">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <rect width="80" height="80" rx="16" fill="#FF6B35" opacity=".75"/>
+      <line x1="0" y1="27" x2="80" y2="27" stroke="rgba(255,255,255,.45)" stroke-width="3"/>
+      <line x1="0" y1="53" x2="80" y2="53" stroke="rgba(255,255,255,.45)" stroke-width="3"/>
+      <line x1="27" y1="0" x2="27" y2="80" stroke="rgba(255,255,255,.45)" stroke-width="3"/>
+      <line x1="53" y1="0" x2="53" y2="80" stroke="rgba(255,255,255,.45)" stroke-width="3"/>
+    </svg>
+  </div>
+  <div class="hd-shape hd-s4">
+    <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+      <rect width="52" height="52" rx="16" fill="#2EC4B6" opacity=".8"/>
+    </svg>
+  </div>
+  <div class="hd-shape hd-s5">
+    <svg width="52" height="68" viewBox="0 0 52 68" fill="none">
+      <rect x="0" y="0" width="14" height="68" rx="7" fill="#A855F7" opacity=".75"/>
+      <rect x="0" y="54" width="52" height="14" rx="7" fill="#A855F7" opacity=".75"/>
+    </svg>
+  </div>
+  <div class="hd-shape hd-s6">
+    <svg width="76" height="32" viewBox="0 0 76 32" fill="none">
+      <rect width="76" height="32" rx="16" fill="#86EFAC" opacity=".8"/>
+    </svg>
+  </div>
+
+
+  <div class="header-inner">
+    <div class="ph-badge">🔍 작품 탐색</div>
+    <h1 class="ph-title">
+      작품을 <span class="c-orange">구경</span>해봐요!
+    </h1>
+    <p class="ph-sub">다른 친구들이 만든 멋진 프로젝트들이에요 🧇</p>
+    <div class="ph-search">
+      <input type="text" placeholder="작품 이름, 작가 이름으로 검색...">
+      <button class="ph-search-btn">검색 🔍</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- 정렬 탭 -->
+  <div class="sort-bar">
+    <span class="sort-label">정렬:</span>
+    <button class="sort-tab active" onclick="setSort(this,'latest')">🆕 최신순</button>
+    <button class="sort-tab" onclick="setSort(this,'views')">👁️ 조회순</button>
+    <button class="sort-tab" onclick="setSort(this,'likes')">❤️ 좋아요순</button>
+  </div>
+
+  <!-- 작품 그리드 -->
+  <div class="section-title">
+    모든 작품 <span class="title-badge">10개</span>
+  </div>
+  <div class="projects-grid">
+    <a href="play.html" class="proj-card">
+      <div class="proj-thumb pt1">🐱
+        <div class="proj-hover"><div class="proj-play-btn">▶</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-title">냥이 점프</div>
+        <div class="proj-author">by 코딩고양이</div>
+        <div class="proj-stats"><span class="proj-stat">❤️ 234</span><span class="proj-stat">👁️ 1.2k</span></div>
+      </div>
+    </a>
+    <a href="play.html" class="proj-card">
+      <div class="proj-thumb pt2">🌊
+        <div class="proj-hover"><div class="proj-play-btn">▶</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-title">바다 탐험</div>
+        <div class="proj-author">by 바다소녀</div>
+        <div class="proj-stats"><span class="proj-stat">❤️ 189</span><span class="proj-stat">👁️ 876</span></div>
+      </div>
+    </a>
+    <a href="play.html" class="proj-card">
+      <div class="proj-thumb pt3">🌟
+        <div class="proj-hover"><div class="proj-play-btn">▶</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-title">별 수집하기</div>
+        <div class="proj-author">by 별동이</div>
+        <div class="proj-stats"><span class="proj-stat">❤️ 312</span><span class="proj-stat">👁️ 2.1k</span></div>
+      </div>
+    </a>
+    <a href="play.html" class="proj-card">
+      <div class="proj-thumb pt4">🦋
+        <div class="proj-hover"><div class="proj-play-btn">▶</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-title">나비 미로</div>
+        <div class="proj-author">by 초등코더</div>
+        <div class="proj-stats"><span class="proj-stat">❤️ 156</span><span class="proj-stat">👁️ 654</span></div>
+      </div>
+    </a>
+    <a href="play.html" class="proj-card">
+      <div class="proj-thumb pt5">🐰
+        <div class="proj-hover"><div class="proj-play-btn">▶</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-title">토끼 달리기</div>
+        <div class="proj-author">by 토끼야</div>
+        <div class="proj-stats"><span class="proj-stat">❤️ 201</span><span class="proj-stat">👁️ 920</span></div>
+      </div>
+    </a>
+    <a href="play.html" class="proj-card">
+      <div class="proj-thumb pt6">🌈
+        <div class="proj-hover"><div class="proj-play-btn">▶</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-title">무지개 그림판</div>
+        <div class="proj-author">by 색깔왕</div>
+        <div class="proj-stats"><span class="proj-stat">❤️ 278</span><span class="proj-stat">👁️ 1.5k</span></div>
+      </div>
+    </a>
+    <a href="play.html" class="proj-card">
+      <div class="proj-thumb pt7">🚀
+        <div class="proj-hover"><div class="proj-play-btn">▶</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-title">우주 여행</div>
+        <div class="proj-author">by 우주선장</div>
+        <div class="proj-stats"><span class="proj-stat">❤️ 344</span><span class="proj-stat">👁️ 2.8k</span></div>
+      </div>
+    </a>
+    <a href="play.html" class="proj-card">
+      <div class="proj-thumb pt8">🎵
+        <div class="proj-hover"><div class="proj-play-btn">▶</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-title">음악 연주</div>
+        <div class="proj-author">by 피아노맨</div>
+        <div class="proj-stats"><span class="proj-stat">❤️ 198</span><span class="proj-stat">👁️ 730</span></div>
+      </div>
+    </a>
+    <a href="play.html" class="proj-card">
+      <div class="proj-thumb pt9">🎪
+        <div class="proj-hover"><div class="proj-play-btn">▶</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-title">서커스 쇼</div>
+        <div class="proj-author">by 마술사</div>
+        <div class="proj-stats"><span class="proj-stat">❤️ 167</span><span class="proj-stat">👁️ 610</span></div>
+      </div>
+    </a>
+    <a href="play.html" class="proj-card">
+      <div class="proj-thumb pt10">🌿
+        <div class="proj-hover"><div class="proj-play-btn">▶</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-title">정원 가꾸기</div>
+        <div class="proj-author">by 초록이</div>
+        <div class="proj-stats"><span class="proj-stat">❤️ 145</span><span class="proj-stat">👁️ 523</span></div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<script>
+  function setSort(el, val) {
+    document.querySelectorAll('.sort-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    console.log('sort by:', val);
+  }
+</script>
+</body>
+</html>

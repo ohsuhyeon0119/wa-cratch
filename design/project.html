@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WaCratch — 프로젝트 에디터</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --wf:           #FFC947;
+      --wf-dk:        #C88010;
+      --wf-pale:      #FFF3C8;
+      --orange:       #FF6B35;
+      --orange-dk:    #D44E1A;
+      --orange-pale:  #FFE8DC;
+      --teal:         #2EC4B6;
+      --teal-dk:      #1A9E96;
+      --teal-pale:    #D6F5F2;
+      --yellow:       #FFD23F;
+      --yellow-dk:    #D4A020;
+      --pink:         #FF85A1;
+      --pink-dk:      #E05882;
+      --pink-pale:    #FFE5EC;
+      --purple:       #A855F7;
+      --purple-pale:  #F3E8FF;
+      --green:        #22C55E;
+      --green-dk:     #16A34A;
+      --blue:         #3B82F6;
+      --blue-pale:    #EFF6FF;
+      --cream:        #FFF8F2;
+      --dark:         #2C1810;
+      --mid:          #7B6B63;
+      --sidebar-bg:   #FFF4EE;
+      --ws-bg:        #F5F0EC;
+      --stage-bg:     #FFF8F2;
+      --border:       #F0E0D6;
+      --toolbar-h:    58px;
+      --toolbox-w:    220px;
+      --stage-w:      440px;
+      --font-d:  'Baloo 2', cursive;
+      --font-b:  'Nunito', sans-serif;
+      --font-code: 'Fira Code', monospace;
+    }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: var(--font-b);
+      background: var(--cream);
+      color: var(--dark);
+      display: flex; flex-direction: column;
+    }
+
+    /* ══════════════════ TOP TOOLBAR ══════════════════ */
+    .toolbar {
+      height: var(--toolbar-h); flex-shrink: 0;
+      background: #fff;
+      border-bottom: 3px solid var(--orange-pale);
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 16px;
+      z-index: 100;
+    }
+
+    .toolbar-logo {
+      display: flex; align-items: center; gap: 8px; text-decoration: none;
+      flex-shrink: 0;
+    }
+    .t-logo-icon {
+      width: 36px; height: 36px; background: var(--orange); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; box-shadow: 2px 3px 0 var(--orange-dk);
+      transition: transform .2s;
+    }
+    .t-logo-icon:hover { transform: rotate(-12deg); }
+    .t-logo-text {
+      font-family: var(--font-d); font-size: 20px; font-weight: 800;
+      color: var(--orange);
+    }
+    .t-logo-text em { color: var(--teal); font-style: normal; }
+
+    .t-divider { width: 2px; height: 28px; background: var(--orange-pale); border-radius: 1px; flex-shrink: 0; }
+
+    /* project name */
+    .t-project-name {
+      font-family: var(--font-d); font-weight: 800; font-size: 15px;
+      background: transparent; border: 2px solid transparent; color: var(--dark);
+      padding: 5px 10px; border-radius: var(--r-sm, 12px); min-width: 160px;
+      outline: none; transition: border-color .2s;
+    }
+    .t-project-name:hover { border-color: var(--orange-pale); }
+    .t-project-name:focus { border-color: var(--orange); background: var(--orange-pale); }
+
+    .t-spacer { flex: 1; }
+
+    /* run / stop */
+    .run-stop { display: flex; gap: 8px; }
+    .btn-run {
+      display: flex; align-items: center; gap: 7px;
+      font-family: var(--font-b); font-weight: 800; font-size: 15px;
+      padding: 9px 22px; border-radius: 100px; border: none; cursor: pointer;
+      background: var(--green); color: #fff;
+      box-shadow: 2px 4px 0 var(--green-dk);
+      transition: all .15s;
+    }
+    .btn-run:hover  { transform: translateY(-2px); box-shadow: 2px 6px 0 var(--green-dk); }
+    .btn-run:active { transform: translateY(1px);  box-shadow: 1px 1px 0 var(--green-dk); }
+    .btn-stop {
+      display: flex; align-items: center; gap: 7px;
+      font-family: var(--font-b); font-weight: 800; font-size: 15px;
+      padding: 9px 18px; border-radius: 100px; border: none; cursor: pointer;
+      background: #fff; color: #EF4444;
+      border: 2.5px solid #FECACA;
+      transition: all .15s;
+    }
+    .btn-stop:hover { background: #FEF2F2; border-color: #EF4444; }
+
+    .t-actions { display: flex; gap: 8px; align-items: center; }
+    .btn-toolbar {
+      font-family: var(--font-b); font-weight: 700; font-size: 13px;
+      padding: 8px 16px; border-radius: 100px; border: none; cursor: pointer;
+      transition: all .2s; display: flex; align-items: center; gap: 5px;
+    }
+    .btn-save  { background: var(--orange-pale); color: var(--orange); }
+    .btn-save:hover { background: var(--orange); color: #fff; }
+    .btn-share {
+      background: var(--teal); color: #fff;
+      box-shadow: 2px 3px 0 var(--teal-dk);
+    }
+    .btn-share:hover { transform: translateY(-1px); box-shadow: 2px 5px 0 var(--teal-dk); }
+
+    .t-avatar {
+      width: 34px; height: 34px; border-radius: 50%; background: var(--orange-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; cursor: pointer; border: 2px solid var(--orange-pale);
+      transition: border-color .2s;
+      flex-shrink: 0;
+    }
+    .t-avatar:hover { border-color: var(--orange); }
+
+    /* ══════════════════ MAIN BODY ══════════════════ */
+    .editor-body {
+      flex: 1; overflow: hidden;
+      display: flex; gap: 0;
+    }
+
+    /* ══════════════════ TOOLBOX ══════════════════ */
+    .toolbox {
+      width: var(--toolbox-w); flex-shrink: 0;
+      background: var(--sidebar-bg);
+      border-right: 3px solid var(--orange-pale);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    .toolbox-header {
+      padding: 12px 14px 8px;
+      font-family: var(--font-d); font-size: 13px; font-weight: 800;
+      color: var(--mid); letter-spacing: .5px;
+      border-bottom: 2px solid var(--orange-pale);
+    }
+
+    .category-list {
+      display: flex; flex-direction: column; gap: 3px;
+      padding: 10px 10px 6px; flex-shrink: 0;
+    }
+
+    .cat-btn {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--font-b); font-weight: 800; font-size: 13px;
+      padding: 9px 12px; border-radius: 12px; border: none; cursor: pointer;
+      transition: all .2s; text-align: left;
+    }
+    .cat-dot {
+      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    .cat-motion   { background: #FFF0E8; color: #CC4A1A; }
+    .cat-motion .cat-dot { background: var(--orange); }
+    .cat-motion.active, .cat-motion:hover { background: var(--orange); color: #fff; }
+    .cat-motion.active .cat-dot, .cat-motion:hover .cat-dot { background: #fff; }
+
+    .cat-sensing  { background: #E8F8F7; color: var(--teal-dk); }
+    .cat-sensing .cat-dot { background: var(--teal); }
+    .cat-sensing.active, .cat-sensing:hover { background: var(--teal); color: #fff; }
+    .cat-sensing.active .cat-dot, .cat-sensing:hover .cat-dot { background: #fff; }
+
+    .cat-speech   { background: var(--pink-pale); color: var(--pink-dk); }
+    .cat-speech .cat-dot { background: var(--pink); }
+    .cat-speech.active, .cat-speech:hover { background: var(--pink); color: #fff; }
+    .cat-speech.active .cat-dot, .cat-speech:hover .cat-dot { background: #fff; }
+
+    .cat-looks    { background: var(--purple-pale); color: #7C3AED; }
+    .cat-looks .cat-dot { background: var(--purple); }
+    .cat-looks.active, .cat-looks:hover { background: var(--purple); color: #fff; }
+    .cat-looks.active .cat-dot, .cat-looks:hover .cat-dot { background: #fff; }
+
+    .cat-control  { background: #FFF5CC; color: #A06010; }
+    .cat-control .cat-dot { background: var(--yellow); }
+    .cat-control.active, .cat-control:hover { background: var(--yellow); color: var(--dark); }
+    .cat-control.active .cat-dot, .cat-control:hover .cat-dot { background: var(--dark); }
+
+    .cat-sound    { background: var(--blue-pale); color: #1D4ED8; }
+    .cat-sound .cat-dot { background: var(--blue); }
+    .cat-sound.active, .cat-sound:hover { background: var(--blue); color: #fff; }
+    .cat-sound.active .cat-dot, .cat-sound:hover .cat-dot { background: #fff; }
+
+    /* blocks list */
+    .block-list {
+      flex: 1; overflow-y: auto; padding: 4px 10px 16px;
+    }
+    .block-list::-webkit-scrollbar { width: 4px; }
+    .block-list::-webkit-scrollbar-thumb { background: var(--orange-pale); border-radius: 2px; }
+
+    .block-item {
+      border-radius: 10px; padding: 9px 12px; margin-bottom: 5px;
+      font-family: var(--font-b); font-weight: 800; font-size: 12.5px;
+      cursor: grab; user-select: none;
+      display: flex; align-items: center; gap: 8px;
+      transition: all .15s; border: 2px solid transparent;
+    }
+    .block-item:hover { transform: translateX(4px) scale(1.02); }
+
+    .b-orange { background: var(--orange); color: #fff; }
+    .b-orange:hover { border-color: var(--orange-dk); box-shadow: 2px 3px 0 var(--orange-dk); }
+    .b-teal   { background: var(--teal);   color: #fff; }
+    .b-teal:hover   { border-color: var(--teal-dk);   box-shadow: 2px 3px 0 var(--teal-dk); }
+    .b-pink   { background: var(--pink);   color: #fff; }
+    .b-pink:hover   { border-color: var(--pink-dk);   box-shadow: 2px 3px 0 var(--pink-dk); }
+    .b-purple { background: var(--purple); color: #fff; }
+    .b-yellow { background: var(--yellow); color: var(--dark); }
+    .b-blue   { background: var(--blue);   color: #fff; }
+
+    .block-notch {
+      width: 14px; height: 14px;
+      background: rgba(255,255,255,.35); border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ══════════════════ WORKSPACE ══════════════════ */
+    .workspace {
+      flex: 1; background: var(--ws-bg); overflow: hidden;
+      position: relative; cursor: crosshair;
+    }
+
+    /* grid */
+    .workspace::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,107,53,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,107,53,.08) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    /* placed blocks mockup */
+    .ws-blocks {
+      position: absolute; top: 32px; left: 40px;
+      display: flex; flex-direction: column; gap: 0;
+    }
+
+    .ws-block {
+      position: relative;
+      border-radius: 10px; padding: 10px 16px;
+      font-family: var(--font-b); font-weight: 800; font-size: 13px;
+      cursor: grab; user-select: none;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 3px 4px 0 rgba(0,0,0,.15);
+      margin-bottom: -2px;
+    }
+    .ws-block:first-child { border-radius: 14px 14px 10px 10px; }
+    .ws-block:last-child  { border-radius: 10px 10px 14px 14px; }
+
+    /* connector tabs */
+    .ws-block::after {
+      content: '';
+      position: absolute; bottom: -6px; left: 20px;
+      width: 24px; height: 7px;
+      background: inherit;
+      border-radius: 0 0 6px 6px;
+    }
+    .ws-block:last-child::after { display: none; }
+
+    .ws-block.selected { outline: 3px solid white; outline-offset: 2px; }
+
+    /* indent for nested blocks */
+    .ws-indent { padding-left: 28px; }
+
+    .ws-input {
+      background: rgba(255,255,255,.35); border-radius: 8px;
+      padding: 3px 10px; font-family: var(--font-b); font-weight: 800; font-size: 13px;
+      border: none; outline: none; min-width: 40px; cursor: text;
+      color: inherit;
+    }
+
+    /* second stack of blocks */
+    .ws-blocks-2 {
+      position: absolute; top: 250px; left: 230px;
+    }
+
+    /* ws hint */
+    .ws-hint {
+      position: absolute; bottom: 20px; right: 20px;
+      background: rgba(255,255,255,.88); backdrop-filter: blur(8px);
+      border: 2px solid var(--orange-pale); border-radius: 14px;
+      padding: 10px 16px; font-size: 12px; font-weight: 700; color: var(--mid);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* zoom controls */
+    .ws-zoom {
+      position: absolute; bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 6px; align-items: center;
+      background: rgba(255,255,255,.9); backdrop-filter: blur(8px);
+      border: 2px solid var(--orange-pale); border-radius: 100px;
+      padding: 5px 14px;
+    }
+    .zoom-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: none;
+      background: var(--orange-pale); color: var(--orange); font-size: 16px; font-weight: 800;
+      cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center;
+    }
+    .zoom-btn:hover { background: var(--orange); color: #fff; }
+    .zoom-val { font-family: var(--font-d); font-size: 13px; font-weight: 800; color: var(--mid); min-width: 44px; text-align: center; }
+
+    /* ══════════════════ STAGE PANEL ══════════════════ */
+    .stage-panel {
+      width: var(--stage-w); flex-shrink: 0;
+      background: var(--stage-bg);
+      border-left: 3px solid var(--orange-pale);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    /* stage top controls */
+    .stage-controls {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 2px solid var(--orange-pale);
+    }
+    .stage-title {
+      font-family: var(--font-d); font-size: 14px; font-weight: 800; color: var(--mid);
+    }
+    .stage-btns { display: flex; gap: 6px; }
+    .s-btn {
+      width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+      transition: all .15s; background: var(--orange-pale);
+    }
+    .s-btn:hover { background: var(--orange); }
+
+    /* canvas area */
+    .stage-canvas {
+      margin: 12px; border-radius: 18px; overflow: hidden;
+      border: 3px solid var(--orange-pale); background: #87CEEB;
+      aspect-ratio: 4/3; position: relative; flex-shrink: 0;
+    }
+
+    /* sky bg */
+    .canvas-sky {
+      width: 100%; height: 100%;
+      background: linear-gradient(180deg, #87CEEB 0%, #B0E0F8 60%, #98D8C4 80%, #7BC8A0 100%);
+      display: flex; align-items: flex-end; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+
+    /* clouds */
+    .cloud {
+      position: absolute; border-radius: 50px; background: rgba(255,255,255,.85);
+    }
+    .c1 { width: 80px; height: 28px; top: 18%; left: 8%; }
+    .c2 { width: 60px; height: 22px; top: 12%; right: 15%; }
+    .c3 { width: 50px; height: 18px; top: 28%; left: 55%; }
+
+    /* ground */
+    .ground {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 28%;
+      background: linear-gradient(180deg, #7BC8A0 0%, #5DAF84 100%);
+    }
+
+    /* 와냥이 스프라이트 */
+    .sprite-cat {
+      position: absolute; bottom: 26%; left: 34%;
+      width: 72px; height: 88px;
+      filter: drop-shadow(2px 5px 5px rgba(0,0,0,.18));
+      cursor: pointer;
+      /* 기본: idle bob */
+      animation: spriteIdle 1.8s ease-in-out infinite;
+    }
+    @keyframes spriteIdle {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-5px); }
+    }
+    /* 걷기 — walk-frame 클래스를 JS로 토글 */
+    .sprite-cat.walking {
+      animation: spriteWalkMove 0.12s steps(1) infinite, spriteSlide 3s linear forwards;
+    }
+    @keyframes spriteWalkMove {
+      0%  { content: ''; } /* JS로 SVG 교체 */
+      50% { content: ''; }
+    }
+
+    /* speech bubble */
+    .speech-bubble {
+      position: absolute; bottom: 52%; left: 45%;
+      background: white; border-radius: 14px; padding: 6px 12px;
+      font-family: var(--font-d); font-size: 13px; font-weight: 700; color: var(--dark);
+      border: 2.5px solid var(--orange-pale); white-space: nowrap;
+      box-shadow: 2px 3px 0 var(--orange-pale);
+    }
+    .speech-bubble::after {
+      content: '';
+      position: absolute; bottom: -10px; left: 16px;
+      width: 0; height: 0;
+      border-left: 8px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 10px solid white;
+    }
+    .speech-bubble::before {
+      content: '';
+      position: absolute; bottom: -13px; left: 14px;
+      width: 0; height: 0;
+      border-left: 10px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 12px solid var(--orange-pale);
+    }
+
+    /* coordinates */
+    .stage-coords {
+      display: flex; gap: 8px;
+      padding: 5px 14px;
+      border-bottom: 2px solid var(--orange-pale);
+    }
+    .coord-chip {
+      background: var(--orange-pale); border-radius: 8px;
+      padding: 3px 10px; font-family: var(--font-code); font-size: 12px;
+      font-weight: 500; color: var(--orange);
+    }
+
+    /* sprite selector */
+    .sprite-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 0; }
+    .sprite-section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px 8px;
+      border-bottom: 2px solid var(--orange-pale);
+    }
+    .sprite-section-title {
+      font-family: var(--font-d); font-size: 13px; font-weight: 800; color: var(--mid);
+    }
+    .add-sprite {
+      width: 26px; height: 26px; border-radius: 50%; background: var(--orange); color: #fff;
+      border: none; font-size: 16px; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 1px 2px 0 var(--orange-dk); transition: all .15s;
+    }
+    .add-sprite:hover { transform: scale(1.1); }
+
+    .sprite-list { display: flex; gap: 8px; padding: 10px 14px; overflow-x: auto; }
+    .sprite-list::-webkit-scrollbar { height: 3px; }
+    .sprite-list::-webkit-scrollbar-thumb { background: var(--orange-pale); border-radius: 2px; }
+
+    .sprite-thumb {
+      flex-shrink: 0; width: 68px;
+      border-radius: 14px; padding: 8px 6px;
+      border: 2.5px solid transparent; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      background: #fff; transition: all .2s;
+    }
+    .sprite-thumb.active { border-color: var(--orange); background: var(--orange-pale); }
+    .sprite-thumb:hover:not(.active) { border-color: var(--orange-pale); transform: translateY(-2px); }
+    .sprite-thumb .s-icon { font-size: 26px; }
+    .sprite-thumb .s-name { font-family: var(--font-d); font-size: 10px; font-weight: 800; color: var(--mid); }
+    .sprite-thumb.active .s-name { color: var(--orange); }
+
+    /* stage bg selector */
+    .bg-section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 14px;
+      border-top: 2px solid var(--orange-pale);
+    }
+    .bg-section-title {
+      font-family: var(--font-d); font-size: 13px; font-weight: 800; color: var(--mid);
+    }
+    .bg-list { display: flex; gap: 8px; padding: 8px 14px 12px; overflow-x: auto; }
+    .bg-thumb {
+      flex-shrink: 0; width: 52px; height: 38px;
+      border-radius: 10px; cursor: pointer; border: 2.5px solid transparent;
+      transition: all .2s; overflow: hidden;
+    }
+    .bg-thumb.active { border-color: var(--orange); }
+    .bg-thumb:hover:not(.active) { border-color: var(--orange-pale); transform: translateY(-1px); }
+
+    .bg-sky   { background: linear-gradient(180deg,#87CEEB,#7BC8A0); }
+    .bg-night { background: linear-gradient(180deg,#1a1a2e,#16213e); }
+    .bg-ocean { background: linear-gradient(180deg,#0077B6,#00B4D8,#90E0EF); }
+    .bg-space { background: radial-gradient(circle at 30% 40%, #2d1b69, #000); }
+    .bg-forest { background: linear-gradient(180deg,#87CEEB,#228B22,#006400); }
+
+    /* ══════════════════ STATUS BAR ══════════════════ */
+    .status-bar {
+      height: 28px; flex-shrink: 0;
+      background: #fff; border-top: 2px solid var(--orange-pale);
+      display: flex; align-items: center; gap: 16px; padding: 0 14px;
+      font-size: 11px; font-weight: 700; color: var(--mid);
+    }
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOOLBAR ── -->
+<div class="toolbar">
+  <a href="index.html" class="toolbar-logo">
+    <div class="t-logo-icon">🧇</div>
+    <span class="t-logo-text">Wa<em>Cratch</em></span>
+  </a>
+
+  <div class="t-divider"></div>
+
+  <input class="t-project-name" value="와피냥의 첫 번째 모험" type="text" spellcheck="false">
+
+  <div class="t-spacer"></div>
+
+  <div class="run-stop">
+    <button class="btn-run">▶ 실행하기</button>
+    <button class="btn-stop">⏹ 멈추기</button>
+  </div>
+
+  <div class="t-divider"></div>
+
+  <div class="t-actions">
+    <button class="btn-toolbar btn-save">💾 저장</button>
+    <button class="btn-toolbar btn-share">🔗 공유하기</button>
+  </div>
+
+  <div class="t-divider"></div>
+  <div class="t-avatar">🧇</div>
+</div>
+
+<!-- ── EDITOR BODY ── -->
+<div class="editor-body">
+
+  <!-- ── TOOLBOX ── -->
+  <div class="toolbox">
+    <div class="toolbox-header">🧩 블록 선택</div>
+
+    <div class="category-list">
+      <button class="cat-btn cat-motion active" onclick="selectCat(this,'motion')">
+        <span class="cat-dot"></span>🏃 움직임
+      </button>
+      <button class="cat-btn cat-sensing" onclick="selectCat(this,'sensing')">
+        <span class="cat-dot"></span>👀 감지
+      </button>
+      <button class="cat-btn cat-speech" onclick="selectCat(this,'speech')">
+        <span class="cat-dot"></span>💬 말풍선
+      </button>
+      <button class="cat-btn cat-looks" onclick="selectCat(this,'looks')">
+        <span class="cat-dot"></span>✨ 모양
+      </button>
+      <button class="cat-btn cat-control" onclick="selectCat(this,'control')">
+        <span class="cat-dot"></span>🔄 제어
+      </button>
+      <button class="cat-btn cat-sound" onclick="selectCat(this,'sound')">
+        <span class="cat-dot"></span>🎵 소리
+      </button>
+    </div>
+
+    <!-- block lists per category -->
+    <div class="block-list" id="blocks-motion">
+      <div class="block-item b-orange"><span class="block-notch"></span>10 만큼 이동하기</div>
+      <div class="block-item b-orange"><span class="block-notch"></span>오른쪽으로 이동</div>
+      <div class="block-item b-orange"><span class="block-notch"></span>왼쪽으로 이동</div>
+      <div class="block-item b-orange"><span class="block-notch"></span>위쪽으로 이동</div>
+      <div class="block-item b-orange"><span class="block-notch"></span>아래쪽으로 이동</div>
+      <div class="block-item b-orange"><span class="block-notch"></span>x: 0, y: 0 로 이동</div>
+      <div class="block-item b-orange"><span class="block-notch"></span>15도 회전하기</div>
+      <div class="block-item b-orange"><span class="block-notch"></span>처음 위치로 가기</div>
+    </div>
+    <div class="block-list" id="blocks-sensing" style="display:none">
+      <div class="block-item b-teal"><span class="block-notch"></span>↑ 위 키 눌렸을 때</div>
+      <div class="block-item b-teal"><span class="block-notch"></span>↓ 아래 키 눌렸을 때</div>
+      <div class="block-item b-teal"><span class="block-notch"></span>← 왼쪽 키 눌렸을 때</div>
+      <div class="block-item b-teal"><span class="block-notch"></span>→ 오른쪽 키 눌렸을 때</div>
+      <div class="block-item b-teal"><span class="block-notch"></span>스페이스 눌렸을 때</div>
+      <div class="block-item b-teal"><span class="block-notch"></span>벽에 닿았을 때</div>
+      <div class="block-item b-teal"><span class="block-notch"></span>마우스를 클릭했을 때</div>
+    </div>
+    <div class="block-list" id="blocks-speech" style="display:none">
+      <div class="block-item b-pink"><span class="block-notch"></span>"안녕!" 이라고 말하기</div>
+      <div class="block-item b-pink"><span class="block-notch"></span>2초 동안 말하기</div>
+      <div class="block-item b-pink"><span class="block-notch"></span>말풍선 지우기</div>
+    </div>
+    <div class="block-list" id="blocks-looks" style="display:none">
+      <div class="block-item b-purple"><span class="block-notch"></span>보이기</div>
+      <div class="block-item b-purple"><span class="block-notch"></span>숨기기</div>
+      <div class="block-item b-purple"><span class="block-notch"></span>크기를 100%로 설정</div>
+      <div class="block-item b-purple"><span class="block-notch"></span>크기를 10 키우기</div>
+    </div>
+    <div class="block-list" id="blocks-control" style="display:none">
+      <div class="block-item b-yellow"><span class="block-notch"></span>🚀 시작했을 때</div>
+      <div class="block-item b-yellow"><span class="block-notch"></span>10번 반복하기</div>
+      <div class="block-item b-yellow"><span class="block-notch"></span>계속 반복하기</div>
+      <div class="block-item b-yellow"><span class="block-notch"></span>만약 ~ 이라면</div>
+      <div class="block-item b-yellow"><span class="block-notch"></span>1초 기다리기</div>
+    </div>
+    <div class="block-list" id="blocks-sound" style="display:none">
+      <div class="block-item b-blue"><span class="block-notch"></span>야옹 소리 재생</div>
+      <div class="block-item b-blue"><span class="block-notch"></span>효과음 재생하기</div>
+      <div class="block-item b-blue"><span class="block-notch"></span>소리 멈추기</div>
+    </div>
+  </div>
+
+  <!-- ── WORKSPACE ── -->
+  <div class="workspace" id="workspace">
+
+    <!-- Block stack 1 -->
+    <div class="ws-blocks">
+      <div class="ws-block b-yellow selected" style="background:#FFD23F;color:#2C1810;">
+        🚀 시작했을 때
+      </div>
+      <div class="ws-block b-teal" style="background:#2EC4B6;color:#fff;">
+        ↑ 위 키 눌렸을 때
+      </div>
+      <div class="ws-block b-orange" style="background:#FF6B35;color:#fff;">
+        위쪽으로 <input class="ws-input" value="10"> 이동
+      </div>
+      <div class="ws-block b-pink" style="background:#FF85A1;color:#fff;">
+        💬 "야옹!" 이라고 말하기
+      </div>
+      <div class="ws-block b-teal" style="background:#2EC4B6;color:#fff;">
+        ↓ 아래 키 눌렸을 때
+      </div>
+      <div class="ws-block b-orange" style="background:#FF6B35;color:#fff;">
+        아래쪽으로 <input class="ws-input" value="10"> 이동
+      </div>
+    </div>
+
+    <!-- Block stack 2 (second chain) -->
+    <div class="ws-blocks-2">
+      <div class="ws-block b-yellow" style="background:#FFD23F;color:#2C1810;">
+        🔄 계속 반복하기
+      </div>
+      <div class="ws-block b-teal ws-indent" style="background:#26B0A3;color:#fff;">
+        벽에 닿았을 때
+      </div>
+      <div class="ws-block b-orange ws-indent" style="background:#E55A1E;color:#fff;">
+        처음 위치로 가기
+      </div>
+    </div>
+
+    <!-- workspace hint -->
+    <div class="ws-hint">
+      💡 블록을 왼쪽에서 드래그해 조립하세요!
+    </div>
+
+    <!-- zoom controls -->
+    <div class="ws-zoom">
+      <button class="zoom-btn">−</button>
+      <span class="zoom-val">100%</span>
+      <button class="zoom-btn">+</button>
+    </div>
+  </div>
+
+  <!-- ── STAGE PANEL ── -->
+  <div class="stage-panel">
+    <!-- controls row -->
+    <div class="stage-controls">
+      <span class="stage-title">🎬 스테이지</span>
+      <div class="stage-btns">
+        <button class="s-btn" title="전체화면">⛶</button>
+        <button class="s-btn" title="설정">⚙</button>
+      </div>
+    </div>
+
+    <!-- canvas -->
+    <div class="stage-canvas">
+      <div class="canvas-sky">
+        <div class="cloud c1"></div>
+        <div class="cloud c2"></div>
+        <div class="cloud c3"></div>
+        <div class="ground"></div>
+        <!-- 와냥이 스프라이트 (idle — walk-r1/r2 SVG로 JS 교체) -->
+        <div class="sprite-cat" id="wanyangi" title="와냥이">
+          <svg id="spriteFrame" viewBox="-18 -18 306 378" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:72px;height:88px;">
+            <!-- TAIL -->
+            <path d="M198 258 Q248 228 244 186 Q240 152 222 163" stroke="#E8A818" stroke-width="26" fill="none" stroke-linecap="round"/>
+            <path d="M198 258 Q248 228 244 186 Q240 152 222 163" stroke="#FFC947" stroke-width="16" fill="none" stroke-linecap="round"/>
+            <circle cx="222" cy="161" r="16" fill="#FFE090"/><circle cx="222" cy="161" r="9" fill="rgba(255,255,255,.6)"/>
+            <!-- ARMS -->
+            <ellipse cx="22" cy="222" rx="22" ry="28" fill="#E8A818" transform="rotate(-12 22 222)"/>
+            <ellipse cx="22" cy="222" rx="16" ry="21" fill="#FFC947" transform="rotate(-12 22 222)"/>
+            <circle cx="16" cy="246" r="14" fill="#E8A818"/><circle cx="16" cy="246" r="10" fill="#FFC947"/>
+            <ellipse cx="240" cy="222" rx="22" ry="28" fill="#E8A818" transform="rotate(12 240 222)"/>
+            <ellipse cx="240" cy="222" rx="16" ry="21" fill="#FFC947" transform="rotate(12 240 222)"/>
+            <circle cx="246" cy="246" r="14" fill="#E8A818"/><circle cx="246" cy="246" r="10" fill="#FFC947"/>
+            <!-- BODY -->
+            <rect x="16" y="60" width="228" height="224" rx="68" fill="#FFC947"/>
+            <line x1="16" y1="130" x2="244" y2="130" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+            <line x1="16" y1="200" x2="244" y2="200" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+            <line x1="88"  y1="60"  x2="88"  y2="284" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+            <line x1="172" y1="60"  x2="172" y2="284" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+            <rect x="26"  y="70"  width="53" height="51" rx="14" fill="rgba(255,255,255,.22)"/>
+            <rect x="97"  y="70"  width="66" height="51" rx="14" fill="rgba(255,255,255,.22)"/>
+            <rect x="181" y="70"  width="53" height="51" rx="14" fill="rgba(255,255,255,.22)"/>
+            <rect x="26"  y="140" width="53" height="51" rx="14" fill="rgba(255,255,255,.16)"/>
+            <rect x="97"  y="140" width="66" height="51" rx="14" fill="rgba(255,255,255,.16)"/>
+            <rect x="181" y="140" width="53" height="51" rx="14" fill="rgba(255,255,255,.16)"/>
+            <ellipse cx="130" cy="88" rx="72" ry="18" fill="rgba(255,255,255,.18)"/>
+            <!-- EARS -->
+            <path d="M52,78 C36,52 30,16 64,8 C86,3 108,50 104,68 Z" fill="#E8A818"/>
+            <path d="M60,74 C48,54 44,30 64,20 C78,14 98,52 96,68 Z" fill="#FFCB8A" opacity=".9"/>
+            <path d="M208,78 C224,52 230,16 196,8 C174,3 152,50 156,68 Z" fill="#E8A818"/>
+            <path d="M200,74 C212,54 216,30 196,20 C182,14 162,52 164,68 Z" fill="#FFCB8A" opacity=".9"/>
+            <!-- FACE -->
+            <circle cx="90"  cy="156" r="11" fill="#1A0A00"/><circle cx="90"  cy="156" r="8.5" fill="#2C1208"/>
+            <circle cx="170" cy="156" r="11" fill="#1A0A00"/><circle cx="170" cy="156" r="8.5" fill="#2C1208"/>
+            <circle cx="130" cy="182" r="9" fill="#D4882A"/><circle cx="133" cy="179" r="3" fill="white" opacity=".6"/>
+            <path d="M117 194 Q124 202 130 194 Q136 202 143 194" stroke="#1A0A00" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+            <line x1="104" y1="179" x2="58"  y2="170" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+            <line x1="104" y1="187" x2="56"  y2="187" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+            <line x1="156" y1="179" x2="202" y2="170" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+            <line x1="156" y1="187" x2="204" y2="187" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+            <!-- FEET -->
+            <ellipse cx="90"  cy="302" rx="40" ry="23" fill="#E8A818"/><ellipse cx="90"  cy="297" rx="34" ry="19" fill="#FFC947"/>
+            <circle cx="79"  cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/><circle cx="90"  cy="306" r="6.5" fill="#FFCB8A" opacity=".9"/><circle cx="101" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/>
+            <ellipse cx="170" cy="302" rx="40" ry="23" fill="#E8A818"/><ellipse cx="170" cy="297" rx="34" ry="19" fill="#FFC947"/>
+            <circle cx="159" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/><circle cx="170" cy="306" r="6.5" fill="#FFCB8A" opacity=".9"/><circle cx="181" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- coords -->
+    <div class="stage-coords">
+      <span class="coord-chip">x: 0</span>
+      <span class="coord-chip">y: 0</span>
+    </div>
+
+    <!-- sprite list -->
+    <div class="sprite-section">
+      <div class="sprite-section-header">
+        <span class="sprite-section-title">🐾 스프라이트</span>
+        <button class="add-sprite" title="스프라이트 추가">+</button>
+      </div>
+      <div class="sprite-list">
+        <div class="sprite-thumb active">
+          <span class="s-icon">🧇</span>
+          <span class="s-name">와냥이</span>
+        </div>
+      </div>
+
+      <div class="bg-section-header">
+        <span class="bg-section-title">🖼 배경</span>
+      </div>
+      <div class="bg-list">
+        <div class="bg-thumb bg-sky active"    title="하늘"></div>
+        <div class="bg-thumb bg-night"          title="밤"></div>
+        <div class="bg-thumb bg-ocean"          title="바다"></div>
+        <div class="bg-thumb bg-space"          title="우주"></div>
+        <div class="bg-thumb bg-forest"         title="숲"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── STATUS BAR ── -->
+<div class="status-bar">
+  <span><span class="status-dot"></span> 준비됨</span>
+  <span>스프라이트: 와냥이</span>
+  <span>블록: 6개</span>
+  <span style="margin-left:auto;">WaCratch v1.0 🐾</span>
+</div>
+
+<script>
+  function selectCat(el, cat) {
+    // remove active from all
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    // hide all block lists
+    document.querySelectorAll('.block-list').forEach(l => l.style.display = 'none');
+    document.getElementById('blocks-' + cat).style.display = '';
+  }
+
+  // ── 와냥이 걷기 애니메이션 (walk-r1 / walk-r2 프레임 교대) ──
+  const sprite = document.getElementById('wanyangi');
+  const frameEl = document.getElementById('spriteFrame');
+  let walkFrame = 0, walkTimer = null, spriteX = 34, spriteDir = 1;
+
+  // walk-r1 SVG 내용 (발 교대 프레임 A)
+  const WALK_R1 = `<svg viewBox="-18 -18 306 378" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:72px;height:88px;">
+    <path d="M198 258 Q248 228 244 186 Q240 152 222 163" stroke="#E8A818" stroke-width="26" fill="none" stroke-linecap="round"/>
+    <path d="M198 258 Q248 228 244 186 Q240 152 222 163" stroke="#FFC947" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <circle cx="222" cy="161" r="16" fill="#FFE090"/><circle cx="222" cy="161" r="9" fill="rgba(255,255,255,.6)"/>
+    <path d="M30 210 Q4 178 10 148" stroke="#E8A818" stroke-width="26" fill="none" stroke-linecap="round"/>
+    <path d="M30 210 Q4 178 10 148" stroke="#FFC947" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <circle cx="10" cy="146" r="18" fill="#E8A818"/><circle cx="10" cy="146" r="13" fill="#FFC947"/>
+    <g transform="translate(0,8) rotate(4 130 172)">
+      <rect x="16" y="60" width="228" height="218" rx="68" fill="#FFC947"/>
+      <line x1="16" y1="128" x2="244" y2="128" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+      <line x1="16" y1="196" x2="244" y2="196" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+      <line x1="88" y1="60" x2="88" y2="278" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+      <line x1="172" y1="60" x2="172" y2="278" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+      <rect x="26" y="70" width="53" height="49" rx="14" fill="rgba(255,255,255,.22)"/>
+      <rect x="97" y="70" width="66" height="49" rx="14" fill="rgba(255,255,255,.22)"/>
+      <rect x="181" y="70" width="53" height="49" rx="14" fill="rgba(255,255,255,.22)"/>
+      <rect x="26" y="138" width="53" height="49" rx="14" fill="rgba(255,255,255,.18)"/>
+      <rect x="97" y="138" width="66" height="49" rx="14" fill="rgba(255,255,255,.18)"/>
+      <rect x="181" y="138" width="53" height="49" rx="14" fill="rgba(255,255,255,.18)"/>
+      <ellipse cx="130" cy="86" rx="72" ry="17" fill="rgba(255,255,255,.18)"/>
+      <path d="M52,78 C36,52 30,16 64,8 C86,3 108,50 104,68 Z" fill="#E8A818"/>
+      <path d="M60,74 C48,54 44,30 64,20 C78,14 98,52 96,68 Z" fill="#FFCB8A" opacity=".9"/>
+      <path d="M208,78 C224,52 230,16 196,8 C174,3 152,50 156,68 Z" fill="#E8A818"/>
+      <path d="M200,74 C212,54 216,30 196,20 C182,14 162,52 164,68 Z" fill="#FFCB8A" opacity=".9"/>
+      <circle cx="90" cy="154" r="11" fill="#1A0A00"/><circle cx="90" cy="154" r="8.5" fill="#2C1208"/>
+      <circle cx="170" cy="154" r="11" fill="#1A0A00"/><circle cx="170" cy="154" r="8.5" fill="#2C1208"/>
+      <circle cx="130" cy="178" r="9" fill="#D4882A"/><circle cx="133" cy="175" r="3" fill="white" opacity=".6"/>
+      <path d="M117 190 Q124 198 130 190 Q136 198 143 190" stroke="#1A0A00" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <line x1="104" y1="176" x2="58" y2="167" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+      <line x1="104" y1="184" x2="56" y2="184" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+      <line x1="156" y1="176" x2="202" y2="167" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+      <line x1="156" y1="184" x2="204" y2="184" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+    </g>
+    <path d="M240 218 Q262 248 256 272" stroke="#E8A818" stroke-width="26" fill="none" stroke-linecap="round"/>
+    <path d="M240 218 Q262 248 256 272" stroke="#FFC947" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <circle cx="256" cy="275" r="18" fill="#E8A818"/><circle cx="256" cy="275" r="13" fill="#FFC947"/>
+    <ellipse cx="78" cy="306" rx="42" ry="22" fill="#E8A818" transform="rotate(-14 78 306)"/>
+    <ellipse cx="78" cy="300" rx="35" ry="17" fill="#FFC947" transform="rotate(-14 78 300)"/>
+    <ellipse cx="178" cy="312" rx="42" ry="22" fill="#E8A818" transform="rotate(18 178 312)"/>
+    <ellipse cx="178" cy="306" rx="35" ry="17" fill="#FFC947" transform="rotate(18 178 306)"/>
+  </svg>`;
+
+  const WALK_R2 = `<svg viewBox="-18 -18 306 378" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:72px;height:88px;">
+    <path d="M198 258 Q248 228 244 186 Q240 152 222 163" stroke="#E8A818" stroke-width="26" fill="none" stroke-linecap="round"/>
+    <path d="M198 258 Q248 228 244 186 Q240 152 222 163" stroke="#FFC947" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <circle cx="222" cy="161" r="16" fill="#FFE090"/><circle cx="222" cy="161" r="9" fill="rgba(255,255,255,.6)"/>
+    <path d="M230 208 Q258 174 254 144" stroke="#E8A818" stroke-width="26" fill="none" stroke-linecap="round"/>
+    <path d="M230 208 Q258 174 254 144" stroke="#FFC947" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <circle cx="254" cy="142" r="18" fill="#E8A818"/><circle cx="254" cy="142" r="13" fill="#FFC947"/>
+    <g transform="translate(0,0) rotate(4 130 172)">
+      <rect x="16" y="60" width="228" height="222" rx="68" fill="#FFC947"/>
+      <line x1="16" y1="130" x2="244" y2="130" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+      <line x1="16" y1="200" x2="244" y2="200" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+      <line x1="88" y1="60" x2="88" y2="282" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+      <line x1="172" y1="60" x2="172" y2="282" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+      <rect x="26" y="70" width="53" height="51" rx="14" fill="rgba(255,255,255,.22)"/>
+      <rect x="97" y="70" width="66" height="51" rx="14" fill="rgba(255,255,255,.22)"/>
+      <rect x="181" y="70" width="53" height="51" rx="14" fill="rgba(255,255,255,.22)"/>
+      <rect x="26" y="140" width="53" height="51" rx="14" fill="rgba(255,255,255,.18)"/>
+      <rect x="97" y="140" width="66" height="51" rx="14" fill="rgba(255,255,255,.18)"/>
+      <rect x="181" y="140" width="53" height="51" rx="14" fill="rgba(255,255,255,.18)"/>
+      <ellipse cx="130" cy="88" rx="72" ry="18" fill="rgba(255,255,255,.18)"/>
+      <path d="M52,78 C36,52 30,16 64,8 C86,3 108,50 104,68 Z" fill="#E8A818"/>
+      <path d="M60,74 C48,54 44,30 64,20 C78,14 98,52 96,68 Z" fill="#FFCB8A" opacity=".9"/>
+      <path d="M208,78 C224,52 230,16 196,8 C174,3 152,50 156,68 Z" fill="#E8A818"/>
+      <path d="M200,74 C212,54 216,30 196,20 C182,14 162,52 164,68 Z" fill="#FFCB8A" opacity=".9"/>
+      <circle cx="90" cy="156" r="11" fill="#1A0A00"/><circle cx="90" cy="156" r="8.5" fill="#2C1208"/>
+      <circle cx="170" cy="156" r="11" fill="#1A0A00"/><circle cx="170" cy="156" r="8.5" fill="#2C1208"/>
+      <circle cx="130" cy="182" r="9" fill="#D4882A"/><circle cx="133" cy="179" r="3" fill="white" opacity=".6"/>
+      <path d="M117 194 Q124 202 130 194 Q136 202 143 194" stroke="#1A0A00" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <line x1="104" y1="179" x2="58" y2="170" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+      <line x1="104" y1="187" x2="56" y2="187" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+      <line x1="156" y1="179" x2="202" y2="170" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+      <line x1="156" y1="187" x2="204" y2="187" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+    </g>
+    <path d="M22 218 Q-2 246 4 270" stroke="#E8A818" stroke-width="26" fill="none" stroke-linecap="round"/>
+    <path d="M22 218 Q-2 246 4 270" stroke="#FFC947" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <circle cx="4" cy="273" r="18" fill="#E8A818"/><circle cx="4" cy="273" r="13" fill="#FFC947"/>
+    <ellipse cx="172" cy="304" rx="42" ry="22" fill="#E8A818" transform="rotate(-14 172 304)"/>
+    <ellipse cx="172" cy="298" rx="35" ry="17" fill="#FFC947" transform="rotate(-14 172 298)"/>
+    <ellipse cx="86" cy="312" rx="42" ry="22" fill="#E8A818" transform="rotate(18 86 312)"/>
+    <ellipse cx="86" cy="306" rx="35" ry="17" fill="#FFC947" transform="rotate(18 86 306)"/>
+  </svg>`;
+
+  const keysDown = {};
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    keysDown[e.key] = true;
+    if (!walkTimer) startWalk();
+  });
+  document.addEventListener('keyup', e => {
+    keysDown[e.key] = false;
+    if (!keysDown['ArrowLeft'] && !keysDown['ArrowRight']) stopWalk();
+  });
+
+  function startWalk() {
+    walkTimer = setInterval(() => {
+      walkFrame ^= 1;
+      const going = keysDown['ArrowRight'] ? 1 : -1;
+      spriteDir = going;
+      spriteX = Math.max(2, Math.min(90, spriteX + going * 1.8));
+      sprite.style.left = spriteX + '%';
+      sprite.style.transform = going < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+      sprite.style.animation = 'none';
+      sprite.innerHTML = walkFrame === 0 ? WALK_R1 : WALK_R2;
+    }, 125);
+  }
+
+  function stopWalk() {
+    clearInterval(walkTimer);
+    walkTimer = null;
+    sprite.style.transform = spriteDir < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+    sprite.style.animation = 'spriteIdle 1.8s ease-in-out infinite';
+    // idle 프레임 복원
+    sprite.innerHTML = `<svg viewBox="-18 -18 306 378" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:72px;height:88px;">
+      <path d="M198 258 Q248 228 244 186 Q240 152 222 163" stroke="#E8A818" stroke-width="26" fill="none" stroke-linecap="round"/>
+      <path d="M198 258 Q248 228 244 186 Q240 152 222 163" stroke="#FFC947" stroke-width="16" fill="none" stroke-linecap="round"/>
+      <circle cx="222" cy="161" r="16" fill="#FFE090"/><circle cx="222" cy="161" r="9" fill="rgba(255,255,255,.6)"/>
+      <ellipse cx="22" cy="222" rx="22" ry="28" fill="#E8A818" transform="rotate(-12 22 222)"/>
+      <ellipse cx="22" cy="222" rx="16" ry="21" fill="#FFC947" transform="rotate(-12 22 222)"/>
+      <circle cx="16" cy="246" r="14" fill="#E8A818"/><circle cx="16" cy="246" r="10" fill="#FFC947"/>
+      <ellipse cx="240" cy="222" rx="22" ry="28" fill="#E8A818" transform="rotate(12 240 222)"/>
+      <ellipse cx="240" cy="222" rx="16" ry="21" fill="#FFC947" transform="rotate(12 240 222)"/>
+      <circle cx="246" cy="246" r="14" fill="#E8A818"/><circle cx="246" cy="246" r="10" fill="#FFC947"/>
+      <rect x="16" y="60" width="228" height="224" rx="68" fill="#FFC947"/>
+      <line x1="16" y1="130" x2="244" y2="130" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+      <line x1="16" y1="200" x2="244" y2="200" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+      <line x1="88" y1="60" x2="88" y2="284" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+      <line x1="172" y1="60" x2="172" y2="284" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+      <rect x="26" y="70" width="53" height="51" rx="14" fill="rgba(255,255,255,.22)"/>
+      <rect x="97" y="70" width="66" height="51" rx="14" fill="rgba(255,255,255,.22)"/>
+      <rect x="181" y="70" width="53" height="51" rx="14" fill="rgba(255,255,255,.22)"/>
+      <rect x="26" y="140" width="53" height="51" rx="14" fill="rgba(255,255,255,.16)"/>
+      <rect x="97" y="140" width="66" height="51" rx="14" fill="rgba(255,255,255,.16)"/>
+      <rect x="181" y="140" width="53" height="51" rx="14" fill="rgba(255,255,255,.16)"/>
+      <ellipse cx="130" cy="88" rx="72" ry="18" fill="rgba(255,255,255,.18)"/>
+      <path d="M52,78 C36,52 30,16 64,8 C86,3 108,50 104,68 Z" fill="#E8A818"/>
+      <path d="M60,74 C48,54 44,30 64,20 C78,14 98,52 96,68 Z" fill="#FFCB8A" opacity=".9"/>
+      <path d="M208,78 C224,52 230,16 196,8 C174,3 152,50 156,68 Z" fill="#E8A818"/>
+      <path d="M200,74 C212,54 216,30 196,20 C182,14 162,52 164,68 Z" fill="#FFCB8A" opacity=".9"/>
+      <circle cx="90" cy="156" r="11" fill="#1A0A00"/><circle cx="90" cy="156" r="8.5" fill="#2C1208"/>
+      <circle cx="170" cy="156" r="11" fill="#1A0A00"/><circle cx="170" cy="156" r="8.5" fill="#2C1208"/>
+      <circle cx="130" cy="182" r="9" fill="#D4882A"/><circle cx="133" cy="179" r="3" fill="white" opacity=".6"/>
+      <path d="M117 194 Q124 202 130 194 Q136 202 143 194" stroke="#1A0A00" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <line x1="104" y1="179" x2="58" y2="170" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+      <line x1="104" y1="187" x2="56" y2="187" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+      <line x1="156" y1="179" x2="202" y2="170" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+      <line x1="156" y1="187" x2="204" y2="187" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".5"/>
+      <ellipse cx="90" cy="302" rx="40" ry="23" fill="#E8A818"/><ellipse cx="90" cy="297" rx="34" ry="19" fill="#FFC947"/>
+      <circle cx="79" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/><circle cx="90" cy="306" r="6.5" fill="#FFCB8A" opacity=".9"/><circle cx="101" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/>
+      <ellipse cx="170" cy="302" rx="40" ry="23" fill="#E8A818"/><ellipse cx="170" cy="297" rx="34" ry="19" fill="#FFC947"/>
+      <circle cx="159" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/><circle cx="170" cy="306" r="6.5" fill="#FFCB8A" opacity=".9"/><circle cx="181" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/>
+    </svg>`;
+  }
+
+  // Make workspace blocks draggable (visual only)
+  document.querySelectorAll('.ws-block').forEach(block => {
+    let isDragging = false, startX, startY, origX, origY;
+    block.addEventListener('mousedown', e => {
+      if (e.target.tagName === 'INPUT') return;
+      isDragging = true;
+      startX = e.clientX; startY = e.clientY;
+      const rect = block.getBoundingClientRect();
+      origX = rect.left; origY = rect.top;
+      block.style.opacity = '.75';
+      block.style.zIndex = '99';
+    });
+    document.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      const dx = e.clientX - startX, dy = e.clientY - startY;
+      block.style.transform = `translate(${dx}px,${dy}px)`;
+    });
+    document.addEventListener('mouseup', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      block.style.opacity = '';
+      block.style.zIndex = '';
+      block.style.transform = '';
+    });
+  });
+</script>
+</body>
+</html>

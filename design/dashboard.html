@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WaCratch — 내 프로젝트</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --wf: #FFC947; --wf-dk: #C88010; --wf-pale: #FFF3C8;
+      --orange: #FF6B35; --orange-dk: #D44E1A; --orange-lt: #FF9A6C; --orange-pale: #FFE8DC;
+      --teal: #2EC4B6; --teal-dk: #1A9E96; --teal-pale: #D6F5F2;
+      --yellow: #FFD23F; --yellow-dk: #D4A020; --yellow-pale: #FFF5CC;
+      --pink: #FF85A1; --pink-pale: #FFE5EC;
+      --purple: #A855F7; --purple-pale: #F3E8FF;
+      --green: #22C55E; --green-dk: #16A34A; --green-pale: #DCFCE7;
+      --cream: #FFF8F2; --dark: #2C1810; --mid: #7B6B63; --border: #F0E0D6;
+      --sidebar-w: 240px;
+      --font-d: 'Baloo 2', cursive; --font-b: 'Nunito', sans-serif;
+    }
+    html, body { height: 100%; }
+    body { font-family: var(--font-b); background: var(--cream); color: var(--dark); display: flex; flex-direction: column; }
+
+    /* TOP NAV */
+    .topnav {
+      height: 56px; flex-shrink: 0;
+      background: #fff; border-bottom: 3px solid var(--orange-pale);
+      display: flex; align-items: center; gap: 16px; padding: 0 24px;
+      z-index: 100;
+    }
+    .tn-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .tn-logo-icon { width: 36px; height: 36px; background: var(--orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 2px 2px 0 var(--orange-dk); }
+    .tn-logo-text { font-family: var(--font-d); font-size: 20px; font-weight: 800; color: var(--orange); }
+    .tn-logo-text em { color: var(--teal); font-style: normal; }
+    .tn-spacer { flex: 1; }
+    .tn-search { max-width: 280px; flex: 1; position: relative; }
+    .tn-search input { width: 100%; font-family: var(--font-b); font-weight: 600; font-size: 13px; padding: 8px 12px 8px 34px; border: 2px solid var(--border); border-radius: 100px; background: var(--cream); outline: none; transition: border-color .2s; }
+    .tn-search input:focus { border-color: var(--orange); background: #fff; }
+    .tn-search::before { content: '🔍'; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; pointer-events: none; }
+    .tn-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--orange-pale); display: flex; align-items: center; justify-content: center; font-size: 17px; cursor: pointer; border: 2px solid var(--orange-pale); transition: border-color .2s; }
+    .tn-avatar:hover { border-color: var(--orange); }
+    .tn-name { font-weight: 800; font-size: 14px; }
+
+    /* BODY LAYOUT */
+    .body-layout { flex: 1; display: flex; overflow: hidden; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      background: #fff; border-right: 3px solid var(--orange-pale);
+      display: flex; flex-direction: column; padding: 20px 12px;
+      overflow-y: auto;
+    }
+    .sb-avatar-block {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 16px 8px 20px; border-bottom: 2px solid var(--orange-pale); margin-bottom: 16px;
+    }
+    .sb-avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--orange-pale); display: flex; align-items: center; justify-content: center; font-size: 36px; border: 3px solid var(--orange-pale); margin-bottom: 10px; }
+    .sb-username { font-family: var(--font-d); font-size: 17px; font-weight: 800; margin-bottom: 2px; }
+    .sb-level { font-size: 12px; font-weight: 700; color: var(--mid); }
+    .sb-xp-bar { width: 100%; height: 8px; background: var(--border); border-radius: 4px; margin-top: 10px; overflow: hidden; }
+    .sb-xp-fill { height: 100%; width: 65%; background: linear-gradient(90deg, var(--wf-dk), var(--wf)); border-radius: 4px; }
+
+    .sb-section { margin-bottom: 20px; }
+    .sb-section-title { font-family: var(--font-d); font-size: 11px; font-weight: 800; color: var(--mid); letter-spacing: 1px; text-transform: uppercase; padding: 0 8px; margin-bottom: 6px; }
+    .sb-link {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--font-b); font-weight: 700; font-size: 14px;
+      padding: 10px 12px; border-radius: 12px; cursor: pointer;
+      text-decoration: none; color: var(--mid); transition: all .2s;
+      margin-bottom: 2px;
+    }
+    .sb-link:hover   { background: var(--wf-pale); color: var(--wf-dk); }
+    .sb-link.active  { background: var(--wf); color: var(--dark); }
+    .sb-link.active:hover { background: var(--wf-dk); color: #fff; }
+    .sb-badge {
+      margin-left: auto; background: var(--wf-dk); color: #fff;
+      font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 100px;
+    }
+    .sb-link.active .sb-badge { background: rgba(44,24,16,.2); }
+
+    .sb-new-btn {
+      margin-top: auto; width: 100%;
+      font-family: var(--font-b); font-weight: 800; font-size: 15px;
+      padding: 13px; border-radius: 14px; border: none; cursor: pointer;
+      background: var(--wf); color: var(--dark);
+      box-shadow: 2px 4px 0 var(--wf-dk);
+      transition: all .15s; text-decoration: none; display: block; text-align: center;
+    }
+    .sb-new-btn:hover { transform: translateY(-2px); box-shadow: 2px 6px 0 var(--wf-dk); }
+
+    /* MAIN CONTENT */
+    .content { flex: 1; overflow-y: auto; padding: 28px 32px; }
+    .content::-webkit-scrollbar { width: 6px; }
+    .content::-webkit-scrollbar-thumb { background: var(--orange-pale); border-radius: 3px; }
+
+    /* WELCOME BANNER */
+    .welcome {
+      background: linear-gradient(130deg, var(--wf) 0%, #FFE090 60%, var(--wf-pale) 100%);
+      border-radius: 24px; padding: 28px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px; position: relative; overflow: hidden;
+      border: 2.5px solid var(--wf-dk);
+    }
+    .welcome::after {
+      content: '🧇🧇🧇🧇🧇🧇🧇🧇🧇🧇';
+      position: absolute; right: -20px; bottom: 6px;
+      font-size: 22px; letter-spacing: 12px; opacity: .14; pointer-events: none;
+    }
+    .welcome-text {}
+    .welcome-greeting { font-family: var(--font-d); font-size: 26px; font-weight: 800; color: var(--dark); margin-bottom: 4px; }
+    .welcome-sub { font-size: 14px; font-weight: 600; color: var(--mid); }
+    .welcome-mascot { font-size: 72px; filter: drop-shadow(0 4px 8px rgba(200,128,16,.2)); }
+
+    /* STATS ROW */
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 28px; }
+    .stat-card {
+      background: #fff; border-radius: 18px; padding: 18px 20px;
+      border: 2.5px solid var(--orange-pale); transition: transform .2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-card:nth-child(1) { border-color: var(--orange-pale); }
+    .stat-card:nth-child(2) { border-color: var(--teal-pale); }
+    .stat-card:nth-child(3) { border-color: var(--yellow-pale); }
+    .stat-card:nth-child(4) { border-color: var(--pink-pale); }
+    .stat-card-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+    .stat-card-n { font-family: var(--font-d); font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+    .stat-card-l { font-size: 12px; font-weight: 700; color: var(--mid); }
+    .stat-card:nth-child(1) .stat-card-n { color: var(--orange); }
+    .stat-card:nth-child(2) .stat-card-n { color: var(--teal); }
+    .stat-card:nth-child(3) .stat-card-n { color: var(--yellow-dk); }
+    .stat-card:nth-child(4) .stat-card-n { color: var(--pink); }
+
+    /* SECTION HEADER */
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .section-title { font-family: var(--font-d); font-size: 20px; font-weight: 800; }
+    .see-all { font-weight: 800; font-size: 13px; color: var(--orange); text-decoration: none; }
+    .see-all:hover { text-decoration: underline; }
+
+    /* PROJECT GRID */
+    .proj-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 32px; }
+
+    /* new project card */
+    .proj-new {
+      border-radius: 18px; border: 2.5px dashed var(--orange);
+      background: var(--orange-pale); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; padding: 32px 16px; transition: all .2s;
+      text-decoration: none;
+    }
+    .proj-new:hover { background: var(--orange); transform: translateY(-3px); }
+    .proj-new:hover .pn-icon { background: rgba(255,255,255,.25); }
+    .proj-new:hover .pn-text { color: #fff; }
+    .pn-icon { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,107,53,.2); display: flex; align-items: center; justify-content: center; font-size: 26px; transition: background .2s; }
+    .pn-text { font-family: var(--font-d); font-size: 14px; font-weight: 800; color: var(--orange); transition: color .2s; }
+
+    .proj-card {
+      background: #fff; border-radius: 18px; overflow: hidden;
+      border: 2.5px solid var(--border); cursor: pointer; transition: all .25s;
+      position: relative;
+    }
+    .proj-card:hover { border-color: var(--orange); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(255,107,53,.14); }
+    .proj-thumb { width: 100%; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; font-size: 44px; position: relative; }
+    .pt1 { background: linear-gradient(135deg,#FFE8DC,#FFCBB0); }
+    .pt2 { background: linear-gradient(135deg,#D6F5F2,#A8EDE8); }
+    .pt3 { background: linear-gradient(135deg,#FFF5CC,#FFE070); }
+    .pt4 { background: linear-gradient(135deg,#F3E8FF,#E0C8FF); }
+    .pt5 { background: linear-gradient(135deg,#FFE5EC,#FFC0D0); }
+    .pt6 { background: linear-gradient(135deg,#DCFCE7,#A8E8BC); }
+
+    /* hover actions overlay */
+    .proj-hover {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,.35); opacity: 0;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity .2s;
+    }
+    .proj-card:hover .proj-hover { opacity: 1; }
+    .ph-btn {
+      background: #fff; border-radius: 100px; font-family: var(--font-b);
+      font-weight: 800; font-size: 12px; padding: 7px 14px; cursor: pointer;
+      border: none; transition: all .15s; text-decoration: none; color: var(--dark);
+    }
+    .ph-btn.edit { color: var(--orange); }
+    .ph-btn.edit:hover { background: var(--orange); color: #fff; }
+    .ph-btn.view:hover { background: var(--teal); color: #fff; }
+
+    .proj-info { padding: 12px 14px; }
+    .proj-title { font-weight: 800; font-size: 14px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .proj-meta { display: flex; align-items: center; justify-content: space-between; }
+    .proj-date { font-size: 11px; font-weight: 600; color: var(--mid); }
+    .proj-stats { display: flex; gap: 8px; }
+    .proj-stat { font-size: 11px; font-weight: 700; color: var(--mid); }
+
+    /* status badge */
+    .status-badge {
+      position: absolute; top: 8px; right: 8px;
+      font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 100px;
+    }
+    .sb-published { background: var(--green); color: #fff; }
+    .sb-draft { background: var(--yellow); color: var(--dark); }
+
+    /* ACTIVITY FEED */
+    .activity-list { display: flex; flex-direction: column; gap: 10px; }
+    .activity-item { background: #fff; border-radius: 14px; padding: 14px 16px; border: 2px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .act-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+    .act-like    { background: var(--pink-pale); }
+    .act-view    { background: var(--teal-pale); }
+    .act-remix   { background: var(--purple-pale); }
+    .act-body { flex: 1; }
+    .act-text { font-size: 13px; font-weight: 700; line-height: 1.5; }
+    .act-text strong { color: var(--orange); }
+    .act-time { font-size: 11px; font-weight: 600; color: var(--mid); margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div class="topnav">
+  <a href="index.html" class="tn-logo">
+    <div class="tn-logo-icon">🧇</div>
+    <span class="tn-logo-text">Wa<em>Cratch</em></span>
+  </a>
+  <div class="tn-spacer"></div>
+  <div class="tn-search"><input type="text" placeholder="내 프로젝트 검색..."></div>
+  <span class="tn-name">코딩냥이</span>
+  <div class="tn-avatar">🧇</div>
+</div>
+
+<!-- BODY -->
+<div class="body-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-avatar-block">
+      <div class="sb-avatar">🧇</div>
+      <div class="sb-username">코딩냥이</div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-title">나의 공간</div>
+      <a href="dashboard.html" class="sb-link active">🏠 내 프로젝트</a>
+      <a href="explore.html"   class="sb-link">🔍 탐색하기</a>
+      <a href="#"              class="sb-link">❤️ 좋아요한 작품</a>
+      <a href="#"              class="sb-link">👥 팔로잉</a>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-title">계정</div>
+      <a href="index.html" class="sb-link">🚪 로그아웃</a>
+    </div>
+
+    <a href="project.html" class="sb-new-btn">+ 새 프로젝트</a>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- WELCOME -->
+    <div class="welcome">
+      <div class="welcome-text">
+        <div class="welcome-greeting">안녕, 코딩냥이! 🧇</div>
+        <div class="welcome-sub">오늘도 멋진 작품을 만들어볼까요?</div>
+      </div>
+      <div class="welcome-mascot">🧇</div>
+    </div>
+
+    <!-- MY PROJECTS -->
+    <div class="section-header">
+      <h2 class="section-title">🎮 내 프로젝트</h2>
+      <a href="#" class="see-all">전체 보기 →</a>
+    </div>
+    <div class="proj-grid">
+      <!-- new project card -->
+      <a href="project.html" class="proj-new">
+        <div class="pn-icon">+</div>
+        <div class="pn-text">새 프로젝트 만들기</div>
+      </a>
+      <!-- existing projects -->
+      <div class="proj-card" onclick="location.href='project.html'">
+        <div class="proj-thumb pt1">🐱
+          <div class="proj-hover">
+            <a href="project.html" class="ph-btn edit">✏️ 편집</a>
+            <a href="play.html"   class="ph-btn view">▶ 실행</a>
+          </div>
+        </div>
+        <span class="status-badge sb-published">공개</span>
+        <div class="proj-info">
+          <div class="proj-title">냥이의 대모험</div>
+          <div class="proj-meta">
+            <span class="proj-date">2일 전 수정</span>
+            <div class="proj-stats"><span class="proj-stat">❤️ 234</span><span class="proj-stat">👁️ 1.2k</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="proj-card">
+        <div class="proj-thumb pt2">🌊
+          <div class="proj-hover">
+            <a href="project.html" class="ph-btn edit">✏️ 편집</a>
+            <a href="play.html"   class="ph-btn view">▶ 실행</a>
+          </div>
+        </div>
+        <span class="status-badge sb-published">공개</span>
+        <div class="proj-info">
+          <div class="proj-title">바다 탐험</div>
+          <div class="proj-meta">
+            <span class="proj-date">5일 전</span>
+            <div class="proj-stats"><span class="proj-stat">❤️ 89</span><span class="proj-stat">👁️ 430</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="proj-card">
+        <div class="proj-thumb pt3">🌟
+          <div class="proj-hover">
+            <a href="project.html" class="ph-btn edit">✏️ 편집</a>
+            <a href="play.html"   class="ph-btn view">▶ 실행</a>
+          </div>
+        </div>
+        <span class="status-badge sb-draft">비공개</span>
+        <div class="proj-info">
+          <div class="proj-title">별 수집 게임 (작업중)</div>
+          <div class="proj-meta">
+            <span class="proj-date">어제</span>
+            <div class="proj-stats"><span class="proj-stat">❤️ 0</span><span class="proj-stat">👁️ 0</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="proj-card">
+        <div class="proj-thumb pt4">🦋
+          <div class="proj-hover">
+            <a href="project.html" class="ph-btn edit">✏️ 편집</a>
+            <a href="play.html"   class="ph-btn view">▶ 실행</a>
+          </div>
+        </div>
+        <span class="status-badge sb-published">공개</span>
+        <div class="proj-info">
+          <div class="proj-title">나비 미로</div>
+          <div class="proj-meta">
+            <span class="proj-date">1주일 전</span>
+            <div class="proj-stats"><span class="proj-stat">❤️ 56</span><span class="proj-stat">👁️ 234</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="proj-card">
+        <div class="proj-thumb pt5">🐰
+          <div class="proj-hover">
+            <a href="project.html" class="ph-btn edit">✏️ 편집</a>
+            <a href="play.html"   class="ph-btn view">▶ 실행</a>
+          </div>
+        </div>
+        <span class="status-badge sb-published">공개</span>
+        <div class="proj-info">
+          <div class="proj-title">토끼 달리기</div>
+          <div class="proj-meta">
+            <span class="proj-date">2주일 전</span>
+            <div class="proj-stats"><span class="proj-stat">❤️ 45</span><span class="proj-stat">👁️ 189</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="proj-card">
+        <div class="proj-thumb pt6">🌈
+          <div class="proj-hover">
+            <a href="project.html" class="ph-btn edit">✏️ 편집</a>
+            <a href="play.html"   class="ph-btn view">▶ 실행</a>
+          </div>
+        </div>
+        <span class="status-badge sb-draft">비공개</span>
+        <div class="proj-info">
+          <div class="proj-title">무지개 그림판</div>
+          <div class="proj-meta">
+            <span class="proj-date">3주일 전</span>
+            <div class="proj-stats"><span class="proj-stat">❤️ 0</span><span class="proj-stat">👁️ 0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div class="section-header">
+      <h2 class="section-title">🔔 최근 활동</h2>
+    </div>
+    <div class="activity-list">
+      <div class="activity-item">
+        <div class="act-icon act-like">❤️</div>
+        <div class="act-body">
+          <div class="act-text"><strong>별동이</strong>님이 &quot;냥이의 대모험&quot;을 좋아해요!</div>
+          <div class="act-time">10분 전</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="act-icon act-view">👁️</div>
+        <div class="act-body">
+          <div class="act-text"><strong>바다소녀</strong>님이 &quot;바다 탐험&quot;을 봤어요</div>
+          <div class="act-time">1시간 전</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="act-icon act-remix">🔁</div>
+        <div class="act-body">
+          <div class="act-text"><strong>초등코더</strong>님이 &quot;냥이의 대모험&quot;을 리믹스했어요!</div>
+          <div class="act-time">3시간 전</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="act-icon act-like">❤️</div>
+        <div class="act-body">
+          <div class="act-text"><strong>우주선장</strong>님이 &quot;나비 미로&quot;를 좋아해요!</div>
+          <div class="act-time">어제</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

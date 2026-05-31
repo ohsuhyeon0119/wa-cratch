@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CatCratch — 와피냥 캐릭터</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #FF6B35; --orange-dk: #D44E1A; --orange-pale: #FFE8DC;
+      --teal: #2EC4B6; --teal-dk: #1A9E96; --teal-pale: #D6F5F2;
+      --wf: #FFC947; --wf-dk: #E8A818; --wf-pale: #FFF3C8; --wf-deep: #C88010;
+      --cream: #FFF8F2; --dark: #2C1810; --mid: #7B6B63; --border: #F0E0D6;
+      --font-d: 'Baloo 2', cursive; --font-b: 'Nunito', sans-serif;
+    }
+    body { font-family: var(--font-b); background: var(--cream); color: var(--dark); }
+    body::before { content: ''; position: fixed; inset: 0; background-image: radial-gradient(circle,#FF6B35 1px,transparent 1px); background-size: 36px 36px; opacity: .04; pointer-events: none; }
+
+    .nav { position: sticky; top: 0; z-index: 200; background: rgba(255,248,242,.94); backdrop-filter: blur(14px); border-bottom: 3px solid var(--orange-pale); padding: 10px 48px; display: flex; align-items: center; gap: 16px; }
+    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .nav-logo-icon { width: 40px; height: 40px; background: var(--orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 2px 3px 0 var(--orange-dk); }
+    .nav-logo-text { font-family: var(--font-d); font-size: 22px; font-weight: 800; color: var(--orange); }
+    .nav-logo-text em { color: var(--teal); font-style: normal; }
+    .nav-spacer { flex: 1; }
+    .nav-back { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px; color: var(--mid); text-decoration: none; padding: 7px 12px; border-radius: 10px; transition: all .2s; }
+    .nav-back:hover { background: var(--orange-pale); color: var(--orange); }
+
+    .page { max-width: 1100px; margin: 0 auto; padding: 48px 32px 80px; }
+
+    /* HERO */
+    .hero { display: grid; grid-template-columns: 1fr 440px; gap: 48px; align-items: center; margin-bottom: 72px; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--wf-pale); color: var(--wf-deep); font-weight: 800; font-size: 13px; padding: 6px 14px; border-radius: 100px; box-shadow: 2px 3px 0 #D4A040; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes mascotBob { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-20px) rotate(2deg)} }
+
+    .hero-name { font-family: var(--font-d); font-size: 64px; font-weight: 800; line-height: 1.08; margin-bottom: 16px; letter-spacing: -2px; }
+    .c-wf { color: var(--wf-dk); }
+    .c-orange { color: var(--orange); }
+
+    .hero-sub { font-size: 18px; font-weight: 600; color: var(--mid); line-height: 1.65; margin-bottom: 28px; }
+    .hero-traits { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px; }
+    .trait { background: #fff; border: 2.5px solid var(--border); border-radius: 100px; padding: 8px 16px; font-weight: 800; font-size: 14px; }
+    .trait.t1 { border-color: #FFE080; color: var(--wf-deep); }
+    .trait.t2 { border-color: var(--orange-pale); color: var(--orange); }
+    .trait.t3 { border-color: var(--teal-pale); color: var(--teal-dk); }
+    .trait.t4 { border-color: #FFE5EC; color: #E05882; }
+
+    .hero-cta { display: flex; gap: 12px; }
+    .btn { font-family: var(--font-b); font-weight: 800; font-size: 15px; padding: 12px 24px; border-radius: 14px; border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all .15s; }
+    .btn-wf { background: var(--wf); color: var(--dark); box-shadow: 3px 4px 0 var(--wf-deep); }
+    .btn-wf:hover { transform: translateY(-2px); box-shadow: 3px 6px 0 var(--wf-deep); }
+    .btn-ghost { background: transparent; border: 2.5px solid var(--wf-dk); color: var(--wf-dk); }
+    .btn-ghost:hover { background: var(--wf-pale); }
+
+    .hero-mascot { display: flex; justify-content: center; animation: mascotBob 4s ease-in-out infinite; }
+
+    /* SECTIONS */
+    .section { margin-bottom: 64px; }
+    .section-title { font-family: var(--font-d); font-size: 32px; font-weight: 800; margin-bottom: 32px; display: flex; align-items: center; gap: 12px; }
+    .sec-badge { background: var(--wf-pale); color: var(--wf-deep); font-size: 13px; font-weight: 800; padding: 4px 12px; border-radius: 100px; box-shadow: 1px 2px 0 #D4A040; font-family: var(--font-b); }
+
+    /* EXPRESSIONS */
+    .expr-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; }
+    .expr-card { background: #fff; border-radius: 24px; padding: 28px 20px 20px; border: 2.5px solid var(--border); text-align: center; transition: all .25s; cursor: default; }
+    .expr-card:nth-child(1) { border-color: #FFE080; }
+    .expr-card:nth-child(2) { border-color: var(--teal-pale); }
+    .expr-card:nth-child(3) { border-color: var(--orange-pale); }
+    .expr-card:nth-child(4) { border-color: #FFE5EC; }
+    .expr-card:hover { transform: translateY(-7px); box-shadow: 0 14px 32px rgba(0,0,0,.1); }
+    .expr-svg { width: 120px; height: 140px; margin: 0 auto 12px; display: block; }
+    .expr-label { font-family: var(--font-d); font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+    .expr-desc { font-size: 12px; font-weight: 600; color: var(--mid); }
+
+    /* PALETTE */
+    .palette-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+    .swatch { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .swatch-circle { width: 72px; height: 72px; border-radius: 50%; border: 3px solid rgba(0,0,0,.08); box-shadow: 3px 4px 0 rgba(0,0,0,.1); }
+    .swatch-name { font-family: var(--font-d); font-size: 13px; font-weight: 800; }
+    .swatch-hex { font-size: 11px; font-weight: 700; color: var(--mid); font-family: monospace; }
+
+    /* STORY */
+    .story-card { background: linear-gradient(130deg, var(--wf-pale) 0%, #FFF8E0 100%); border-radius: 28px; padding: 40px; border: 2.5px solid #FFE080; display: grid; grid-template-columns: 200px 1fr; gap: 40px; align-items: center; }
+    .story-title { font-family: var(--font-d); font-size: 26px; font-weight: 800; margin-bottom: 14px; }
+    .story-body { font-size: 16px; font-weight: 600; color: var(--mid); line-height: 1.8; }
+    .story-quote { background: rgba(255,255,255,.7); border-left: 4px solid var(--wf); padding: 12px 18px; border-radius: 0 12px 12px 0; margin-top: 16px; font-style: italic; font-size: 15px; font-weight: 700; color: var(--wf-deep); }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo"><div class="nav-logo-icon">🐱</div><span class="nav-logo-text">Cat<em>Cratch</em></span></a>
+  <div class="nav-spacer"></div>
+  <a href="learn.html" class="nav-back">← 학습 페이지로</a>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div>
+      <div class="hero-badge">🧇 공식 마스코트</div>
+      <h1 class="hero-name"><span class="c-wf">와</span><span class="c-orange">피</span>냥</h1>
+      <p class="hero-sub">와플과 냥이가 만나서 태어난 CatCratch의 마스코트!<br>네모난 와플 몸에 고양이 귀와 꼬리가 달린 귀여운 친구예요.</p>
+      <div class="hero-traits">
+        <span class="trait t1">🧇 와플 바디</span>
+        <span class="trait t2">🐾 고양이 꼬리</span>
+        <span class="trait t3">✨ 코딩 선생님</span>
+        <span class="trait t4">💕 항상 친절해</span>
+      </div>
+      <div class="hero-cta">
+        <a href="learn.html" class="btn btn-wf">와피냥과 배우기 →</a>
+        <a href="editor.html" class="btn btn-ghost">함께 만들기</a>
+      </div>
+    </div>
+
+    <!-- ★ REDESIGNED MAIN CHARACTER ★ -->
+    <div class="hero-mascot">
+      <svg viewBox="-18 -18 306 378" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:360px;height:456px;">
+        <!-- Warm background glow -->
+        <ellipse cx="130" cy="192" r="148" fill="#FFF3C8" opacity=".45"/>
+
+        <!-- VARIANT LABEL -->
+        <rect x="5" y="5" width="80" height="24" rx="12" fill="#FFD23F"/>
+        <text x="45" y="21" font-size="12" font-weight="800" fill="#2C1810" text-anchor="middle" font-family="sans-serif">눈 C형</text>
+
+        <!-- TAIL (behind body) -->
+        <path d="M198 258 Q248 228 244 186 Q240 152 222 163"
+              stroke="#E8A818" stroke-width="26" fill="none" stroke-linecap="round"/>
+        <path d="M198 258 Q248 228 244 186 Q240 152 222 163"
+              stroke="#FFC947" stroke-width="16" fill="none" stroke-linecap="round"/>
+        <!-- Fluffy tail tip -->
+        <circle cx="222" cy="161" r="24" fill="#FFE090"/>
+        <circle cx="222" cy="161" r="16" fill="#FFF8C0"/>
+        <circle cx="222" cy="161" r="8"  fill="rgba(255,255,255,.7)"/>
+
+        <!-- LEFT ARM (relaxed, short stub) -->
+        <ellipse cx="22" cy="222" rx="22" ry="28" fill="#E8A818" transform="rotate(-12 22 222)"/>
+        <ellipse cx="22" cy="222" rx="16" ry="21" fill="#FFC947" transform="rotate(-12 22 222)"/>
+        <!-- left paw (attached to arm tip) -->
+        <circle cx="16" cy="246" r="14" fill="#E8A818"/>
+        <circle cx="16" cy="246" r="10" fill="#FFC947"/>
+
+        <!-- RIGHT ARM (raised up, waving!) -->
+        <path d="M236 174 Q256 135 250 108 Q247 90 236 98"
+              stroke="#E8A818" stroke-width="26" fill="none" stroke-linecap="round"/>
+        <path d="M236 174 Q256 135 250 108 Q247 90 236 98"
+              stroke="#FFC947" stroke-width="16" fill="none" stroke-linecap="round"/>
+        <!-- waving paw (clean, no fingers) -->
+        <circle cx="238" cy="98"  r="18" fill="#E8A818"/>
+        <circle cx="238" cy="98"  r="13" fill="#FFC947"/>
+
+        <!-- ★ MAIN WAFFLE BODY ★ -->
+        <rect x="16" y="60" width="228" height="224" rx="68" fill="#FFC947"/>
+
+        <!-- Waffle grooves — more visible, crisper -->
+        <line x1="16"  y1="130" x2="244" y2="130" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+        <line x1="16"  y1="200" x2="244" y2="200" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+        <line x1="88"  y1="60"  x2="88"  y2="284" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+        <line x1="172" y1="60"  x2="172" y2="284" stroke="#C88010" stroke-width="12" stroke-linecap="round" opacity=".56"/>
+
+        <!-- Waffle bump highlights — 3×3 full grid -->
+        <rect x="26"  y="70"  width="53" height="51" rx="14" fill="rgba(255,255,255,.24)"/>
+        <rect x="97"  y="70"  width="66" height="51" rx="14" fill="rgba(255,255,255,.24)"/>
+        <rect x="181" y="70"  width="53" height="51" rx="14" fill="rgba(255,255,255,.24)"/>
+        <rect x="26"  y="140" width="53" height="51" rx="14" fill="rgba(255,255,255,.18)"/>
+        <rect x="97"  y="140" width="66" height="51" rx="14" fill="rgba(255,255,255,.18)"/>
+        <rect x="181" y="140" width="53" height="51" rx="14" fill="rgba(255,255,255,.18)"/>
+        <rect x="26"  y="210" width="53" height="44" rx="14" fill="rgba(255,255,255,.15)"/>
+        <rect x="97"  y="210" width="66" height="44" rx="14" fill="rgba(255,255,255,.15)"/>
+        <rect x="181" y="210" width="53" height="44" rx="14" fill="rgba(255,255,255,.15)"/>
+
+        <!-- Top sheen (subtle) -->
+        <ellipse cx="130" cy="88" rx="72" ry="18" fill="rgba(255,255,255,.18)"/>
+
+        <!-- CAT EARS -->
+        <!-- Left ear -->
+        <path d="M52,78 C36,52 30,16 64,8 C86,3 108,50 104,68 Z" fill="#E8A818"/>
+        <path d="M60,74 C48,54 44,30 64,20 C78,14 98,52 96,68 Z" fill="#FFCB8A" opacity=".9"/>
+        <!-- Right ear -->
+        <path d="M208,78 C224,52 230,16 196,8 C174,3 152,50 156,68 Z" fill="#E8A818"/>
+        <path d="M200,74 C212,54 216,30 196,20 C182,14 162,52 164,68 Z" fill="#FFCB8A" opacity=".9"/>
+
+        <!-- ★ EYES — Variant C: minimal filled dot (Sanrio style) ★ -->
+        <!-- Left eye -->
+        <circle cx="90"  cy="156" r="11" fill="#1A0A00"/>
+        <circle cx="90"  cy="156" r="8.5" fill="#2C1208"/>
+
+
+        <!-- Right eye -->
+        <circle cx="170" cy="156" r="11" fill="#1A0A00"/>
+        <circle cx="170" cy="156" r="8.5" fill="#2C1208"/>
+
+
+        <!-- ★ TINY BUTTON NOSE ★ -->
+        <circle cx="130" cy="182" r="9"  fill="#D4882A"/>
+        <circle cx="133" cy="179" r="3"  fill="white" opacity=".65"/>
+
+        <!-- mouth: tiny ω (Sanrio style) -->
+        <path d="M117 194 Q124 202 130 194 Q136 202 143 194" stroke="#1A0A00" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+
+        <!-- Whiskers -->
+        <line x1="104" y1="182" x2="58"  y2="173" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".52"/>
+        <line x1="104" y1="190" x2="56"  y2="190" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".52"/>
+        <line x1="156" y1="182" x2="202" y2="173" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".52"/>
+        <line x1="156" y1="190" x2="204" y2="190" stroke="#1A0A00" stroke-width="1.8" stroke-linecap="round" opacity=".52"/>
+
+
+
+
+
+        <!-- LEFT FOOT -->
+        <ellipse cx="90"  cy="302" rx="40" ry="23" fill="#E8A818"/>
+        <ellipse cx="90"  cy="297" rx="34" ry="19" fill="#FFC947"/>
+        <circle cx="79"  cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/>
+        <circle cx="90"  cy="306" r="6.5" fill="#FFCB8A" opacity=".9"/>
+        <circle cx="101" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/>
+
+        <!-- RIGHT FOOT -->
+        <ellipse cx="170" cy="302" rx="40" ry="23" fill="#E8A818"/>
+        <ellipse cx="170" cy="297" rx="34" ry="19" fill="#FFC947"/>
+        <circle cx="159" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/>
+        <circle cx="170" cy="306" r="6.5" fill="#FFCB8A" opacity=".9"/>
+        <circle cx="181" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/>
+
+        <!-- Sparkles around character -->
+        <text x="10"  y="106" font-size="20" opacity=".7">✨</text>
+        <text x="8"   y="172" font-size="15" opacity=".55">⭐</text>
+        <text x="248" y="50"  font-size="18" opacity=".65">🌟</text>
+        <text x="244" cy="292" font-size="14" opacity=".5">💫</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- EXPRESSIONS -->
+  <div class="section">
+    <h2 class="section-title">표정 모음 <span class="sec-badge">4가지 표정</span></h2>
+    <div class="expr-grid">
+
+      <!-- Happy (crescent eyes = max cuteness) -->
+      <div class="expr-card">
+        <svg class="expr-svg" viewBox="0 0 120 145" fill="none">
+          <ellipse cx="60" cy="85" rx="58" ry="56" fill="#FFF3C8" opacity=".4"/>
+          <!-- tail -->
+          <path d="M88 118 Q112 103 109 82 Q106 65 96 72" stroke="#E8A818" stroke-width="11" fill="none" stroke-linecap="round"/>
+          <path d="M88 118 Q112 103 109 82 Q106 65 96 72" stroke="#FFC947" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+          <circle cx="95" cy="70" r="10" fill="#FFE090"/>
+          <!-- body -->
+          <rect x="14" y="32" width="92" height="96" rx="30" fill="#FFC947"/>
+          <!-- grid -->
+          <line x1="14" y1="62" x2="106" y2="62" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <line x1="14" y1="92" x2="106" y2="92" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <line x1="44" y1="32" x2="44" y2="128" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <line x1="76" y1="32" x2="76" y2="128" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <!-- sheen -->
+          <ellipse cx="60" cy="44" rx="36" ry="11" fill="rgba(255,255,255,.28)"/>
+          <!-- ears -->
+          <polygon points="24,38  14,14  50,32" fill="#E8A818"/>
+          <polygon points="26,36  18,22  46,32" fill="#FFB3C8" opacity=".9"/>
+          <polygon points="96,38 106,14  70,32" fill="#E8A818"/>
+          <polygon points="94,36 102,22  74,32" fill="#FFB3C8" opacity=".9"/>
+          <!-- CRESCENT HAPPY EYES ≧◡≦ -->
+          <path d="M36 56 Q46 48 56 56" stroke="#1A0A00" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+          <path d="M64 56 Q74 48 84 56" stroke="#1A0A00" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+          <!-- tiny eyelashes -->
+          <line x1="38" y1="53" x2="35" y2="48" stroke="#1A0A00" stroke-width="2" stroke-linecap="round"/>
+          <line x1="54" y1="50" x2="54" y2="44" stroke="#1A0A00" stroke-width="2" stroke-linecap="round"/>
+          <line x1="66" y1="50" x2="66" y2="44" stroke="#1A0A00" stroke-width="2" stroke-linecap="round"/>
+          <line x1="82" y1="53" x2="85" y2="48" stroke="#1A0A00" stroke-width="2" stroke-linecap="round"/>
+          <!-- nose -->
+          <circle cx="60" cy="68" r="5.5" fill="#FF8FA3"/>
+          <!-- BIG smile -->
+          <path d="M46 78 Q60 94 74 78" stroke="#1A0A00" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- CHEEKS -->
+          <circle cx="34" cy="78" r="14" fill="#FFB3C8" opacity=".6"/>
+          <circle cx="26" cy="73" r="4"  fill="white" opacity=".55"/>
+          <circle cx="86" cy="78" r="14" fill="#FFB3C8" opacity=".6"/>
+          <circle cx="78" cy="73" r="4"  fill="white" opacity=".55"/>
+          <!-- feet -->
+          <ellipse cx="42" cy="131" rx="17" ry="11" fill="#E8A818"/>
+          <ellipse cx="42" cy="128" rx="14" ry="9" fill="#FFC947"/>
+          <ellipse cx="78" cy="131" rx="17" ry="11" fill="#E8A818"/>
+          <ellipse cx="78" cy="128" rx="14" ry="9" fill="#FFC947"/>
+        </svg>
+        <div class="expr-label">최고야! 😆</div>
+        <div class="expr-desc">일이 잘 될 때!</div>
+      </div>
+
+      <!-- Thinking (one eye normal, one squinty, thought bubble) -->
+      <div class="expr-card">
+        <svg class="expr-svg" viewBox="0 0 120 145" fill="none">
+          <ellipse cx="60" cy="85" rx="58" ry="56" fill="#D6F5F2" opacity=".3"/>
+          <path d="M88 118 Q112 103 109 82 Q106 65 96 72" stroke="#E8A818" stroke-width="11" fill="none" stroke-linecap="round"/>
+          <path d="M88 118 Q112 103 109 82 Q106 65 96 72" stroke="#FFC947" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+          <circle cx="95" cy="70" r="10" fill="#FFE090"/>
+          <rect x="14" y="32" width="92" height="96" rx="30" fill="#FFC947"/>
+          <line x1="14" y1="62" x2="106" y2="62" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <line x1="14" y1="92" x2="106" y2="92" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <line x1="44" y1="32" x2="44" y2="128" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <line x1="76" y1="32" x2="76" y2="128" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <ellipse cx="60" cy="44" rx="36" ry="11" fill="rgba(255,255,255,.28)"/>
+          <polygon points="24,38  14,14  50,32" fill="#E8A818"/>
+          <polygon points="26,36  18,22  46,32" fill="#FFB3C8" opacity=".9"/>
+          <polygon points="96,38 106,14  70,32" fill="#E8A818"/>
+          <polygon points="94,36 102,22  74,32" fill="#FFB3C8" opacity=".9"/>
+          <!-- Left eye normal (big) -->
+          <circle cx="42" cy="56" r="15" fill="white"/>
+          <circle cx="42" cy="56" r="10" fill="#1A0A00"/>
+          <circle cx="47" cy="51" r="4"  fill="white"/>
+          <circle cx="38" cy="53" r="2"  fill="white" opacity=".6"/>
+          <!-- Right eye squinting (~) -->
+          <path d="M66 54 Q76 47 86 54" stroke="#1A0A00" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path d="M66 59 Q76 65 86 59" stroke="#1A0A00" stroke-width="2" fill="none" stroke-linecap="round" opacity=".4"/>
+          <circle cx="60" cy="68" r="5.5" fill="#FF8FA3"/>
+          <path d="M48 78 Q60 86 72 78" stroke="#1A0A00" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <circle cx="34" cy="76" r="12" fill="#FFB3C8" opacity=".55"/>
+          <circle cx="86" cy="76" r="12" fill="#FFB3C8" opacity=".55"/>
+          <!-- THOUGHT BUBBLES -->
+          <circle cx="102" cy="24" r="12" fill="white" stroke="#E8D090" stroke-width="1.5"/>
+          <circle cx="96"  cy="34" r="7"  fill="white" stroke="#E8D090" stroke-width="1.5"/>
+          <circle cx="90"  cy="42" r="5"  fill="white" stroke="#E8D090" stroke-width="1.5"/>
+          <text x="98" y="28" font-size="10" text-anchor="middle">?</text>
+          <ellipse cx="42" cy="131" rx="17" ry="11" fill="#E8A818"/>
+          <ellipse cx="42" cy="128" rx="14" ry="9"  fill="#FFC947"/>
+          <ellipse cx="78" cy="131" rx="17" ry="11" fill="#E8A818"/>
+          <ellipse cx="78" cy="128" rx="14" ry="9"  fill="#FFC947"/>
+        </svg>
+        <div class="expr-label">고민 중... 🤔</div>
+        <div class="expr-desc">어떤 블록을 쓸까?</div>
+      </div>
+
+      <!-- Surprised (huge O_O eyes) -->
+      <div class="expr-card">
+        <svg class="expr-svg" viewBox="0 0 120 145" fill="none">
+          <ellipse cx="60" cy="85" rx="58" ry="56" fill="#FFE8DC" opacity=".4"/>
+          <path d="M88 118 Q112 103 109 82 Q106 65 96 72" stroke="#E8A818" stroke-width="11" fill="none" stroke-linecap="round"/>
+          <path d="M88 118 Q112 103 109 82 Q106 65 96 72" stroke="#FFC947" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+          <circle cx="95" cy="70" r="10" fill="#FFE090"/>
+          <rect x="14" y="32" width="92" height="96" rx="30" fill="#FFC947"/>
+          <line x1="14" y1="62" x2="106" y2="62" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <line x1="14" y1="92" x2="106" y2="92" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <line x1="44" y1="32" x2="44" y2="128" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <line x1="76" y1="32" x2="76" y2="128" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <ellipse cx="60" cy="44" rx="36" ry="11" fill="rgba(255,255,255,.28)"/>
+          <!-- ears startled/up -->
+          <polygon points="22,34  10,8  48,28" fill="#E8A818"/>
+          <polygon points="24,32  16,16  44,28" fill="#FFB3C8" opacity=".9"/>
+          <polygon points="98,34 110,8  72,28" fill="#E8A818"/>
+          <polygon points="96,32 104,16  76,28" fill="#FFB3C8" opacity=".9"/>
+          <!-- SUPER BIG EYES (surprised) -->
+          <circle cx="42" cy="56" r="17" fill="white"/>
+          <circle cx="42" cy="56" r="11" fill="#1A0A00"/>
+          <circle cx="47" cy="50" r="4.5" fill="white"/>
+          <circle cx="78" cy="56" r="17" fill="white"/>
+          <circle cx="78" cy="56" r="11" fill="#1A0A00"/>
+          <circle cx="83" cy="50" r="4.5" fill="white"/>
+          <!-- O mouth -->
+          <ellipse cx="60" cy="80" rx="10" ry="12" fill="#1A0A00"/>
+          <ellipse cx="60" cy="81" rx="7"  ry="9"  fill="#8B1A1A"/>
+          <!-- big blush -->
+          <circle cx="28" cy="74" r="14" fill="#FFB3C8" opacity=".7"/>
+          <circle cx="92" cy="74" r="14" fill="#FFB3C8" opacity=".7"/>
+          <!-- exclamation -->
+          <text x="5" y="22" font-size="14" fill="#FF6B35" font-weight="900" font-family="Arial">!</text>
+          <ellipse cx="42" cy="131" rx="17" ry="11" fill="#E8A818"/>
+          <ellipse cx="42" cy="128" rx="14" ry="9"  fill="#FFC947"/>
+          <ellipse cx="78" cy="131" rx="17" ry="11" fill="#E8A818"/>
+          <ellipse cx="78" cy="128" rx="14" ry="9"  fill="#FFC947"/>
+        </svg>
+        <div class="expr-label">깜짝! 😲</div>
+        <div class="expr-desc">오류를 발견했을 때</div>
+      </div>
+
+      <!-- Crown (success!) -->
+      <div class="expr-card">
+        <svg class="expr-svg" viewBox="0 0 120 145" fill="none">
+          <ellipse cx="60" cy="85" rx="58" ry="56" fill="#FFF5CC" opacity=".5"/>
+          <path d="M88 118 Q112 103 109 82 Q106 65 96 72" stroke="#E8A818" stroke-width="11" fill="none" stroke-linecap="round"/>
+          <path d="M88 118 Q112 103 109 82 Q106 65 96 72" stroke="#FFC947" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+          <circle cx="95" cy="70" r="10" fill="#FFE090"/>
+          <rect x="14" y="32" width="92" height="96" rx="30" fill="#FFC947"/>
+          <line x1="14" y1="62" x2="106" y2="62" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <line x1="14" y1="92" x2="106" y2="92" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <line x1="44" y1="32" x2="44" y2="128" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <line x1="76" y1="32" x2="76" y2="128" stroke="#E8A818" stroke-width="4" opacity=".3"/>
+          <ellipse cx="60" cy="44" rx="36" ry="11" fill="rgba(255,255,255,.28)"/>
+          <polygon points="24,38  14,14  50,32" fill="#E8A818"/>
+          <polygon points="26,36  18,22  46,32" fill="#FFB3C8" opacity=".9"/>
+          <polygon points="96,38 106,14  70,32" fill="#E8A818"/>
+          <polygon points="94,36 102,22  74,32" fill="#FFB3C8" opacity=".9"/>
+          <!-- Wink (left crescent, right normal big) -->
+          <path d="M32 55 Q42 47 52 55" stroke="#1A0A00" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+          <!-- Star wink on left -->
+          <text x="34" y="58" font-size="13">⭐</text>
+          <!-- Right normal big eye -->
+          <circle cx="76" cy="56" r="15" fill="white"/>
+          <circle cx="76" cy="56" r="10" fill="#1A0A00"/>
+          <circle cx="81" cy="51" r="4"  fill="white"/>
+          <circle cx="60" cy="68" r="5.5" fill="#FF8FA3"/>
+          <!-- BIG smile -->
+          <path d="M44 80 Q60 98 76 80" stroke="#1A0A00" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <circle cx="34" cy="80" r="14" fill="#FFB3C8" opacity=".65"/>
+          <circle cx="86" cy="80" r="14" fill="#FFB3C8" opacity=".65"/>
+          <ellipse cx="42" cy="131" rx="17" ry="11" fill="#E8A818"/>
+          <ellipse cx="42" cy="128" rx="14" ry="9"  fill="#FFC947"/>
+          <ellipse cx="78" cy="131" rx="17" ry="11" fill="#E8A818"/>
+          <ellipse cx="78" cy="128" rx="14" ry="9"  fill="#FFC947"/>
+          <!-- CROWN -->
+          <path d="M30 26 L38 10 L48 20 L60 6 L72 20 L82 10 L90 26 Z" fill="#FFD23F"/>
+          <rect x="30" y="26" width="60" height="8" rx="3" fill="#E8B020"/>
+          <circle cx="38" cy="12" r="4" fill="#FF6B35"/>
+          <circle cx="60" cy="8"  r="4" fill="#FF6B35"/>
+          <circle cx="82" cy="12" r="4" fill="#FF6B35"/>
+        </svg>
+        <div class="expr-label">해냈어! 👑</div>
+        <div class="expr-desc">미션 성공!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLOR PALETTE -->
+  <div class="section">
+    <h2 class="section-title">컬러 팔레트 <span class="sec-badge">와피냥 컬러</span></h2>
+    <div class="palette-grid">
+      <div class="swatch"><div class="swatch-circle" style="background:#FFC947;"></div><div class="swatch-name">와플 허니</div><div class="swatch-hex">#FFC947</div></div>
+      <div class="swatch"><div class="swatch-circle" style="background:#E8A818;"></div><div class="swatch-name">와플 골드</div><div class="swatch-hex">#E8A818</div></div>
+      <div class="swatch"><div class="swatch-circle" style="background:#FFE090;border-color:rgba(0,0,0,.1)"></div><div class="swatch-name">와플 크림</div><div class="swatch-hex">#FFE090</div></div>
+      <div class="swatch"><div class="swatch-circle" style="background:#FFB3C8;"></div><div class="swatch-name">냥이 핑크</div><div class="swatch-hex">#FFB3C8</div></div>
+      <div class="swatch"><div class="swatch-circle" style="background:#FF8FA3;"></div><div class="swatch-name">코 핑크</div><div class="swatch-hex">#FF8FA3</div></div>
+      <div class="swatch"><div class="swatch-circle" style="background:#1A0A00;"></div><div class="swatch-name">눈동자</div><div class="swatch-hex">#1A0A00</div></div>
+      <div class="swatch"><div class="swatch-circle" style="background:#FF6B35;"></div><div class="swatch-name">CatCratch 오렌지</div><div class="swatch-hex">#FF6B35</div></div>
+      <div class="swatch"><div class="swatch-circle" style="background:#2EC4B6;"></div><div class="swatch-name">CatCratch 틸</div><div class="swatch-hex">#2EC4B6</div></div>
+    </div>
+  </div>
+
+  <!-- STORY -->
+  <div class="section">
+    <h2 class="section-title">와피냥 이야기 <span class="sec-badge">캐릭터 소개</span></h2>
+    <div class="story-card">
+      <div style="display:flex;justify-content:center;">
+        <svg viewBox="0 0 160 190" fill="none" style="width:160px;height:190px;">
+          <path d="M122 148 Q146 133 143 110 Q140 90 130 98" stroke="#E8A818" stroke-width="14" fill="none" stroke-linecap="round"/>
+          <path d="M122 148 Q146 133 143 110 Q140 90 130 98" stroke="#FFC947" stroke-width="8.5" fill="none" stroke-linecap="round"/>
+          <circle cx="130" cy="97" r="14" fill="#FFE090"/>
+          <circle cx="130" cy="97" r="9" fill="#FFF8C0"/>
+          <rect x="18" y="38" width="124" height="126" rx="38" fill="#FFC947"/>
+          <line x1="18" y1="76" x2="142" y2="76" stroke="#E8A818" stroke-width="6" opacity=".3"/>
+          <line x1="18" y1="114" x2="142" y2="114" stroke="#E8A818" stroke-width="6" opacity=".3"/>
+          <line x1="56"  y1="38" x2="56"  y2="164" stroke="#E8A818" stroke-width="6" opacity=".3"/>
+          <line x1="104" y1="38" x2="104" y2="164" stroke="#E8A818" stroke-width="6" opacity=".3"/>
+          <ellipse cx="80" cy="54" rx="48" ry="16" fill="rgba(255,255,255,.28)"/>
+          <polygon points="32,46  20,16  60,38" fill="#E8A818"/>
+          <polygon points="34,44  24,26  56,38" fill="#FFB3C8" opacity=".9"/>
+          <polygon points="128,46 140,16 100,38" fill="#E8A818"/>
+          <polygon points="126,44 136,26 104,38" fill="#FFB3C8" opacity=".9"/>
+          <!-- happy closed crescent eyes -->
+          <path d="M46 74 Q56 66 66 74" stroke="#1A0A00" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path d="M94 74 Q104 66 114 74" stroke="#1A0A00" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <circle cx="80" cy="88" r="6.5" fill="#FF8FA3"/>
+          <path d="M68 98 Q80 114 92 98" stroke="#1A0A00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <circle cx="54" cy="100" r="14" fill="#FFB3C8" opacity=".55"/>
+          <circle cx="46" cy="95" r="4" fill="white" opacity=".55"/>
+          <circle cx="106" cy="100" r="14" fill="#FFB3C8" opacity=".55"/>
+          <circle cx="98"  cy="95" r="4" fill="white" opacity=".55"/>
+          <ellipse cx="52"  cy="172" rx="22" ry="14" fill="#E8A818"/>
+          <ellipse cx="52"  cy="168" rx="18" ry="11" fill="#FFC947"/>
+          <ellipse cx="108" cy="172" rx="22" ry="14" fill="#E8A818"/>
+          <ellipse cx="108" cy="168" rx="18" ry="11" fill="#FFC947"/>
+        </svg>
+      </div>
+      <div>
+        <h3 class="story-title">누가 와피냥을 만들었나요?</h3>
+        <p class="story-body">어느 날, 마법의 와플 가게에서 특별한 와플이 구워졌어요.<br>황금빛 격자 무늬가 새겨진 그 와플에서<br>고양이 귀와 꼬리가 솟아났고, 커다랗고 반짝이는 눈이 떠졌어요.<br><br>그렇게 태어난 <strong>와피냥</strong>은 코딩을 너무너무 좋아해서,<br>모든 어린이 친구들에게 블록 코딩을 가르쳐 주기로 결심했답니다!</p>
+        <div class="story-quote">"안녕! 나는 와피냥이야 🧇 같이 코딩해볼까냥~?"</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
