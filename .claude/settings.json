@@ -6,16 +6,17 @@
         "hooks": [
           {
             "type": "command",
-            "if": "Bash(git push *)",
-            "command": "cat | jq -r '.tool_input.command // \"\"' | grep -q -- '--force' && exit 2; exit 0",
-            "statusMessage": "force push 차단 검사..."
+            "if": "Bash(git commit*)",
+            "command": "FAILED=0; [ -n \"$(find backend/tests/hurl -name '*.hurl' 2>/dev/null)\" ] && { hurl --test backend/tests/hurl/*.hurl --variable base_url=http://localhost:8000 2>&1 | tail -5 || FAILED=1; }; [ -n \"$(find frontend/e2e -name '*.spec.ts' 2>/dev/null)\" ] && { (cd frontend && npx playwright test --reporter=line 2>&1 | tail -5) || FAILED=1; }; [ $FAILED -eq 1 ] && exit 2; exit 0",
+            "timeout": 60,
+            "statusMessage": "커밋 전 테스트 검증 중..."
           },
           {
             "type": "command",
-            "if": "Bash(git commit*)",
-            "command": "FAILED=0; HURL_FILES=$(find backend/tests/hurl -name '*.hurl' 2>/dev/null); [ -n \"$HURL_FILES\" ] && { hurl --test backend/tests/hurl/*.hurl --variable base_url=http://localhost:8000 || FAILED=1; }; E2E_FILES=$(find frontend/e2e -name '*.spec.ts' 2>/dev/null); [ -n \"$E2E_FILES\" ] && { (cd frontend && npx playwright test) || FAILED=1; }; [ $FAILED -eq 1 ] && exit 2; exit 0",
-            "statusMessage": "커밋 전 테스트 검증 중...",
-            "timeout": 120
+            "if": "Bash(git push *)",
+            "command": "cat | jq -r '.tool_input.command // \"\"' | grep -q -- '--force' && exit 2; exit 0",
+            "timeout": 5,
+            "statusMessage": "force push 차단 검사..."
           }
         ]
       }

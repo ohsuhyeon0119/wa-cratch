@@ -69,9 +69,6 @@ cd frontend && npx playwright test
 
 ## 개발 파이프라인
 
-> 상세 워크플로우는 **[DEV-WORKFLOW.md](./DEV-WORKFLOW.md)** 를 참고한다.
-> 역할 분담, 각 단계별 행동 기준, MCP 사용 시점, 테스트 전략 등이 정리되어 있다.
-
 ### 래칫 방법론 (Ratchet Pattern)
 구현은 AI가 한다. 완료 판정은 테스트가 한다.
 
@@ -81,6 +78,18 @@ cd frontend && npx playwright test
 
 테스트 코드는 개발자가 직접 작성한다. AI는 테스트 파일을 수정할 수 없다. 테스트가 통과하면 그 상태는 잠긴다 — 뒤로 돌아가지 않는다.
 
+### 역할 분담
+
+| 항목 | 개발자 | AI |
+|------|--------|----|
+| 이슈 작성 / 칸반 관리 | ✅ | 읽기만 |
+| 테스트 코드 작성 | ✅ | 확인 요청 후 수정 가능 |
+| 기능 구현 | | ✅ |
+| 커밋 | | ✅ (테스트 통과 후) |
+| PR 생성 | | ✅ (개발자 요청 시) |
+| PR 머지 | ✅ | |
+| Wiki 수정 | ✅ | 읽기만 |
+
 ### 작업 사이클 (이슈 하나 처리 흐름)
 
 ```
@@ -88,12 +97,14 @@ cd frontend && npx playwright test
 2. 테스트 코드 먼저 작성 (개발자)
    - 백엔드: backend/tests/hurl/ 에 Hurl 파일
    - 프론트: frontend/e2e/ 에 Playwright 스펙
-3. /feature-dev #이슈번호 실행 → GitHub MCP로 이슈 읽기 + 기존 테스트 코드 확인 후 구현
-   (구현 목표: 이미 작성된 테스트가 통과하는 것)
+3. /suhyeon-workflow #이슈번호 실행
+   - GitHub MCP로 이슈 읽기 + design/ 디렉토리 디자인 파일 확인
+   - 브레인스토밍 → 플랜 → TDD → 구현 순으로 진행 (각 단계 개발자 승인)
+   - 구현 목표: 이미 작성된 테스트가 통과하는 것
 4. 작업 단위마다 커밋
    - 형식: feat: [작업 내용 명시] (#이슈번호)
-   - Pre-commit Hook이 관련 테스트 통과 여부 강제 검증 (실패 시 커밋 차단)
-5. 모든 테스트 통과 → 개발자가 PR 생성 요청 → AI가 PR 작성
+   - Pre-commit Hook이 테스트 통과 여부 강제 검증 (실패 시 커밋 차단)
+5. 모든 테스트 통과 → 개발자가 PR 생성 요청 → AI가 GitHub MCP로 PR 작성
 6. GitHub Actions에서 Hurl + Playwright 자동 실행
 7. 통과 → 머지 → 칸반 Done
 ```
@@ -174,3 +185,6 @@ git clone https://github.com/ohsuhyeon0119/cat-cratch.wiki.git /tmp/catcratch-wi
 **구분**:
 - Playwright MCP → 테스트 작성 시 (DOM 탐색, 셀렉터 확인)
 - `npx playwright test --headless` → 래칫 검증/CI (Hook에서 자동 실행)
+
+## 에이전트 전략
+대화 과정에서 명확하게 정해지지 않은 스펙 사항이 있으면 다시 되물어보면서 구체화하라.
