@@ -1,7 +1,17 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import s from './PlayPage.module.css'
+import { useToast } from '../../hooks/useToast'
+import Toast from '../../components/Toast/Toast'
+import ShareModal from '../../components/ShareModal/ShareModal'
 
 export default function PlayPage() {
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isLiked, setIsLiked] = useState(false)
+  const [likeCount, setLikeCount] = useState(1234)
+  const [shareOpen, setShareOpen] = useState(false)
+  const { toastVisible, toastMessage, toastType, showToast } = useToast()
+
   return (
     <>
       <nav className={s.nav}>
@@ -33,15 +43,24 @@ export default function PlayPage() {
               <div className={s.sprite}>🧇</div>
               <div className={s.speech}>안녕냥~ 🧇</div>
             </div>
-            <div className={s.playOverlay}>
-              <div className={s.playBtn}>▶</div>
-            </div>
+            {!isPlaying && (
+              <div className={s.playOverlay} onClick={() => setIsPlaying(true)}>
+                <div className={s.playBtn}>▶</div>
+              </div>
+            )}
           </div>
 
           <div className={s.stageActions}>
-            <button className={`${s.actionBtn} ${s.abLike}`}>❤️ 좋아요 <span className={s.abCount}>1,234</span></button>
-            <button className={`${s.actionBtn} ${s.abShare}`}>🔗 공유</button>
-            <Link to="/editor/1" className={`${s.actionBtn} ${s.abRemix}`}>🔁 리믹스</Link>
+            <button
+              className={`${s.actionBtn} ${s.abLike} ${isLiked ? s.liked : ''}`}
+              onClick={() => {
+                setIsLiked(prev => !prev)
+                setLikeCount(prev => isLiked ? prev - 1 : prev + 1)
+              }}
+            >
+              {isLiked ? '❤️' : '🤍'} 좋아요 <span className={s.abCount}>{likeCount.toLocaleString()}</span>
+            </button>
+            <button className={`${s.actionBtn} ${s.abShare}`} onClick={() => setShareOpen(true)}>🔗 공유</button>
             <div className={s.actionSpacer}/>
             <button className={s.fullscreenBtn} title="전체화면">⛶</button>
           </div>
@@ -68,7 +87,6 @@ export default function PlayPage() {
             <div className={s.infoStats}>
               <div className={s.infoStat}><span className={s.infoStatN}>1,234</span><span className={s.infoStatL}>❤️ 좋아요</span></div>
               <div className={s.infoStat}><span className={s.infoStatN}>8,412</span><span className={s.infoStatL}>👁️ 조회</span></div>
-              <div className={s.infoStat}><span className={s.infoStatN}>340</span><span className={s.infoStatL}>🔁 리믹스</span></div>
             </div>
           </div>
         </div>
@@ -124,6 +142,14 @@ export default function PlayPage() {
           </div>
         </div>
       </div>
+
+      <Toast visible={toastVisible} message={toastMessage} type={toastType} />
+      <ShareModal
+        isOpen={shareOpen}
+        projectId="1"
+        projectTitle="냥이의 대모험"
+        onClose={() => setShareOpen(false)}
+      />
     </>
   )
 }

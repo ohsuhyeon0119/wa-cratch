@@ -1,23 +1,21 @@
 import { Link } from 'react-router-dom'
 import s from './DashboardPage.module.css'
+import { MY_PROJECTS } from '../../mock/projects'
+import { MOCK_ACTIVITY } from '../../mock/activity'
+import { useToast } from '../../hooks/useToast'
+import Toast from '../../components/Toast/Toast'
 
-const PROJECTS = [
-  { id: 1, emoji: '🐱', title: '냥이의 대모험', date: '2일 전 수정', likes: 234, views: '1.2k', thumb: s.pt1, published: true },
-  { id: 2, emoji: '🌊', title: '바다 탐험', date: '5일 전', likes: 89, views: '430', thumb: s.pt2, published: true },
-  { id: 3, emoji: '🌟', title: '별 수집 게임 (작업중)', date: '어제', likes: 0, views: '0', thumb: s.pt3, published: false },
-  { id: 4, emoji: '🦋', title: '나비 미로', date: '1주일 전', likes: 56, views: '234', thumb: s.pt4, published: true },
-  { id: 5, emoji: '🐰', title: '토끼 달리기', date: '2주일 전', likes: 45, views: '189', thumb: s.pt5, published: true },
-  { id: 6, emoji: '🌈', title: '무지개 그림판', date: '3주일 전', likes: 0, views: '0', thumb: s.pt6, published: false },
-]
+const THUMB_CLASSES = [s.pt1, s.pt2, s.pt3, s.pt4, s.pt5, s.pt6]
 
-const ACTIVITY = [
-  { type: 'like',  icon: '❤️', cls: s.actLike,  text: <><strong>별동이</strong>님이 &quot;냥이의 대모험&quot;을 좋아해요!</>, time: '10분 전' },
-  { type: 'view',  icon: '👁️', cls: s.actView,  text: <><strong>바다소녀</strong>님이 &quot;바다 탐험&quot;을 봤어요</>, time: '1시간 전' },
-  { type: 'remix', icon: '🔁', cls: s.actRemix, text: <><strong>초등코더</strong>님이 &quot;냥이의 대모험&quot;을 리믹스했어요!</>, time: '3시간 전' },
-  { type: 'like',  icon: '❤️', cls: s.actLike,  text: <><strong>우주선장</strong>님이 &quot;나비 미로&quot;를 좋아해요!</>, time: '어제' },
-]
+const ACT_CLS: Record<string, string> = {
+  like: s.actLike,
+  view: s.actView,
+  remix: s.actRemix,
+}
 
 export default function DashboardPage() {
+  const { toastVisible, toastMessage, toastType, showToast } = useToast()
+
   return (
     <div className={s.page}>
       {/* TOP NAV */}
@@ -49,7 +47,7 @@ export default function DashboardPage() {
           </div>
           <div className={s.sbSection}>
             <div className={s.sbSectionTitle}>계정</div>
-            <Link to="/" className={s.sbLink}>🚪 로그아웃</Link>
+            <Link to="/" className={s.sbLink} onClick={() => showToast('로그아웃 됐어요 👋', 'info')}>🚪 로그아웃</Link>
           </div>
           <Link to="/editor/new" className={s.sbNewBtn}>+ 새 프로젝트</Link>
         </div>
@@ -74,9 +72,9 @@ export default function DashboardPage() {
               <div className={s.pnIcon}>+</div>
               <div className={s.pnText}>새 프로젝트 만들기</div>
             </Link>
-            {PROJECTS.map(p => (
+            {MY_PROJECTS.map((p, index) => (
               <div key={p.id} className={s.projCard}>
-                <div className={`${s.projThumb} ${p.thumb}`}>
+                <div className={`${s.projThumb} ${THUMB_CLASSES[index % 6]}`}>
                   {p.emoji}
                   <div className={s.projHover}>
                     <Link to={`/editor/${p.id}`} className={`${s.phBtn} ${s.edit}`}>✏️ 편집</Link>
@@ -89,7 +87,7 @@ export default function DashboardPage() {
                 <div className={s.projInfo}>
                   <div className={s.projTitle}>{p.title}</div>
                   <div className={s.projMeta}>
-                    <span className={s.projDate}>{p.date}</span>
+                    <span className={s.projDate}>{p.views > 0 ? `${p.views} views` : '비공개'}</span>
                     <div className={s.projStats}>
                       <span className={s.projStat}>❤️ {p.likes}</span>
                       <span className={s.projStat}>👁️ {p.views}</span>
@@ -104,9 +102,9 @@ export default function DashboardPage() {
             <h2 className={s.sectionTitle}>🔔 최근 활동</h2>
           </div>
           <div className={s.activityList}>
-            {ACTIVITY.map((a, i) => (
+            {MOCK_ACTIVITY.map((a, i) => (
               <div key={i} className={s.activityItem}>
-                <div className={`${s.actIcon} ${a.cls}`}>{a.icon}</div>
+                <div className={`${s.actIcon} ${ACT_CLS[a.type] ?? ''}`}>{a.icon}</div>
                 <div>
                   <div className={s.actText}>{a.text}</div>
                   <div className={s.actTime}>{a.time}</div>
@@ -116,6 +114,8 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <Toast visible={toastVisible} message={toastMessage} type={toastType} />
     </div>
   )
 }

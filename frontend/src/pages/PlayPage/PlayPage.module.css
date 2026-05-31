@@ -81,6 +81,7 @@
 }
 .abLike  { background: var(--pink-pale); color: var(--pink-dk); border-color: var(--pink-pale); }
 .abLike:hover  { background: var(--pink); color: #fff; border-color: var(--pink); }
+.liked { background: #FF85A1; color: #fff; border-color: #FF85A1; }
 .abShare { background: var(--teal-pale); color: var(--teal-dk); border-color: var(--teal-pale); }
 .abShare:hover { background: var(--teal); color: #fff; border-color: var(--teal); }
 .abRemix { background: var(--orange-pale); color: var(--orange); border-color: var(--orange-pale); text-decoration: none; }

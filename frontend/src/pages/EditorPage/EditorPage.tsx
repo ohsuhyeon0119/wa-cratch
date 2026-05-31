@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import s from './EditorPage.module.css'
+import { useToast } from '../../hooks/useToast'
+import Toast from '../../components/Toast/Toast'
+import ShareModal from '../../components/ShareModal/ShareModal'
 
 type Category = 'motion' | 'sensing' | 'speech' | 'looks' | 'control' | 'sound'
 
@@ -60,6 +63,9 @@ const CAT_BTNS: { key: Category; cls: string; label: string }[] = [
 
 export default function EditorPage() {
   const [cat, setCat] = useState<Category>('motion')
+  const { toastVisible, toastMessage, toastType, showToast } = useToast()
+  const [isRunning, setIsRunning] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
 
   return (
     <div className={s.page}>
@@ -73,13 +79,13 @@ export default function EditorPage() {
         <input className={s.tProjectName} defaultValue="와냥이의 첫 번째 모험" type="text" spellCheck={false}/>
         <div className={s.tSpacer}/>
         <div className={s.runStop}>
-          <button className={s.btnRun}>▶ 실행하기</button>
-          <button className={s.btnStop}>⏹ 멈추기</button>
+          <button className={s.btnRun} onClick={() => setIsRunning(true)}>▶ 실행하기</button>
+          <button className={s.btnStop} onClick={() => setIsRunning(false)}>⏹ 멈추기</button>
         </div>
         <div className={s.tDivider}/>
         <div className={s.tActions}>
-          <button className={`${s.btnToolbar} ${s.btnSave}`}>💾 저장</button>
-          <button className={`${s.btnToolbar} ${s.btnShare}`}>🔗 공유하기</button>
+          <button className={`${s.btnToolbar} ${s.btnSave}`} onClick={() => showToast('저장됐어요! 💾', 'success')}>💾 저장</button>
+          <button className={`${s.btnToolbar} ${s.btnShare}`} onClick={() => setShareOpen(true)}>🔗 공유하기</button>
         </div>
         <div className={s.tDivider}/>
         <div className={s.tAvatar}>🧇</div>
@@ -216,11 +222,22 @@ export default function EditorPage() {
 
       {/* STATUS BAR */}
       <div className={s.statusBar}>
-        <span><span className={s.statusDot}/> 준비됨</span>
+        <span>
+          <span className={s.statusDot}/>
+          {isRunning ? '▶ 실행 중...' : '준비됨'}
+        </span>
         <span>스프라이트: 와냥이</span>
         <span>블록: 6개</span>
         <span style={{ marginLeft: 'auto' }}>WaCratch v1.0 🐾</span>
       </div>
+
+      <Toast visible={toastVisible} message={toastMessage} type={toastType} />
+      <ShareModal
+        isOpen={shareOpen}
+        projectId="test"
+        projectTitle="와냥이의 첫 번째 모험"
+        onClose={() => setShareOpen(false)}
+      />
     </div>
   )
 }

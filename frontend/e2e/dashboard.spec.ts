@@ -24,3 +24,12 @@ test('프로젝트 그리드가 렌더링된다', async ({ page }) => {
   await expect(page.getByText('🎮 내 프로젝트')).toBeVisible();
   await expect(page.locator('[class*="projGrid"]')).toBeVisible();
 });
+
+test('로그아웃 클릭 시 홈으로 이동한다', async ({ page }) => {
+  // Given
+  await page.goto('/dashboard');
+  // When
+  await page.getByRole('link', { name: /로그아웃/ }).click();
+  // Then
+  await expect(page).toHaveURL('/');
+});

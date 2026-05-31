@@ -1,0 +1,104 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.shareModal {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  min-width: 320px;
+  max-width: 480px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  position: relative;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.closeBtn:hover {
+  color: #333;
+}
+
+.title {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  word-break: break-word;
+}
+
+.urlContainer {
+  margin-bottom: 20px;
+}
+
+.shareUrl {
+  background-color: #f0f0f0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #333;
+  word-break: break-all;
+  line-height: 1.5;
+  border: 1px solid #ddd;
+}
+
+.copyBtn {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: var(--teal);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.copyBtn:hover:not(:disabled) {
+  background-color: var(--teal-dk);
+}
+
+.copyBtn:disabled {
+  opacity: 0.9;
+  cursor: default;
+}
+
+.copyBtn:active:not(:disabled) {
+  transform: scale(0.98);
+}
