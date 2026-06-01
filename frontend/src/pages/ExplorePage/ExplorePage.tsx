@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import s from './ExplorePage.module.css'
-import { MOCK_PROJECTS, type Project } from '../../mock/projects'
+import { getProjects, type Project } from '../../api/projects'
 
 type Sort = 'latest' | 'views' | 'likes'
 
@@ -10,16 +10,11 @@ const THUMB_CLASSES = [s.pt1, s.pt2, s.pt3, s.pt4, s.pt5, s.pt6, s.pt7, s.pt8, s
 export default function ExplorePage() {
   const [sort, setSort] = useState<Sort>('latest')
   const [searchQuery, setSearchQuery] = useState('')
+  const [projects, setProjects] = useState<Project[]>([])
 
-  const filtered = MOCK_PROJECTS.filter((p: Project) =>
-    p.title.includes(searchQuery) || p.author.includes(searchQuery)
-  )
-
-  const sorted = [...filtered].sort((a: Project, b: Project) => {
-    if (sort === 'views') return b.views - a.views
-    if (sort === 'likes') return b.likes - a.likes
-    return b.id - a.id  // 'latest': id 내림차순
-  })
+  useEffect(() => {
+    getProjects(sort, searchQuery).then(setProjects).catch(() => setProjects([]))
+  }, [sort, searchQuery])
 
   return (
     <>
@@ -99,11 +94,11 @@ export default function ExplorePage() {
         </div>
 
         <div className={s.sectionTitle}>
-          모든 작품 <span className={s.titleBadge}>{sorted.length}개</span>
+          모든 작품 <span className={s.titleBadge}>{projects.length}개</span>
         </div>
 
         <div className={s.projectsGrid}>
-          {sorted.map((p: Project, index: number) => (
+          {projects.map((p: Project, index: number) => (
             <Link key={p.id} to={`/play/${p.id}`} className={s.projCard}>
               <div className={`${s.projThumb} ${THUMB_CLASSES[index % THUMB_CLASSES.length]}`}>
                 {p.emoji}
