@@ -183,8 +183,13 @@
 :global(.blocklyToolboxCategory) {
   border-radius: 0 12px 12px 0 !important;
   margin: 2px 8px 2px 0 !important;
+  padding: 0 !important;          /* Blockly의 padding:10px 0 제거 */
+  min-height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
   cursor: pointer !important;
   transition: background-color .15s !important;
+  box-sizing: border-box !important;
 }
 :global(.blocklyToolboxCategory:hover:not(.blocklyToolboxSelected)) {
   background-color: var(--orange-pale) !important;
@@ -195,6 +200,14 @@
   border-left-color: var(--orange-dk) !important;
 }
 
+/* 컨테이너 — flex item으로 가로 채움 */
+:global(.blocklyTreeRowContentContainer) {
+  flex: 1 !important;
+  padding: 0 12px 0 4px !important;
+  align-items: center !important;
+  min-width: 0 !important;
+}
+
 /* 카테고리 레이블 — 텍스트 오버플로 방지 */
 :global(.blocklyToolboxCategoryLabel) {
   font-family: var(--font-b) !important;
@@ -203,9 +216,7 @@
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  display: inline-block !important;
-  max-width: 148px !important;
-  vertical-align: middle !important;
+  max-width: 100% !important;
   color: var(--dark) !important;
 }
 :global(.blocklyToolboxCategory.blocklyToolboxSelected .blocklyToolboxCategoryLabel) {
