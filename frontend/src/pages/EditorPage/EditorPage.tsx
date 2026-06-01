@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import * as Blockly from 'blockly'
 import s from './EditorPage.module.css'
 import { useToast } from '../../hooks/useToast'
@@ -9,10 +9,13 @@ import StageCanvas from './StageCanvas'
 import { registerBlocks, TOOLBOX_CONFIG } from './blockDefs'
 import { SpriteRuntime, defaultSpriteState } from './spriteRuntime'
 import type { SpriteState, Background } from './spriteRuntime'
+import { getProject, createProject, updateProject } from '../../api/projects'
 
 registerBlocks()
 
 export default function EditorPage() {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const { toastVisible, toastMessage, toastType, showToast } = useToast()
   const [isRunning, setIsRunning] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
@@ -48,11 +51,29 @@ export default function EditorPage() {
     }
     workspace.addChangeListener(updateCount)
 
+    // 프로젝트 불러오기 (id가 'new'가 아닌 경우)
+    if (id && id !== 'new') {
+      getProject(id)
+        .then((project) => {
+          if (
+            project.blocks_json &&
+            Object.keys(project.blocks_json).length > 0
+          ) {
+            Blockly.serialization.workspaces.load(project.blocks_json, workspace)
+          }
+        })
+        .catch(() => {
+          // 불러오기 실패 시 무시 (빈 워크스페이스로 시작)
+        })
+    }
+
     return () => {
       workspace.removeChangeListener(updateCount)
       workspace.dispose()
       workspaceRef.current = null
     }
+  // id는 마운트 시 한 번만 읽으면 되므로 의도적으로 제외
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // 윈도우 리사이즈 시 Blockly 재조정
@@ -128,24 +149,23 @@ export default function EditorPage() {
     }
   }, [])
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if (!workspaceRef.current) return
-    const state = Blockly.serialization.workspaces.save(workspaceRef.current)
-    localStorage.setItem('wc_workspace', JSON.stringify(state))
-    showToast('저장됐어요! 💾', 'success')
-  }, [showToast])
-
-  // 저장된 워크스페이스 복원
-  useEffect(() => {
-    const saved = localStorage.getItem('wc_workspace')
-    if (saved && workspaceRef.current) {
-      try {
-        Blockly.serialization.workspaces.load(JSON.parse(saved), workspaceRef.current)
-      } catch {
-        // 복원 실패 시 무시
+    const blocks_json = Blockly.serialization.workspaces.save(workspaceRef.current)
+    try {
+      if (!id || id === 'new') {
+        const newProject = await createProject({ title: 'New Project' })
+        await updateProject(newProject.id, { blocks_json })
+        showToast('저장됐어요! 💾', 'success')
+        navigate(`/editor/${newProject.id}`)
+      } else {
+        await updateProject(id, { blocks_json })
+        showToast('저장됐어요! 💾', 'success')
       }
+    } catch {
+      showToast('저장에 실패했어요 😢', 'error')
     }
-  }, [])
+  }, [id, navigate, showToast])
 
   return (
     <div className={s.page}>
