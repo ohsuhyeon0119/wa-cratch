@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
+import { register } from '../../api/auth'
 import s from './LoginPage.module.css'
 
 type Tab = 'login' | 'signup'
@@ -19,7 +21,43 @@ export default function LoginPage() {
   const [tab, setTab] = useState<Tab>('login')
   const [pw, setPw] = useState('')
   const navigate = useNavigate()
+  const { login } = useAuth()
   const score = calcScore(pw)
+
+  // Login form state
+  const [loginUsername, setLoginUsername] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
+
+  // Signup form state
+  const [signupNickname, setSignupNickname] = useState('')
+  const [signupUsername, setSignupUsername] = useState('')
+  const [signupError, setSignupError] = useState('')
+
+  const handleLogin = async () => {
+    setLoginError('')
+    try {
+      await login(loginUsername, loginPassword)
+      navigate('/dashboard')
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : '로그인에 실패했습니다.'
+      setLoginError(message)
+    }
+  }
+
+  const handleSignup = async () => {
+    setSignupError('')
+    try {
+      await register(signupUsername, signupNickname, pw)
+      await login(signupUsername, pw)
+      navigate('/dashboard')
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : '회원가입에 실패했습니다.'
+      setSignupError(message)
+    }
+  }
 
   return (
     <div className={s.page}>
@@ -104,14 +142,28 @@ export default function LoginPage() {
                 <label htmlFor="l-id">아이디</label>
                 <div className={s.fieldWrap}>
                   <span className={s.fieldIcon}>🐾</span>
-                  <input className={s.fieldInput} type="text" id="l-id" placeholder="아이디를 입력하세요"/>
+                  <input
+                    className={s.fieldInput}
+                    type="text"
+                    id="l-id"
+                    placeholder="아이디를 입력하세요"
+                    value={loginUsername}
+                    onChange={e => setLoginUsername(e.target.value)}
+                  />
                 </div>
               </div>
               <div className={s.field}>
                 <label htmlFor="l-pw">비밀번호</label>
                 <div className={s.fieldWrap}>
                   <span className={s.fieldIcon}>🔒</span>
-                  <input className={s.fieldInput} type="password" id="l-pw" placeholder="비밀번호를 입력하세요"/>
+                  <input
+                    className={s.fieldInput}
+                    type="password"
+                    id="l-pw"
+                    placeholder="비밀번호를 입력하세요"
+                    value={loginPassword}
+                    onChange={e => setLoginPassword(e.target.value)}
+                  />
                 </div>
               </div>
               <div className={s.rememberRow}>
@@ -121,7 +173,8 @@ export default function LoginPage() {
                 </div>
                 <a href="#" className={s.forgot}>비밀번호 찾기</a>
               </div>
-              <button className={s.btnSubmit} onClick={() => navigate('/dashboard')}>로그인하기 →</button>
+              <button className={s.btnSubmit} onClick={handleLogin}>로그인하기 →</button>
+              {loginError && <p className={s.errorMsg}>{loginError}</p>}
               <p className={s.switchHint}>
                 아직 계정이 없나요? <a onClick={() => setTab('signup')}>회원가입하기</a>
               </p>
@@ -134,14 +187,28 @@ export default function LoginPage() {
                 <label htmlFor="s-nickname">닉네임</label>
                 <div className={s.fieldWrap}>
                   <span className={s.fieldIcon}>🐾</span>
-                  <input className={s.fieldInput} type="text" id="s-nickname" placeholder="사용할 닉네임 (예: 코딩냥이)"/>
+                  <input
+                    className={s.fieldInput}
+                    type="text"
+                    id="s-nickname"
+                    placeholder="사용할 닉네임 (예: 코딩냥이)"
+                    value={signupNickname}
+                    onChange={e => setSignupNickname(e.target.value)}
+                  />
                 </div>
               </div>
               <div className={s.field}>
                 <label htmlFor="s-id">아이디</label>
                 <div className={s.fieldWrap}>
                   <span className={s.fieldIcon}>😺</span>
-                  <input className={s.fieldInput} type="text" id="s-id" placeholder="영문, 숫자 조합 (4~16자)"/>
+                  <input
+                    className={s.fieldInput}
+                    type="text"
+                    id="s-id"
+                    placeholder="영문, 숫자 조합 (4~16자)"
+                    value={signupUsername}
+                    onChange={e => setSignupUsername(e.target.value)}
+                  />
                 </div>
               </div>
               <div className={s.field}>
@@ -166,9 +233,10 @@ export default function LoginPage() {
                   </div>
                 )}
               </div>
-              <button className={`${s.btnSubmit} ${s.btnSubmitTeal}`} onClick={() => navigate('/dashboard')}>
+              <button className={`${s.btnSubmit} ${s.btnSubmitTeal}`} onClick={handleSignup}>
                 가입하기 🧇
               </button>
+              {signupError && <p className={s.errorMsg}>{signupError}</p>}
               <p className={s.switchHint}>
                 이미 계정이 있나요? <a onClick={() => setTab('login')}>로그인하기</a>
               </p>

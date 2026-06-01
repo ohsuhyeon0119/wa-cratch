@@ -176,3 +176,4 @@
 .fill2 { background: var(--yellow); }
 .fill3 { background: var(--teal); }
 .pwLabel { font-size: 11px; font-weight: 700; color: var(--mid); }
+.errorMsg { margin-top: 8px; font-size: 13px; color: #FF6B6B; font-weight: 600; }
