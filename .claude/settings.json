@@ -10,6 +10,12 @@
             "if": "Bash(git push *)",
             "timeout": 5,
             "statusMessage": "force push 차단 검사..."
+          },
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // \"\"'); echo \"$CMD\" | grep -q 'git commit' || exit 0; CDPATH=$(echo \"$CMD\" | grep -oE 'cd [^ ]+' | head -1 | awk '{print $2}'); GCPATH=$(echo \"$CMD\" | grep -oE 'git -C [^ ]+' | head -1 | awk '{print $3}'); TARGET=${CDPATH:-$GCPATH}; if [ -n \"$TARGET\" ] && [ -d \"$TARGET\" ]; then REPO=$(git -C \"$TARGET\" rev-parse --show-toplevel 2>/dev/null); else REPO=$(git rev-parse --show-toplevel 2>/dev/null); fi; [ -z \"$REPO\" ] && exit 0; HURL_DIR=\"$REPO/backend/tests/hurl\"; FAILED=0; if [ -n \"$(find \"$HURL_DIR\" -name '*.hurl' 2>/dev/null)\" ]; then if curl -sf http://localhost:8000/docs > /dev/null 2>&1; then echo '▶ Hurl 테스트 실행 중...'; if hurl --test \"$HURL_DIR\"/*.hurl --variable base_url=http://localhost:8000 2>&1 | tail -5; then echo '✓ Hurl 통과'; else echo '✗ Hurl 실패'; FAILED=1; fi; else echo '⚠ 백엔드 미실행 → Hurl 건너뜀'; fi; fi; E2E_DIR=\"$REPO/frontend/e2e\"; if [ -n \"$(find \"$E2E_DIR\" -name '*.spec.ts' 2>/dev/null)\" ]; then FRONTEND_NM=\"$REPO/frontend/node_modules\"; GIT_COMMON=$(git -C \"$REPO\" rev-parse --git-common-dir 2>/dev/null || echo ''); MAIN_REPO=$(dirname \"$GIT_COMMON\" 2>/dev/null || echo ''); if [ ! -d \"$FRONTEND_NM\" ] && [ -d \"$MAIN_REPO/frontend/node_modules\" ]; then ln -sf \"$MAIN_REPO/frontend/node_modules\" \"$FRONTEND_NM\"; fi; echo '▶ Playwright 테스트 실행 중...'; if (cd \"$REPO/frontend\" && npx playwright test --reporter=line 2>&1 | tail -10); then echo '✓ Playwright 통과'; else echo '✗ Playwright 실패'; FAILED=1; fi; fi; [ \"$FAILED\" -eq 1 ] && exit 2; exit 0",
+            "timeout": 180,
+            "statusMessage": "커밋 전 테스트 실행 중..."
           }
         ]
       }

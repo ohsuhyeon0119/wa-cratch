@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import s from './ExplorePage.module.css'
 import { getProjects, type Project } from '../../api/projects'
+import { useAuth } from '../../context/AuthContext'
 
 type Sort = 'latest' | 'views' | 'likes'
 
 const THUMB_CLASSES = [s.pt1, s.pt2, s.pt3, s.pt4, s.pt5, s.pt6, s.pt7, s.pt8, s.pt9, s.pt10]
 
 export default function ExplorePage() {
+  const { user } = useAuth()
   const [sort, setSort] = useState<Sort>('latest')
   const [searchQuery, setSearchQuery] = useState('')
   const [projects, setProjects] = useState<Project[]>([])
@@ -27,8 +29,12 @@ export default function ExplorePage() {
           <li><Link to="/explore" className={s.active}>🔍 탐색하기</Link></li>
         </ul>
         <div className={s.navActions}>
-          <Link to="/login" className={`${s.btn} ${s.btnGhost}`}>로그인</Link>
-          <Link to="/editor/new" className={`${s.btn} ${s.btnPrimary}`}>+ 만들기</Link>
+          {user ? (
+            <Link to="/dashboard" className={`${s.btn} ${s.btnGhost}`}>{user.avatar} {user.nickname}</Link>
+          ) : (
+            <Link to="/login" className={`${s.btn} ${s.btnGhost}`}>로그인</Link>
+          )}
+          <Link to={user ? '/editor/new' : '/login'} className={`${s.btn} ${s.btnPrimary}`}>+ 만들기</Link>
         </div>
       </nav>
 

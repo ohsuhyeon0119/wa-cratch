@@ -22,6 +22,7 @@ export default function EditorPage() {
   const [spriteState, setSpriteState] = useState<SpriteState>(defaultSpriteState())
   const [selectedBg, setSelectedBg] = useState<Background>('sky')
   const [blockCount, setBlockCount] = useState(0)
+  const [projectTitle, setProjectTitle] = useState('새 프로젝트')
 
   const workspaceDivRef = useRef<HTMLDivElement>(null)
   const workspaceRef = useRef<Blockly.WorkspaceSvg | null>(null)
@@ -55,6 +56,7 @@ export default function EditorPage() {
     if (id && id !== 'new') {
       getProject(id)
         .then((project) => {
+          setProjectTitle(project.title)
           if (
             project.blocks_json &&
             Object.keys(project.blocks_json).length > 0
@@ -62,9 +64,7 @@ export default function EditorPage() {
             Blockly.serialization.workspaces.load(project.blocks_json, workspace)
           }
         })
-        .catch(() => {
-          // 불러오기 실패 시 무시 (빈 워크스페이스로 시작)
-        })
+        .catch(() => {})
     }
 
     return () => {
@@ -154,18 +154,18 @@ export default function EditorPage() {
     const blocks_json = Blockly.serialization.workspaces.save(workspaceRef.current)
     try {
       if (!id || id === 'new') {
-        const newProject = await createProject({ title: 'New Project' })
+        const newProject = await createProject({ title: projectTitle || '새 프로젝트' })
         await updateProject(newProject.id, { blocks_json })
         showToast('저장됐어요! 💾', 'success')
         navigate(`/editor/${newProject.id}`)
       } else {
-        await updateProject(id, { blocks_json })
+        await updateProject(id, { blocks_json, title: projectTitle || '새 프로젝트' })
         showToast('저장됐어요! 💾', 'success')
       }
     } catch {
       showToast('저장에 실패했어요 😢', 'error')
     }
-  }, [id, navigate, showToast])
+  }, [id, navigate, showToast, projectTitle])
 
   return (
     <div className={s.page}>
@@ -176,7 +176,13 @@ export default function EditorPage() {
           <span className={s.tLogoText}>Wa<em>Cratch</em></span>
         </Link>
         <div className={s.tDivider}/>
-        <input className={s.tProjectName} defaultValue="와냥이의 첫 번째 모험" type="text" spellCheck={false}/>
+        <input
+          className={s.tProjectName}
+          value={projectTitle}
+          onChange={e => setProjectTitle(e.target.value)}
+          type="text"
+          spellCheck={false}
+        />
         <div className={s.tSpacer}/>
         <div className={s.runStop}>
           <button className={s.btnRun} onClick={handleRun}>▶ 실행하기</button>
@@ -221,8 +227,8 @@ export default function EditorPage() {
       <Toast visible={toastVisible} message={toastMessage} type={toastType} />
       <ShareModal
         isOpen={shareOpen}
-        projectId="test"
-        projectTitle="와냥이의 첫 번째 모험"
+        projectId={id && id !== 'new' ? id : ''}
+        projectTitle={projectTitle}
         onClose={() => setShareOpen(false)}
       />
     </div>

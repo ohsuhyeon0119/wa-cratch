@@ -3,41 +3,25 @@ import { useEffect, useState } from 'react'
 import s from './DashboardPage.module.css'
 import { getMyProjects } from '../../api/projects'
 import type { Project } from '../../api/projects'
-import { getActivity } from '../../api/activity'
-import type { Activity } from '../../api/activity'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../hooks/useToast'
 import Toast from '../../components/Toast/Toast'
 
 const THUMB_CLASSES = [s.pt1, s.pt2, s.pt3, s.pt4, s.pt5, s.pt6]
 
-const ACT_CLS: Record<string, string> = {
-  like: s.actLike,
-  view: s.actView,
-  remix: s.actRemix,
-}
-
 export default function DashboardPage() {
   const { toastVisible, toastMessage, toastType, showToast } = useToast()
   const { user } = useAuth()
 
   const [projects, setProjects] = useState<Project[]>([])
-  const [activity, setActivity] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setLoading(true)
-    Promise.all([getMyProjects(), getActivity()])
-      .then(([projs, acts]) => {
-        setProjects(projs)
-        setActivity(acts)
-      })
-      .catch(() => {
-        // API 오류 시 빈 상태 유지
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+    getMyProjects()
+      .then(setProjects)
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
   const nickname = user?.nickname ?? '...'
@@ -125,20 +109,6 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          <div className={s.sectionHeader}>
-            <h2 className={s.sectionTitle}>🔔 최근 활동</h2>
-          </div>
-          <div className={s.activityList}>
-            {loading ? null : activity.map((a, i) => (
-              <div key={i} className={s.activityItem}>
-                <div className={`${s.actIcon} ${ACT_CLS[a.type] ?? ''}`}>{a.icon}</div>
-                <div>
-                  <div className={s.actText}>{a.text}</div>
-                  <div className={s.actTime}>{a.time}</div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 

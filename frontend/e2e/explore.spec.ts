@@ -52,7 +52,11 @@ test('좋아요순 정렬 클릭 시 카드 순서가 변경된다', async ({ pa
   await page.goto('/explore');
   const firstTitleBefore = await page.locator('[class*="projTitle"]').first().textContent();
   // When
-  await page.getByRole('button', { name: /좋아요순/ }).click();
+  const [response] = await Promise.all([
+    page.waitForResponse(resp => resp.url().includes('/projects') && resp.status() === 200),
+    page.getByRole('button', { name: /좋아요순/ }).click(),
+  ]);
+  await response.json();
   // Then
   const firstTitleAfter = await page.locator('[class*="projTitle"]').first().textContent();
   expect(firstTitleAfter).not.toBe(firstTitleBefore);

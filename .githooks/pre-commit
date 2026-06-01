@@ -19,10 +19,10 @@ if [ -n "$(find "$HURL_DIR" -name '*.hurl' 2>/dev/null)" ]; then
     fi
   else
     # 백엔드가 없으면 venv로 직접 기동
-    VENV="$REPO_ROOT/backend/.venv/bin/uvicorn"
+    VENV="$REPO_ROOT/backend/venv312/bin/python3.12"
     if [ -f "$VENV" ]; then
       echo "▶ 백엔드 서버 기동 중..."
-      (cd "$REPO_ROOT/backend" && .venv/bin/uvicorn app.main:app --port 8000 > /dev/null 2>&1) &
+      (cd "$REPO_ROOT/backend" && "$VENV" -m uvicorn app.main:app --port 8000 > /dev/null 2>&1) &
       BACKEND_PID=$!
       BACKEND_STARTED=1
       sleep 3
@@ -41,6 +41,13 @@ fi
 # ── Playwright tests ────────────────────────────────────────────────
 E2E_DIR="$REPO_ROOT/frontend/e2e"
 if [ -n "$(find "$E2E_DIR" -name '*.spec.ts' 2>/dev/null)" ]; then
+  # 워크트리에 node_modules 없으면 메인 레포에서 링크
+  FRONTEND_NM="$REPO_ROOT/frontend/node_modules"
+  GIT_COMMON=$(git rev-parse --git-common-dir 2>/dev/null || echo "")
+  MAIN_REPO=$(dirname "$GIT_COMMON" 2>/dev/null || echo "")
+  if [ ! -d "$FRONTEND_NM" ] && [ -d "$MAIN_REPO/frontend/node_modules" ]; then
+    ln -sf "$MAIN_REPO/frontend/node_modules" "$FRONTEND_NM"
+  fi
   echo "▶ Playwright 테스트 실행 중..."
   if ! (cd "$REPO_ROOT/frontend" && npx playwright test --reporter=line 2>&1 | tail -10); then
     echo "✗ Playwright 테스트 실패"

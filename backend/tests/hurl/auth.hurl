@@ -2,7 +2,7 @@
 POST {{base_url}}/auth/register
 Content-Type: application/json
 {
-  "username": "newuser",
+  "username": "testuser_{{newUuid}}",
   "nickname": "새유저",
   "password": "password123"
 }
@@ -40,8 +40,8 @@ Content-Type: application/json
 HTTP 401
 
 
-# GET /auth/me — 유효한 JWT로 유저 정보 조회
-GET {{base_url}}/auth/me
+# GET /users/me — 유효한 JWT로 유저 정보 조회
+GET {{base_url}}/users/me
 Authorization: Bearer {{token}}
 
 HTTP 200

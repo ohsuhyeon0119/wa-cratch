@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import s from './LandingPage.module.css'
+import { useAuth } from '../../context/AuthContext'
 
 export default function LandingPage() {
+  const { user } = useAuth()
   return (
     <>
       {/* ── NAV ── */}
@@ -14,8 +16,14 @@ export default function LandingPage() {
           <li><Link to="/explore">🔍 탐색하기</Link></li>
         </ul>
         <div className={s.navActions}>
-          <Link to="/login" className={`${s.btn} ${s.btnGhost}`}>로그인</Link>
-          <Link to="/login" className={`${s.btn} ${s.btnPrimary}`}>가입하기 🧇</Link>
+          {user ? (
+            <Link to="/dashboard" className={`${s.btn} ${s.btnPrimary}`}>{user.avatar} {user.nickname}</Link>
+          ) : (
+            <>
+              <Link to="/login" className={`${s.btn} ${s.btnGhost}`}>로그인</Link>
+              <Link to="/login" className={`${s.btn} ${s.btnPrimary}`}>가입하기 🧇</Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -110,7 +118,7 @@ export default function LandingPage() {
             쉽고 재미있게 프로그래밍을 시작해 보세요.
           </p>
           <div className={s.heroCta}>
-            <Link to="/login" className={`${s.btn} ${s.btnPrimary}`}>지금 만들어보기 →</Link>
+            <Link to={user ? '/editor/new' : '/login'} className={`${s.btn} ${s.btnPrimary}`}>지금 만들어보기 →</Link>
             <Link to="/explore" className={`${s.btn} ${s.btnTeal}`}>탐색하기 🔍</Link>
           </div>
         </div>

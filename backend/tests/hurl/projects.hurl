@@ -27,8 +27,8 @@ HTTP 200
 jsonpath "$" isCollection
 
 
-# GET /projects/my — 내 프로젝트 목록 (JWT 필요)
-GET {{base_url}}/projects/my
+# GET /projects/me — 내 프로젝트 목록 (JWT 필요)
+GET {{base_url}}/projects/me
 Authorization: Bearer {{token}}
 
 HTTP 200
