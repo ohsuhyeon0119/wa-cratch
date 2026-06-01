@@ -165,7 +165,7 @@ export default function EditorPage() {
     } catch {
       showToast('저장에 실패했어요 😢', 'error')
     }
-  }, [id, navigate, showToast])
+  }, [id, navigate, showToast, projectTitle])
 
   return (
     <div className={s.page}>
