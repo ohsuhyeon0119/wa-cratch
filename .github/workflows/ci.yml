@@ -8,6 +8,20 @@ jobs:
   frontend:
     name: Playwright E2E
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: catcratch
+          POSTGRES_PASSWORD: catcratch
+          POSTGRES_DB: catcratch
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -20,9 +34,11 @@ jobs:
         run: pip install -r requirements.txt
       - name: Start FastAPI server
         working-directory: backend
+        env:
+          DATABASE_URL: postgresql://catcratch:catcratch@localhost:5432/catcratch
         run: uvicorn app.main:app --host 0.0.0.0 --port 8000 &
       - name: Wait for backend
-        run: sleep 3
+        run: sleep 5
       - uses: actions/setup-node@v4
         with:
           node-version: 20
