@@ -347,6 +347,162 @@ export function registerBlocks() {
       colour: '#3B82F6',
       tooltip: '소리를 멈춥니다 (준비 중)',
     },
+
+    // ── VARIABLES ──
+    {
+      type: 'wc_var_set',
+      message0: '변수 %1 을(를) %2 으로 정하기',
+      args0: [
+        { type: 'field_input', name: 'NAME', text: '점수' },
+        { type: 'input_value', name: 'VALUE', check: 'Number' },
+      ],
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#10B981',
+      tooltip: '변수에 값을 저장합니다',
+    },
+    {
+      type: 'wc_var_change',
+      message0: '변수 %1 을(를) %2 만큼 바꾸기',
+      args0: [
+        { type: 'field_input', name: 'NAME', text: '점수' },
+        { type: 'input_value', name: 'VALUE', check: 'Number' },
+      ],
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#10B981',
+      tooltip: '변수 값을 N만큼 바꿉니다',
+    },
+    {
+      type: 'wc_var_get',
+      message0: '변수 %1',
+      args0: [{ type: 'field_input', name: 'NAME', text: '점수' }],
+      output: 'Number',
+      colour: '#10B981',
+      tooltip: '변수의 현재 값을 반환합니다',
+    },
+
+    // ── MATH / OPERATORS ──
+    {
+      type: 'wc_random',
+      message0: '%1 부터 %2 사이 랜덤',
+      args0: [
+        { type: 'input_value', name: 'FROM', check: 'Number' },
+        { type: 'input_value', name: 'TO', check: 'Number' },
+      ],
+      output: 'Number',
+      colour: '#8B5CF6',
+      tooltip: '지정 범위에서 무작위 정수를 반환합니다',
+    },
+    {
+      type: 'wc_add',
+      message0: '%1 + %2',
+      args0: [
+        { type: 'input_value', name: 'A', check: 'Number' },
+        { type: 'input_value', name: 'B', check: 'Number' },
+      ],
+      output: 'Number',
+      colour: '#8B5CF6',
+      tooltip: '두 수를 더합니다',
+    },
+    {
+      type: 'wc_sub',
+      message0: '%1 - %2',
+      args0: [
+        { type: 'input_value', name: 'A', check: 'Number' },
+        { type: 'input_value', name: 'B', check: 'Number' },
+      ],
+      output: 'Number',
+      colour: '#8B5CF6',
+      tooltip: '두 수를 뺍니다',
+    },
+    {
+      type: 'wc_mul',
+      message0: '%1 × %2',
+      args0: [
+        { type: 'input_value', name: 'A', check: 'Number' },
+        { type: 'input_value', name: 'B', check: 'Number' },
+      ],
+      output: 'Number',
+      colour: '#8B5CF6',
+      tooltip: '두 수를 곱합니다',
+    },
+    {
+      type: 'wc_div',
+      message0: '%1 ÷ %2',
+      args0: [
+        { type: 'input_value', name: 'A', check: 'Number' },
+        { type: 'input_value', name: 'B', check: 'Number' },
+      ],
+      output: 'Number',
+      colour: '#8B5CF6',
+      tooltip: '두 수를 나눕니다',
+    },
+    {
+      type: 'wc_gt',
+      message0: '%1 > %2',
+      args0: [
+        { type: 'input_value', name: 'A', check: 'Number' },
+        { type: 'input_value', name: 'B', check: 'Number' },
+      ],
+      output: 'Boolean',
+      colour: '#8B5CF6',
+      tooltip: '왼쪽이 오른쪽보다 크면 참',
+    },
+    {
+      type: 'wc_lt',
+      message0: '%1 < %2',
+      args0: [
+        { type: 'input_value', name: 'A', check: 'Number' },
+        { type: 'input_value', name: 'B', check: 'Number' },
+      ],
+      output: 'Boolean',
+      colour: '#8B5CF6',
+      tooltip: '왼쪽이 오른쪽보다 작으면 참',
+    },
+    {
+      type: 'wc_eq',
+      message0: '%1 = %2',
+      args0: [
+        { type: 'input_value', name: 'A', check: 'Number' },
+        { type: 'input_value', name: 'B', check: 'Number' },
+      ],
+      output: 'Boolean',
+      colour: '#8B5CF6',
+      tooltip: '두 값이 같으면 참',
+    },
+    {
+      type: 'wc_num_literal',
+      message0: '%1',
+      args0: [{ type: 'field_number', name: 'NUM', value: 0 }],
+      output: 'Number',
+      colour: '#8B5CF6',
+      tooltip: '숫자 값',
+    },
+
+    // ── MOUSE SENSING ──
+    {
+      type: 'wc_mouse_x',
+      message0: '마우스 x 좌표',
+      output: 'Number',
+      colour: '#2EC4B6',
+      tooltip: '마우스 커서의 스테이지 x 좌표를 반환합니다',
+    },
+    {
+      type: 'wc_mouse_y',
+      message0: '마우스 y 좌표',
+      output: 'Number',
+      colour: '#2EC4B6',
+      tooltip: '마우스 커서의 스테이지 y 좌표를 반환합니다',
+    },
+    {
+      type: 'wc_set_x_to_mouse',
+      message0: 'x 좌표를 마우스 위치로 설정',
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#2EC4B6',
+      tooltip: '스프라이트의 x 좌표를 마우스 x 위치로 이동합니다 (패들 제어에 유용)',
+    },
   ])
 }
 
@@ -398,6 +554,9 @@ export const TOOLBOX_CONFIG = {
         { kind: 'block', type: 'wc_mouse_click_hat' },
         { kind: 'block', type: 'wc_key_pressed' },
         { kind: 'block', type: 'wc_wall_touching' },
+        { kind: 'block', type: 'wc_mouse_x' },
+        { kind: 'block', type: 'wc_mouse_y' },
+        { kind: 'block', type: 'wc_set_x_to_mouse' },
       ],
     },
     {
@@ -428,6 +587,32 @@ export const TOOLBOX_CONFIG = {
       contents: [
         { kind: 'block', type: 'wc_play_sound' },
         { kind: 'block', type: 'wc_stop_sound' },
+      ],
+    },
+    {
+      kind: 'category',
+      name: '📊 변수',
+      colour: '#10B981',
+      contents: [
+        { kind: 'block', type: 'wc_var_set' },
+        { kind: 'block', type: 'wc_var_change' },
+        { kind: 'block', type: 'wc_var_get' },
+      ],
+    },
+    {
+      kind: 'category',
+      name: '🔢 연산',
+      colour: '#8B5CF6',
+      contents: [
+        { kind: 'block', type: 'wc_num_literal' },
+        { kind: 'block', type: 'wc_random' },
+        { kind: 'block', type: 'wc_add' },
+        { kind: 'block', type: 'wc_sub' },
+        { kind: 'block', type: 'wc_mul' },
+        { kind: 'block', type: 'wc_div' },
+        { kind: 'block', type: 'wc_gt' },
+        { kind: 'block', type: 'wc_lt' },
+        { kind: 'block', type: 'wc_eq' },
       ],
     },
   ],

@@ -10,18 +10,24 @@ export interface SpriteState {
   size: number
   speech: string | null
   bg: Background
+  spriteId: string
 }
 
 const STAGE_W = 480
 const STAGE_H = 360
 
 export function defaultSpriteState(): SpriteState {
-  return { x: 0, y: 0, direction: 90, visible: true, size: 100, speech: null, bg: 'sky' }
+  return { x: 0, y: -35, direction: 90, visible: true, size: 100, speech: null, bg: 'sky', spriteId: 'cat' }
 }
 
 // ── Canvas rendering ──────────────────────────────────────────────
 
-const SPRITE_SVG = `<svg viewBox="-18 -18 306 378" fill="none" xmlns="http://www.w3.org/2000/svg">
+export interface SpriteEntry { name: string; svg: string }
+
+export const SPRITE_LIBRARY: Record<string, SpriteEntry> = {
+  cat: {
+    name: '와냥이',
+    svg: `<svg viewBox="-18 -18 306 378" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M198 258 Q248 228 244 186 Q240 152 222 163" stroke="#E8A818" stroke-width="26" fill="none" stroke-linecap="round"/>
   <path d="M198 258 Q248 228 244 186 Q240 152 222 163" stroke="#FFC947" stroke-width="16" fill="none" stroke-linecap="round"/>
   <circle cx="222" cy="161" r="16" fill="#FFE090"/><circle cx="222" cy="161" r="9" fill="rgba(255,255,255,.6)"/>
@@ -51,22 +57,93 @@ const SPRITE_SVG = `<svg viewBox="-18 -18 306 378" fill="none" xmlns="http://www
   <circle cx="79" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/><circle cx="90" cy="306" r="6.5" fill="#FFCB8A" opacity=".9"/><circle cx="101" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/>
   <ellipse cx="170" cy="302" rx="40" ry="23" fill="#E8A818"/><ellipse cx="170" cy="297" rx="34" ry="19" fill="#FFC947"/>
   <circle cx="159" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/><circle cx="170" cy="306" r="6.5" fill="#FFCB8A" opacity=".9"/><circle cx="181" cy="303" r="6.5" fill="#FFCB8A" opacity=".9"/>
-</svg>`
-
-let cachedSpriteImage: HTMLImageElement | null = null
-
-export function getSpriteImageExport(): Promise<HTMLImageElement> {
-  return getSpriteImage()
+</svg>`,
+  },
+  ball: {
+    name: '공',
+    svg: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="ballGrad" cx="38%" cy="32%" r="62%">
+      <stop offset="0%" stop-color="#FFD580"/>
+      <stop offset="55%" stop-color="#FF6B35"/>
+      <stop offset="100%" stop-color="#CC3A0A"/>
+    </radialGradient>
+  </defs>
+  <circle cx="50" cy="50" r="46" fill="#CC3A0A"/>
+  <circle cx="50" cy="50" r="44" fill="url(#ballGrad)"/>
+  <ellipse cx="36" cy="32" rx="11" ry="6" fill="rgba(255,255,255,0.55)" transform="rotate(-35 36 32)"/>
+  <ellipse cx="30" cy="28" rx="4" ry="2.5" fill="rgba(255,255,255,0.75)" transform="rotate(-35 30 28)"/>
+</svg>`,
+  },
+  paddle: {
+    name: '패들',
+    svg: `<svg viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="4" y="10" width="192" height="42" rx="21" fill="#CC3A0A"/>
+  <rect x="2" y="6" width="192" height="42" rx="21" fill="#FF6B35"/>
+  <rect x="10" y="10" width="120" height="16" rx="8" fill="rgba(255,255,255,0.28)"/>
+  <rect x="10" y="10" width="45" height="8" rx="4" fill="rgba(255,255,255,0.18)"/>
+</svg>`,
+  },
+  brick_red: {
+    name: '빨간 벽돌',
+    svg: `<svg viewBox="0 0 120 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="2" y="6" width="116" height="42" rx="7" fill="#991B1B"/>
+  <rect x="2" y="2" width="116" height="42" rx="7" fill="#EF4444"/>
+  <line x1="2" y1="15" x2="118" y2="15" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
+  <line x1="2" y1="29" x2="118" y2="29" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
+  <line x1="41" y1="2" x2="41" y2="44" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
+  <line x1="82" y1="2" x2="82" y2="44" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
+  <rect x="7" y="5" width="28" height="8" rx="3" fill="rgba(255,255,255,0.18)"/>
+  <rect x="48" y="5" width="28" height="8" rx="3" fill="rgba(255,255,255,0.18)"/>
+  <rect x="88" y="5" width="26" height="8" rx="3" fill="rgba(255,255,255,0.18)"/>
+</svg>`,
+  },
+  brick_blue: {
+    name: '파란 벽돌',
+    svg: `<svg viewBox="0 0 120 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="2" y="6" width="116" height="42" rx="7" fill="#1D4ED8"/>
+  <rect x="2" y="2" width="116" height="42" rx="7" fill="#3B82F6"/>
+  <line x1="2" y1="15" x2="118" y2="15" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
+  <line x1="2" y1="29" x2="118" y2="29" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
+  <line x1="41" y1="2" x2="41" y2="44" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
+  <line x1="82" y1="2" x2="82" y2="44" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
+  <rect x="7" y="5" width="28" height="8" rx="3" fill="rgba(255,255,255,0.18)"/>
+  <rect x="48" y="5" width="28" height="8" rx="3" fill="rgba(255,255,255,0.18)"/>
+  <rect x="88" y="5" width="26" height="8" rx="3" fill="rgba(255,255,255,0.18)"/>
+</svg>`,
+  },
+  brick_green: {
+    name: '초록 벽돌',
+    svg: `<svg viewBox="0 0 120 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="2" y="6" width="116" height="42" rx="7" fill="#15803D"/>
+  <rect x="2" y="2" width="116" height="42" rx="7" fill="#22C55E"/>
+  <line x1="2" y1="15" x2="118" y2="15" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
+  <line x1="2" y1="29" x2="118" y2="29" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
+  <line x1="41" y1="2" x2="41" y2="44" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
+  <line x1="82" y1="2" x2="82" y2="44" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
+  <rect x="7" y="5" width="28" height="8" rx="3" fill="rgba(255,255,255,0.18)"/>
+  <rect x="48" y="5" width="28" height="8" rx="3" fill="rgba(255,255,255,0.18)"/>
+  <rect x="88" y="5" width="26" height="8" rx="3" fill="rgba(255,255,255,0.18)"/>
+</svg>`,
+  },
 }
 
-function getSpriteImage(): Promise<HTMLImageElement> {
-  if (cachedSpriteImage) return Promise.resolve(cachedSpriteImage)
+const spriteImageCache = new Map<string, HTMLImageElement>()
+
+export function getSpriteImageExport(id = 'cat'): Promise<HTMLImageElement> {
+  return getSpriteImage(id)
+}
+
+function getSpriteImage(id = 'cat'): Promise<HTMLImageElement> {
+  const cached = spriteImageCache.get(id)
+  if (cached) return Promise.resolve(cached)
+  const entry = SPRITE_LIBRARY[id] ?? SPRITE_LIBRARY.cat
   return new Promise((resolve) => {
-    const blob = new Blob([SPRITE_SVG], { type: 'image/svg+xml' })
+    const blob = new Blob([entry.svg], { type: 'image/svg+xml' })
     const url = URL.createObjectURL(blob)
     const img = new Image()
     img.onload = () => {
-      cachedSpriteImage = img
+      spriteImageCache.set(id, img)
       resolve(img)
     }
     img.src = url
@@ -236,31 +313,50 @@ export class SpriteRuntime {
   private mouseClickHandlers: (() => void)[] = []
   private onStateChange?: (s: SpriteState) => void
   private animRaf: number | null = null
+  private variables: Map<string, number> = new Map()
+  private mouseX = 0
+  private mouseY = 0
+  private detachMouse: (() => void) | null = null
 
   constructor(canvas: HTMLCanvasElement, initialState: SpriteState, onStateChange?: (s: SpriteState) => void) {
     this.state = { ...initialState }
     this.canvas = canvas
     this.onStateChange = onStateChange
-    getSpriteImage().then((img) => {
+    getSpriteImage(this.state.spriteId).then((img) => {
       this.img = img
       this.render()
     })
   }
 
   render() {
+    const cached = spriteImageCache.get(this.state.spriteId)
+    if (cached && cached !== this.img) this.img = cached
     renderStage(this.canvas, this.state, this.img ?? undefined)
     this.onStateChange?.({ ...this.state })
   }
 
-  // track keyboard
+  // track keyboard + mouse position
   attachKeyListeners() {
     const kd = (e: KeyboardEvent) => this.keysDown.add(e.key)
     const ku = (e: KeyboardEvent) => this.keysDown.delete(e.key)
     document.addEventListener('keydown', kd)
     document.addEventListener('keyup', ku)
+
+    const rect = this.canvas.getBoundingClientRect()
+    const mm = (e: MouseEvent) => {
+      const scaleX = STAGE_W / rect.width
+      const scaleY = STAGE_H / rect.height
+      this.mouseX = (e.clientX - rect.left) * scaleX - STAGE_W / 2
+      this.mouseY = -(((e.clientY - rect.top) * scaleY) - STAGE_H / 2)
+    }
+    this.canvas.addEventListener('mousemove', mm)
+    this.detachMouse = () => this.canvas.removeEventListener('mousemove', mm)
+
     return () => {
       document.removeEventListener('keydown', kd)
       document.removeEventListener('keyup', ku)
+      this.detachMouse?.()
+      this.detachMouse = null
     }
   }
 
@@ -270,9 +366,10 @@ export class SpriteRuntime {
       cancelAnimationFrame(this.animRaf)
       this.animRaf = null
     }
-    // remove mouse handlers
     this.mouseClickHandlers.forEach((h) => document.removeEventListener('click', h))
     this.mouseClickHandlers = []
+    this.detachMouse?.()
+    this.detachMouse = null
   }
 
   async run(workspace: BlocklyType.WorkspaceSvg) {
@@ -538,18 +635,100 @@ export class SpriteRuntime {
       case 'wc_play_sound':
       case 'wc_stop_sound':
         break
+
+      // ── VARIABLES ──
+      case 'wc_var_set': {
+        const name = block.getFieldValue('NAME') as string
+        const valBlock = block.getInputTargetBlock('VALUE') as Block | null
+        const val = valBlock ? await this.evalNumber(valBlock) : 0
+        this.variables.set(name, val)
+        break
+      }
+      case 'wc_var_change': {
+        const name = block.getFieldValue('NAME') as string
+        const valBlock = block.getInputTargetBlock('VALUE') as Block | null
+        const delta = valBlock ? await this.evalNumber(valBlock) : 0
+        this.variables.set(name, (this.variables.get(name) ?? 0) + delta)
+        break
+      }
+
+      // ── MOUSE SENSING ──
+      case 'wc_set_x_to_mouse': {
+        this.state.x = Math.max(-(STAGE_W / 2 - 36), Math.min(STAGE_W / 2 - 36, this.mouseX))
+        this.render()
+        await sleep(16)
+        break
+      }
+    }
+  }
+
+  private async evalNumber(block: Block): Promise<number> {
+    switch (block.type) {
+      case 'wc_num_literal':
+        return Number(block.getFieldValue('NUM'))
+      case 'wc_var_get':
+        return this.variables.get(block.getFieldValue('NAME') as string) ?? 0
+      case 'wc_mouse_x':
+        return this.mouseX
+      case 'wc_mouse_y':
+        return this.mouseY
+      case 'wc_random': {
+        const fromB = block.getInputTargetBlock('FROM') as Block | null
+        const toB = block.getInputTargetBlock('TO') as Block | null
+        const from = fromB ? await this.evalNumber(fromB) : 1
+        const to = toB ? await this.evalNumber(toB) : 10
+        return Math.floor(Math.random() * (to - from + 1)) + from
+      }
+      case 'wc_add': {
+        const a = block.getInputTargetBlock('A') as Block | null
+        const b = block.getInputTargetBlock('B') as Block | null
+        return (a ? await this.evalNumber(a) : 0) + (b ? await this.evalNumber(b) : 0)
+      }
+      case 'wc_sub': {
+        const a = block.getInputTargetBlock('A') as Block | null
+        const b = block.getInputTargetBlock('B') as Block | null
+        return (a ? await this.evalNumber(a) : 0) - (b ? await this.evalNumber(b) : 0)
+      }
+      case 'wc_mul': {
+        const a = block.getInputTargetBlock('A') as Block | null
+        const b = block.getInputTargetBlock('B') as Block | null
+        return (a ? await this.evalNumber(a) : 0) * (b ? await this.evalNumber(b) : 1)
+      }
+      case 'wc_div': {
+        const a = block.getInputTargetBlock('A') as Block | null
+        const b = block.getInputTargetBlock('B') as Block | null
+        const divisor = b ? await this.evalNumber(b) : 1
+        return divisor !== 0 ? (a ? await this.evalNumber(a) : 0) / divisor : 0
+      }
+      default:
+        return Number(block.getFieldValue('NUM') ?? block.getFieldValue('VALUE') ?? 0)
     }
   }
 
   private async evalBool(block: Block): Promise<boolean> {
-    if (block.type === 'wc_wall_touching') {
-      return this.isTouchingWall()
+    switch (block.type) {
+      case 'wc_wall_touching':
+        return this.isTouchingWall()
+      case 'wc_key_pressed':
+        return this.keysDown.has(block.getFieldValue('KEY') as string)
+      case 'wc_gt': {
+        const a = block.getInputTargetBlock('A') as Block | null
+        const b = block.getInputTargetBlock('B') as Block | null
+        return (a ? await this.evalNumber(a) : 0) > (b ? await this.evalNumber(b) : 0)
+      }
+      case 'wc_lt': {
+        const a = block.getInputTargetBlock('A') as Block | null
+        const b = block.getInputTargetBlock('B') as Block | null
+        return (a ? await this.evalNumber(a) : 0) < (b ? await this.evalNumber(b) : 0)
+      }
+      case 'wc_eq': {
+        const a = block.getInputTargetBlock('A') as Block | null
+        const b = block.getInputTargetBlock('B') as Block | null
+        return (a ? await this.evalNumber(a) : 0) === (b ? await this.evalNumber(b) : 0)
+      }
+      default:
+        return false
     }
-    if (block.type === 'wc_key_pressed') {
-      const key = block.getFieldValue('KEY') as string
-      return this.keysDown.has(key)
-    }
-    return false
   }
 
   private isTouchingWall(): boolean {

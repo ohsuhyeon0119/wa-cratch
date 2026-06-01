@@ -46,6 +46,38 @@ export default function EditorPage() {
     })
     workspaceRef.current = workspace
 
+    // Flyout 자동 닫힘 방지 + << 닫기 버튼 삽입
+    const flyout = workspace.getFlyout()
+    if (flyout) {
+      flyout.autoClose = false
+
+      const injectCloseBtn = () => {
+        const flyoutDiv = div.querySelector('.blocklyFlyout')?.closest('svg')?.parentElement
+          ?? div.querySelector('[class*="blocklyFlyout"]')?.parentElement
+        if (!flyoutDiv || flyoutDiv.querySelector('.wc-flyout-close')) return
+        const btn = document.createElement('button')
+        btn.className = 'wc-flyout-close'
+        btn.textContent = '«'
+        btn.title = '닫기'
+        Object.assign(btn.style, {
+          position: 'absolute', top: '8px', right: '8px', zIndex: '200',
+          width: '28px', height: '28px', borderRadius: '50%', border: 'none',
+          background: 'var(--orange)', color: '#fff', cursor: 'pointer',
+          fontSize: '13px', fontWeight: '800', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', boxShadow: '1px 2px 0 var(--orange-dk)',
+        })
+        btn.addEventListener('click', () => flyout.hide())
+        flyoutDiv.style.position = 'relative'
+        flyoutDiv.appendChild(btn)
+      }
+
+      workspace.addChangeListener((e: Blockly.Events.Abstract) => {
+        if (e.type === Blockly.Events.TOOLBOX_ITEM_SELECT) {
+          setTimeout(injectCloseBtn, 50)
+        }
+      })
+    }
+
     // 블록 수 업데이트
     const updateCount = () => {
       setBlockCount(workspace.getAllBlocks(false).length)
@@ -142,9 +174,16 @@ export default function EditorPage() {
   const handleBgChange = useCallback((bg: Background) => {
     setSelectedBg(bg)
     setSpriteState((prev) => ({ ...prev, bg }))
-    // 실행 중이 아닐 때도 즉시 배경 업데이트
     if (runtimeRef.current) {
       runtimeRef.current.state.bg = bg
+      runtimeRef.current.render()
+    }
+  }, [])
+
+  const handleSpriteChange = useCallback((spriteId: string) => {
+    setSpriteState((prev) => ({ ...prev, spriteId }))
+    if (runtimeRef.current) {
+      runtimeRef.current.state.spriteId = spriteId
       runtimeRef.current.render()
     }
   }, [])
@@ -209,6 +248,7 @@ export default function EditorPage() {
           state={{ ...spriteState, bg: selectedBg }}
           selectedBg={selectedBg}
           onBgChange={handleBgChange}
+          onSpriteChange={handleSpriteChange}
           canvasRef={canvasRef}
         />
       </div>

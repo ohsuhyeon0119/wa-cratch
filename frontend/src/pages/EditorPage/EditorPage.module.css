@@ -186,6 +186,11 @@
   font-weight: 800 !important;
   font-size: 13px !important;
   cursor: pointer !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 :global(.blocklyTreeRow:hover) {
   background: var(--orange-pale) !important;
@@ -193,9 +198,13 @@
 :global(.blocklyTreeSelected) {
   background: var(--orange) !important;
   color: #fff !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 :global(.blocklyToolboxContents) {
   padding: 4px !important;
+  overflow: hidden !important;
 }
 :global(.blocklyFlyoutBackground) {
   fill: #FFF8F4 !important;
