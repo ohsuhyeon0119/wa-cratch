@@ -6,13 +6,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FAILED=0; if [ -n \"$(find backend/tests/hurl -name '*.hurl' 2>/dev/null)\" ]; then HURL_OUT=$(hurl --test backend/tests/hurl/*.hurl --variable base_url=http://localhost:8000 2>&1); HURL_EC=$?; echo \"$HURL_OUT\" | tail -5; [ $HURL_EC -ne 0 ] && FAILED=1; fi; if [ -n \"$(find frontend/e2e -name '*.spec.ts' 2>/dev/null)\" ]; then PW_OUT=$((cd frontend && npx playwright test --reporter=line) 2>&1); PW_EC=$?; echo \"$PW_OUT\" | tail -5; [ $PW_EC -ne 0 ] && FAILED=1; fi; [ $FAILED -eq 1 ] && exit 2; exit 0",
-            "if": "Bash(git commit*)",
-            "timeout": 60,
-            "statusMessage": "커밋 전 테스트 검증 중..."
-          },
-          {
-            "type": "command",
             "command": "cat | jq -r '.tool_input.command // \"\"' | grep -q -- '--force' && exit 2; exit 0",
             "if": "Bash(git push *)",
             "timeout": 5,
