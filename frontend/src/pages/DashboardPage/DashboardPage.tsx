@@ -114,7 +114,7 @@ export default function DashboardPage() {
                         <div className={s.projHover}>
                           <Link to={`/editor/${p.id}`} className={`${s.phBtn} ${s.edit}`}>✏️ 편집</Link>
                           <Link to={`/play/${p.id}`}   className={s.phBtn}>▶ 실행</Link>
-                          <button className={`${s.phBtn} ${s.delete}`} onClick={() => setDeletingId(p.id)}>🗑️</button>
+                          <button className={`${s.phBtn} ${s.delete}`} onClick={() => setDeletingId(p.id)}>삭제</button>
                         </div>
                       )}
                     </div>
