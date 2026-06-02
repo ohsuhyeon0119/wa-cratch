@@ -51,8 +51,6 @@ export default function DashboardPage() {
         </Link>
         <div className={s.tnSpacer}/>
         <div className={s.tnSearch}><input type="text" placeholder="내 프로젝트 검색..."/></div>
-        <span className={s.tnName}>{nickname}</span>
-        <div className={s.tnAvatar}>{avatar}</div>
       </div>
 
       {/* BODY */}

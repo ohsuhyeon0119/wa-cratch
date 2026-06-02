@@ -17,7 +17,10 @@ export default function LandingPage() {
         </ul>
         <div className={s.navActions}>
           {user ? (
-            <Link to="/dashboard" className={`${s.btn} ${s.btnPrimary}`}>{user.avatar} {user.nickname}</Link>
+            <Link to="/dashboard" className={s.navUser}>
+              <span className={s.navUserName}>{user.nickname}</span>
+              <div className={s.navUserAvatar}>{user.avatar}</div>
+            </Link>
           ) : (
             <>
               <Link to="/login" className={`${s.btn} ${s.btnGhost}`}>로그인</Link>
