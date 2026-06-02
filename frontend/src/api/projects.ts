@@ -58,3 +58,8 @@ export async function updateProject(
 export async function deleteProject(id: string): Promise<void> {
   await client.delete(`/projects/${id}`)
 }
+
+export async function getLikedProjects(): Promise<Project[]> {
+  const response = await client.get<Project[]>('/projects/liked')
+  return response.data
+}

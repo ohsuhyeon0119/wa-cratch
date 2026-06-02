@@ -6,11 +6,11 @@ import type { Project } from '../../api/projects'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../hooks/useToast'
 import Toast from '../../components/Toast/Toast'
-import { getFollowing, getLikedProjects, type FollowingUser } from '../../api/follows'
+import { getLikedProjects } from '../../api/projects'
 
 const THUMB_CLASSES = [s.pt1, s.pt2, s.pt3, s.pt4, s.pt5, s.pt6]
 
-type Tab = 'projects' | 'liked' | 'following'
+type Tab = 'projects' | 'liked'
 
 export default function DashboardPage() {
   const { toastVisible, toastMessage, toastType, showToast } = useToast()
@@ -21,7 +21,6 @@ export default function DashboardPage() {
   const [tab, setTab] = useState<Tab>('projects')
   const [searchQuery, setSearchQuery] = useState('')
   const [likedProjects, setLikedProjects] = useState<Project[]>([])
-  const [followingUsers, setFollowingUsers] = useState<FollowingUser[]>([])
 
   useEffect(() => {
     setLoading(true)
@@ -34,8 +33,6 @@ export default function DashboardPage() {
   useEffect(() => {
     if (tab === 'liked') {
       getLikedProjects().then(setLikedProjects).catch(() => {})
-    } else if (tab === 'following') {
-      getFollowing().then(setFollowingUsers).catch(() => {})
     }
   }, [tab])
 
@@ -66,7 +63,6 @@ export default function DashboardPage() {
             <Link to="/dashboard" className={`${s.sbLink} ${tab === 'projects' ? s.active : ''}`} onClick={() => setTab('projects')}>🏠 내 프로젝트</Link>
             <Link to="/editor/new" className={s.sbLink}>✏️ 프로젝트 만들기</Link>
             <a href="#" className={`${s.sbLink} ${tab === 'liked' ? s.active : ''}`} onClick={(e) => { e.preventDefault(); setTab('liked') }}>❤️ 좋아요한 작품</a>
-            <a href="#" className={`${s.sbLink} ${tab === 'following' ? s.active : ''}`} onClick={(e) => { e.preventDefault(); setTab('following') }}>👥 팔로잉</a>
           </div>
           <div className={s.sbSection}>
             <div className={s.sbSectionTitle}>계정</div>
@@ -140,33 +136,6 @@ export default function DashboardPage() {
                         <div className={s.projStats}>
                           <span className={s.projStat}>❤️ {p.likes}</span>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {tab === 'following' && (
-            <>
-              <div className={s.sectionHeader}>
-                <h2 className={s.sectionTitle}>👥 팔로잉</h2>
-              </div>
-              <div className={s.projGrid}>
-                {followingUsers.length === 0 ? (
-                  <div style={{ color: 'var(--color-text-muted, #888)', padding: '2rem' }}>
-                    아직 팔로우한 유저가 없어요 🐱
-                  </div>
-                ) : followingUsers.map((u) => (
-                  <div key={u.id} className={s.projCard}>
-                    <div className={`${s.projThumb} ${THUMB_CLASSES[0]}`} style={{ fontSize: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {u.avatar}
-                    </div>
-                    <div className={s.projInfo}>
-                      <div className={s.projTitle}>{u.nickname}</div>
-                      <div className={s.projMeta}>
-                        <span className={s.projDate}>작품 {u.projectCount}개</span>
                       </div>
                     </div>
                   </div>

@@ -6,8 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, get_db, Base
 from app.models import user, project  # noqa: F401 — registers models before create_all
 from app.models import like  # noqa: F401 — registers Like model before create_all
-from app.models import follow  # noqa: F401 — registers Follow model before create_all
-from app.routers import auth, projects, activity, users, likes, follows
+from app.routers import auth, projects, activity, users, likes
 from app.services import auth_service
 
 
@@ -42,4 +41,3 @@ app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(likes.router, prefix="/projects", tags=["likes"])
 app.include_router(projects.router, prefix="/projects", tags=["projects"])
 app.include_router(activity.router, prefix="/activity", tags=["activity"])
-app.include_router(follows.router, prefix="/users", tags=["follows"])

@@ -6,7 +6,6 @@ export type UserResponse = {
   nickname: string
   avatar: string
   projectCount: number
-  followers: number
   totalLikes: number
 }
 

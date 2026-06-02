@@ -40,7 +40,6 @@ class UserResponse(BaseModel):
     nickname: str = Field(..., description="Display nickname")
     avatar: str = Field(..., description="Avatar URL or emoji")
     projectCount: int = Field(..., description="Number of projects created")
-    followers: int = Field(..., description="Number of followers")
     totalLikes: int = Field(..., description="Total likes received")
 
 
@@ -103,23 +102,6 @@ class LikeResponse(BaseModel):
     likes: int = Field(..., description="Updated total like count for the project")
 
 
-# ============================================================================
-# Follow Response Schemas
-# ============================================================================
-
-class FollowResponse(BaseModel):
-    """Follow toggle response"""
-    following: bool = Field(..., description="Whether the current user is now following the target user")
-
-
-class FollowingUserResponse(BaseModel):
-    """User in the following list"""
-    id: str = Field(..., description="User ID")
-    nickname: str = Field(..., description="Display nickname")
-    avatar: str = Field(..., description="Avatar URL or emoji")
-    projectCount: int = Field(..., description="Number of published projects")
-
-
 __all__ = [
     "RegisterRequest",
     "LoginRequest",
@@ -130,6 +112,4 @@ __all__ = [
     "ProjectResponse",
     "ActivityResponse",
     "LikeResponse",
-    "FollowResponse",
-    "FollowingUserResponse",
 ]

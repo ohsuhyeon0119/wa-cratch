@@ -28,6 +28,5 @@ async def me(
         nickname=user.nickname,
         avatar=user.avatar,
         projectCount=stats["projectCount"],
-        followers=stats["followers"],
         totalLikes=stats["totalLikes"],
     )

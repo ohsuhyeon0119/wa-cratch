@@ -36,5 +36,4 @@ def get_user_stats(db: Session, user_id: str) -> dict:
     return {
         "projectCount": project_count,
         "totalLikes": total_likes,
-        "followers": 0,
     }
