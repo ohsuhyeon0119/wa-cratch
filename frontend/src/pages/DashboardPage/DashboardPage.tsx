@@ -101,13 +101,10 @@ export default function DashboardPage() {
                         <Link to={`/play/${p.id}`}   className={s.phBtn}>▶ 실행</Link>
                       </div>
                     </div>
-                    <span className={`${s.statusBadge} ${p.published ? s.sbPublished : s.sbDraft}`}>
-                      {p.published ? '공개' : '비공개'}
-                    </span>
                     <div className={s.projInfo}>
                       <div className={s.projTitle}>{p.title}</div>
                       <div className={s.projMeta}>
-                        <span className={s.projDate}>{p.views > 0 ? `${p.views} views` : '비공개'}</span>
+                        <span className={s.projDate}>{p.views > 0 ? `${p.views} views` : ''}</span>
                         <div className={s.projStats}>
                           <span className={s.projStat}>❤️ {p.likes}</span>
                           <span className={s.projStat}>👁️ {p.views}</span>

@@ -62,7 +62,6 @@ class ProjectUpdateRequest(BaseModel):
     emoji: Optional[str] = Field(default=None, description="Project emoji")
     description: Optional[str] = Field(default=None, description="Project description")
     tags: Optional[list[str]] = Field(default=None, description="Project tags")
-    published: Optional[bool] = Field(default=None, description="Publication status")
     blocks_json: Optional[dict] = Field(default=None, description="Block configuration JSON")
 
 

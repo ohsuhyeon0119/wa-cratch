@@ -22,7 +22,7 @@ def _to_dict(project: Project, author_nickname: str) -> dict:
 
 
 def list_public_projects(db: Session, sort: str = "latest", search: str = "") -> list[dict]:
-    query = db.query(Project, User.nickname).join(User, Project.user_id == User.id).filter(Project.published == True)
+    query = db.query(Project, User.nickname).join(User, Project.user_id == User.id)
 
     if search:
         search_lower = f"%{search.lower()}%"

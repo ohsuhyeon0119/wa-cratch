@@ -131,12 +131,7 @@ html, body { height: 100%; }
 .phBtn.edit { color: var(--orange); }
 .phBtn.edit:hover { background: var(--orange); color: #fff; }
 .phBtn:hover { background: var(--teal); color: #fff; }
-.statusBadge {
-  position: absolute; top: 8px; right: 8px;
-  font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 100px;
-}
-.sbPublished { background: #22C55E; color: #fff; }
-.sbDraft { background: var(--yellow); color: var(--dark); }
+
 .projInfo { padding: 12px 14px; }
 .projTitle { font-weight: 800; font-size: 14px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .projMeta { display: flex; align-items: center; justify-content: space-between; }
