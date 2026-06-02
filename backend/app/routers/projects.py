@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.schemas import ProjectCreateRequest, ProjectResponse, ProjectUpdateRequest
-from app.core.security import get_current_user
+from app.core.security import get_current_user, get_optional_current_user
 from app.database import get_db
 from app.services import auth_service, project_service
 
@@ -59,10 +59,24 @@ async def create_project(
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)
-async def get_project(project_id: str, db: Session = Depends(get_db)) -> ProjectResponse:
+async def get_project(
+    project_id: str,
+    current_user: dict | None = Depends(get_optional_current_user),
+    db: Session = Depends(get_db),
+) -> ProjectResponse:
     data = project_service.get_project(db, project_id)
     if data is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+
+    # If the project is not published, only the owner can access it
+    if not data["published"]:
+        if current_user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+        username: str = current_user.get("sub", "")
+        user = auth_service.get_user_by_username(db, username)
+        if user is None or data["authorId"] != user.id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+
     return _dict_to_response(data)
 
 

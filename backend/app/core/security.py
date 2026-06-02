@@ -21,6 +21,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # OAuth2 scheme for extracting token from Authorization header
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+# OAuth2 scheme that does NOT raise an error when no token is provided
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
+
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """
@@ -97,6 +100,26 @@ def verify_password(plain: str, hashed: str) -> bool:
         True if password matches, False otherwise
     """
     return pwd_context.verify(plain, hashed)
+
+
+async def get_optional_current_user(token: Optional[str] = Depends(oauth2_scheme_optional)) -> Optional[dict]:
+    """
+    Optional authentication dependency. Returns None if no token is provided or
+    if the token is invalid/expired, instead of raising an exception.
+
+    Args:
+        token: Optional JWT token from Authorization header
+
+    Returns:
+        Decoded token payload if valid token provided, None otherwise
+    """
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError:
+        return None
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:

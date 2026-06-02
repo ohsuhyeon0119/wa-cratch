@@ -14,7 +14,7 @@ type Tab = 'projects' | 'liked' | 'following'
 
 export default function DashboardPage() {
   const { toastVisible, toastMessage, toastType, showToast } = useToast()
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
 
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
@@ -72,7 +72,7 @@ export default function DashboardPage() {
           </div>
           <div className={s.sbSection}>
             <div className={s.sbSectionTitle}>계정</div>
-            <Link to="/" className={s.sbLink} onClick={() => showToast('로그아웃 됐어요 👋', 'info')}>🚪 로그아웃</Link>
+            <Link to="/" className={s.sbLink} onClick={() => { logout(); showToast('로그아웃 됐어요 👋', 'info') }}>🚪 로그아웃</Link>
           </div>
           <Link to="/editor/new" className={s.sbNewBtn}>+ 새 프로젝트</Link>
         </div>
@@ -91,7 +91,6 @@ export default function DashboardPage() {
             <>
               <div className={s.sectionHeader}>
                 <h2 className={s.sectionTitle}>🎮 내 프로젝트</h2>
-                <a href="#" className={s.seeAll}>전체 보기 →</a>
               </div>
               <div className={s.projGrid}>
                 <Link to="/editor/new" className={s.projNew}>

@@ -7,9 +7,10 @@ import Toast from '../../components/Toast/Toast'
 import ShareModal from '../../components/ShareModal/ShareModal'
 import StageCanvas from './StageCanvas'
 import { registerBlocks, TOOLBOX_CONFIG } from './blockDefs'
-import { SpriteRuntime, defaultSpriteState } from './spriteRuntime'
+import { SpriteRuntime, defaultSpriteState, SPRITE_LIBRARY } from './spriteRuntime'
 import type { SpriteState, Background } from './spriteRuntime'
 import { getProject, createProject, updateProject } from '../../api/projects'
+import axios from 'axios'
 
 registerBlocks()
 
@@ -205,8 +206,13 @@ export default function EditorPage() {
         await updateProject(id, { blocks_json, title: projectTitle || '새 프로젝트' })
         showToast('저장됐어요! 💾', 'success')
       }
-    } catch {
-      showToast('저장에 실패했어요 😢', 'error')
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        showToast('저장하려면 로그인이 필요해요 🔑', 'error')
+        navigate('/login')
+      } else {
+        showToast('저장에 실패했어요 😢', 'error')
+      }
     }
   }, [id, navigate, showToast, projectTitle])
 
@@ -276,7 +282,7 @@ export default function EditorPage() {
           <span className={s.statusDot}/>
           {isRunning ? '▶ 실행 중...' : '준비됨'}
         </span>
-        <span>스프라이트: 와냥이</span>
+        <span>스프라이트: {SPRITE_LIBRARY[spriteState.spriteId]?.name ?? '와냥이'}</span>
         <span>블록: {blockCount}개</span>
         <span style={{ marginLeft: 'auto' }}>WaCratch v1.0 🐾</span>
       </div>

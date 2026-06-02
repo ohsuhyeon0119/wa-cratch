@@ -1,6 +1,10 @@
 import * as Blockly from 'blockly'
 
+let registered = false
+
 export function registerBlocks() {
+  if (registered) return
+  registered = true
   Blockly.defineBlocksWithJsonArray([
     // ── CONTROL ──
     {

@@ -182,7 +182,6 @@ export default function LoginPage() {
                   <input type="checkbox" id="remember"/>
                   <label htmlFor="remember">로그인 상태 유지</label>
                 </div>
-                <a href="#" className={s.forgot}>비밀번호 찾기</a>
               </div>
               <button className={s.btnSubmit} onClick={handleLogin}>로그인하기 →</button>
               {loginError && <p className={s.errorMsg}>{loginError}</p>}

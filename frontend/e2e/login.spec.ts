@@ -28,3 +28,11 @@ test('비밀번호 입력 시 강도 표시가 나타난다', async ({ page }) =
   // Then
   await expect(page.locator('[class*="pwStrength"]')).toBeVisible();
 });
+
+// #34: 비밀번호 찾기 기능 제거
+test('"비밀번호 찾기" 링크가 존재하지 않는다', async ({ page }) => {
+  // Given
+  await page.goto('/login');
+  // Then
+  await expect(page.getByText('비밀번호 찾기')).not.toBeVisible();
+});

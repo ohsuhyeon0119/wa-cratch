@@ -141,8 +141,6 @@
   width: 18px; height: 18px; accent-color: var(--orange); cursor: pointer;
 }
 .rememberLeft label { font-size: 13px; font-weight: 700; color: var(--mid); cursor: pointer; }
-.forgot { font-size: 13px; font-weight: 700; color: var(--orange); text-decoration: none; }
-.forgot:hover { text-decoration: underline; }
 
 /* BUTTONS */
 .btnSubmit {

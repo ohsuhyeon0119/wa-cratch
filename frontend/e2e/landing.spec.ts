@@ -38,3 +38,11 @@ test('CTA 섹션과 푸터가 렌더링된다', async ({ page }) => {
   await expect(page.getByRole('link', { name: /무료로 시작하기/ })).toBeVisible();
   await expect(page.getByRole('contentinfo').getByText('WaCratch', { exact: true }).first()).toBeVisible();
 });
+
+// #38: 404 페이지
+test('존재하지 않는 URL 접근 시 404 안내 문구가 표시된다', async ({ page }) => {
+  // When
+  await page.goto('/nonexistent-page');
+  // Then
+  await expect(page.getByText(/찾을 수 없어요/)).toBeVisible();
+});
