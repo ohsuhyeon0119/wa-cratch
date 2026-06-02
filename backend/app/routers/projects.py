@@ -49,7 +49,7 @@ async def create_project(
     data = project_service.create_project(
         db,
         user_id=user.id,
-        author_username=user.username,
+        author_nickname=user.nickname,
         title=body.title,
         emoji=body.emoji,
         description=body.description,
