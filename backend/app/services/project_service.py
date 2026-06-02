@@ -13,7 +13,6 @@ def _to_dict(project: Project, author_nickname: str) -> dict:
         "authorId": project.user_id,
         "emoji": project.emoji,
         "likes": project.likes,
-        "views": project.views,
         "published": project.published,
         "description": project.description,
         "tags": project.tags or [],
@@ -34,9 +33,7 @@ def list_public_projects(db: Session, sort: str = "latest", search: str = "") ->
             )
         )
 
-    if sort == "views":
-        query = query.order_by(Project.views.desc())
-    elif sort == "likes":
+    if sort == "likes":
         query = query.order_by(Project.likes.desc())
     else:
         query = query.order_by(Project.created_at.desc())

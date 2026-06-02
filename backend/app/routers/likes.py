@@ -20,7 +20,6 @@ def _project_to_dict(project: Project, author_nickname: str) -> dict:
         "authorId": project.user_id,
         "emoji": project.emoji,
         "likes": project.likes,
-        "views": project.views,
         "published": project.published,
         "description": project.description,
         "tags": project.tags or [],

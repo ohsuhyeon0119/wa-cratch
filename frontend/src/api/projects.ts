@@ -7,7 +7,6 @@ export type Project = {
   authorId: string
   emoji: string
   likes: number
-  views: number
   description: string
   tags: string[]
   blocks_json: Record<string, unknown>

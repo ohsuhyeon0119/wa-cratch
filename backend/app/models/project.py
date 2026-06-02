@@ -15,7 +15,6 @@ class Project(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     tags: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     likes: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    views: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     published: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     blocks_json: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

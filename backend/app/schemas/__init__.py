@@ -73,7 +73,6 @@ class ProjectResponse(BaseModel):
     authorId: str = Field(..., description="Author user ID")
     emoji: str = Field(..., description="Project emoji")
     likes: int = Field(..., description="Number of likes")
-    views: int = Field(..., description="Number of views")
     published: bool = Field(..., description="Publication status")
     description: str = Field(..., description="Project description")
     tags: list[str] = Field(..., description="Project tags")

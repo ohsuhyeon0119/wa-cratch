@@ -209,7 +209,6 @@ export default function PlayPage() {
             </div>
             <div className={s.infoStats}>
               <div className={s.infoStat}><span className={s.infoStatN}>{likeCount.toLocaleString()}</span><span className={s.infoStatL}>❤️ 좋아요</span></div>
-              <div className={s.infoStat}><span className={s.infoStatN}>{(project?.views || 0).toLocaleString()}</span><span className={s.infoStatL}>👁️ 조회</span></div>
             </div>
           </div>
         </div>

@@ -104,10 +104,8 @@ export default function DashboardPage() {
                     <div className={s.projInfo}>
                       <div className={s.projTitle}>{p.title}</div>
                       <div className={s.projMeta}>
-                        <span className={s.projDate}>{p.views > 0 ? `${p.views} views` : ''}</span>
                         <div className={s.projStats}>
                           <span className={s.projStat}>❤️ {p.likes}</span>
-                          <span className={s.projStat}>👁️ {p.views}</span>
                         </div>
                       </div>
                     </div>

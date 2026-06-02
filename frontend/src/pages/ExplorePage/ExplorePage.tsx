@@ -4,7 +4,7 @@ import s from './ExplorePage.module.css'
 import { getProjects, type Project } from '../../api/projects'
 import { useAuth } from '../../context/AuthContext'
 
-type Sort = 'latest' | 'views' | 'likes'
+type Sort = 'latest' | 'likes'
 
 const THUMB_CLASSES = [s.pt1, s.pt2, s.pt3, s.pt4, s.pt5, s.pt6, s.pt7, s.pt8, s.pt9, s.pt10]
 
@@ -97,7 +97,6 @@ export default function ExplorePage() {
         <div className={s.sortBar}>
           <span className={s.sortLabel}>정렬:</span>
           <button className={`${s.sortTab} ${sort === 'latest' ? s.active : ''}`} onClick={() => setSort('latest')}>🆕 최신순</button>
-          <button className={`${s.sortTab} ${sort === 'views'  ? s.active : ''}`} onClick={() => setSort('views')}>👁️ 조회순</button>
           <button className={`${s.sortTab} ${sort === 'likes'  ? s.active : ''}`} onClick={() => setSort('likes')}>❤️ 좋아요순</button>
         </div>
 
@@ -117,7 +116,6 @@ export default function ExplorePage() {
                 <div className={s.projAuthor}>by {p.author}</div>
                 <div className={s.projStats}>
                   <span className={s.projStat}>❤️ {p.likes}</span>
-                  <span className={s.projStat}>👁️ {p.views}</span>
                 </div>
               </div>
             </Link>
