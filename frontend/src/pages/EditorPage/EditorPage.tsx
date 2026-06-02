@@ -4,8 +4,8 @@ import * as Blockly from 'blockly'
 import s from './EditorPage.module.css'
 import { useToast } from '../../hooks/useToast'
 import Toast from '../../components/Toast/Toast'
-import ShareModal from '../../components/ShareModal/ShareModal'
 import StageCanvas from './StageCanvas'
+import { useAuth } from '../../context/AuthContext'
 import { registerBlocks, TOOLBOX_CONFIG } from './blockDefs'
 import { SpriteRuntime, defaultSpriteState, SPRITE_LIBRARY } from './spriteRuntime'
 import type { SpriteState, Background } from './spriteRuntime'
@@ -18,8 +18,8 @@ export default function EditorPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { toastVisible, toastMessage, toastType, showToast } = useToast()
+  const { user } = useAuth()
   const [isRunning, setIsRunning] = useState(false)
-  const [shareOpen, setShareOpen] = useState(false)
   const [spriteState, setSpriteState] = useState<SpriteState>(defaultSpriteState())
   const [selectedBg, setSelectedBg] = useState<Background>('sky')
   const [blockCount, setBlockCount] = useState(0)
@@ -240,10 +240,12 @@ export default function EditorPage() {
         <div className={s.tDivider}/>
         <div className={s.tActions}>
           <button className={`${s.btnToolbar} ${s.btnSave}`} onClick={handleSave}>💾 저장</button>
-          <button className={`${s.btnToolbar} ${s.btnShare}`} onClick={() => setShareOpen(true)}>🔗 공유하기</button>
         </div>
         <div className={s.tDivider}/>
-        <div className={s.tAvatar}>🧇</div>
+        <Link to="/dashboard" className={s.tNavUser}>
+          <span className={s.tNavUserName}>{user?.nickname ?? ''}</span>
+          <div className={s.tNavUserAvatar}>{user?.avatar ?? '🐱'}</div>
+        </Link>
       </div>
 
       {/* EDITOR BODY */}
@@ -288,12 +290,6 @@ export default function EditorPage() {
       </div>
 
       <Toast visible={toastVisible} message={toastMessage} type={toastType} />
-      <ShareModal
-        isOpen={shareOpen}
-        projectId={id && id !== 'new' ? id : ''}
-        projectTitle={projectTitle}
-        onClose={() => setShareOpen(false)}
-      />
     </div>
   )
 }

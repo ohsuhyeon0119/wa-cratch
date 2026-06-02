@@ -230,7 +230,7 @@ export default function LandingPage() {
       <section className={s.ctaBg}>
         <h2 className={s.ctaTitle}>와냥이와 시작해요! 🧇</h2>
         <p className={s.ctaSub}>무료로 가입하고, 와냥이와 첫 번째 작품을 만들어봐요!</p>
-        <Link to="/login" className={s.btnWhite}>무료로 시작하기 🚀</Link>
+        <Link to={user ? '/editor/new' : '/login'} className={s.btnWhite}>무료로 시작하기 🚀</Link>
       </section>
 
       {/* ── FOOTER ── */}

@@ -64,7 +64,7 @@ export default function DashboardPage() {
           <div className={s.sbSection}>
             <div className={s.sbSectionTitle}>나의 공간</div>
             <Link to="/dashboard" className={`${s.sbLink} ${tab === 'projects' ? s.active : ''}`} onClick={() => setTab('projects')}>🏠 내 프로젝트</Link>
-            <Link to="/explore"   className={s.sbLink}>🔍 탐색하기</Link>
+            <Link to="/editor/new" className={s.sbLink}>✏️ 프로젝트 만들기</Link>
             <a href="#" className={`${s.sbLink} ${tab === 'liked' ? s.active : ''}`} onClick={(e) => { e.preventDefault(); setTab('liked') }}>❤️ 좋아요한 작품</a>
             <a href="#" className={`${s.sbLink} ${tab === 'following' ? s.active : ''}`} onClick={(e) => { e.preventDefault(); setTab('following') }}>👥 팔로잉</a>
           </div>
