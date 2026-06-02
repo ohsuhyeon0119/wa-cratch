@@ -53,7 +53,7 @@
 
 .navLogo {
   display: flex; align-items: center; gap: 10px;
-  text-decoration: none; flex-shrink: 0;
+  text-decoration: none; flex-shrink: 0; min-height: 44px;
 }
 .navLogoIcon {
   width: 42px; height: 42px;
@@ -77,6 +77,7 @@
 .navLinks a {
   font-weight: 700; font-size: 15px; color: var(--mid);
   text-decoration: none; padding: 11px 14px;
+  min-height: 44px; display: flex; align-items: center;
   border-radius: var(--r-sm); transition: all .2s;
 }
 .navLinks a:hover { background: var(--orange-pale); color: var(--orange); }
@@ -276,7 +277,7 @@
   color: var(--dark); margin-bottom: 16px;
 }
 .footerCol ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-.footerCol a { color: var(--mid); text-decoration: none; font-size: 14px; font-weight: 600; transition: color .2s; display: block; padding: 10px 4px; margin: -6px 0; }
+.footerCol a { color: var(--mid); text-decoration: none; font-size: 14px; font-weight: 600; transition: color .2s; display: block; min-height: 44px; padding: 12px 4px; margin: -8px 0; }
 .footerCol a:hover { color: var(--orange); }
 
 .footerBottom {
