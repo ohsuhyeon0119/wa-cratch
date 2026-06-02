@@ -141,6 +141,7 @@
 .heroTitle {
   font-family: var(--font-d); font-size: 64px; font-weight: 800;
   line-height: 1.06; margin-bottom: 22px; letter-spacing: -2px;
+  text-wrap: balance;
   animation: slideUp .7s .18s cubic-bezier(.22,1,.36,1) both;
 }
 .heroTitle .cOrange { color: var(--orange); }
