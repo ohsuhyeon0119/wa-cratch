@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import { useAuth } from '../../context/AuthContext'
 import { register } from '../../api/auth'
 import s from './LoginPage.module.css'
@@ -40,8 +41,14 @@ export default function LoginPage() {
       await login(loginUsername, loginPassword)
       navigate('/dashboard')
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : '로그인에 실패했습니다.'
+      let message = '로그인에 실패했어요. 다시 시도해주세요.'
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 401) {
+          message = '아이디 또는 비밀번호가 틀렸어요 😿'
+        } else if (err.response?.status === 422) {
+          message = '아이디와 비밀번호를 입력해 주세요 🐾'
+        }
+      }
       setLoginError(message)
     }
   }
@@ -53,8 +60,12 @@ export default function LoginPage() {
       await login(signupUsername, pw)
       navigate('/dashboard')
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : '회원가입에 실패했습니다.'
+      let message = '회원가입에 실패했어요. 다시 시도해주세요.'
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 422) {
+          message = '정보를 다시 확인해 주세요 🐾'
+        }
+      }
       setSignupError(message)
     }
   }
