@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WaCratch — AI 음성 에이전트 데모</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* ── WaCratch 디자인 토큰 (index.css 완전 동기화) ── */
+      --wf:           #FFC947;
+      --wf-dk:        #C88010;
+      --wf-pale:      #FFF3C8;
+      --orange:       #FF6B35;
+      --orange-dk:    #D44E1A;
+      --orange-lt:    #FF9A6C;
+      --orange-pale:  #FFE8DC;
+      --teal:         #2EC4B6;
+      --teal-dk:      #1A9E96;
+      --teal-pale:    #D6F5F2;
+      --yellow:       #FFD23F;
+      --yellow-dk:    #D4A020;
+      --yellow-pale:  #FFF5CC;
+      --pink:         #FF85A1;
+      --pink-pale:    #FFE5EC;
+      --pink-dk:      #E05882;
+      --purple:       #A855F7;
+      --purple-pale:  #F3E8FF;
+      --green:        #5BC67E;
+      --green-dk:     #3DA85E;
+      --cream:        #FFF8F2;
+      --dark:         #2C1810;
+      --mid:          #7B6B63;
+      --light-mid:    #B0A8A4;
+      --r-sm: 12px;
+      --r-md: 20px;
+      --r-lg: 28px;
+      --r-xl: 40px;
+      --font-d: 'Baloo 2', cursive;
+      --font-b: 'Nunito', sans-serif;
+      --font-c: 'Fira Code', monospace;
+
+      --toolbar-h: 58px;
+      --status-h:  28px;
+      --stage-w:   440px;
+      --panel-w:   356px;
+    }
+
+    html, body { height: 100%; overflow: hidden; font-family: var(--font-b); background: var(--cream); color: var(--dark); }
+
+    /* 도트 패턴 (WaCratch 공통) */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: radial-gradient(circle, #C88010 1.2px, transparent 1.2px);
+      background-size: 36px 36px;
+      opacity: 0.06;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ═══════════════════════════════════════
+       에디터 목업 (배경)
+    ═══════════════════════════════════════ */
+    .page { height: 100vh; display: flex; flex-direction: column; position: relative; z-index: 1; }
+
+    /* 툴바 */
+    .toolbar {
+      height: var(--toolbar-h); flex-shrink: 0;
+      background: #fff; border-bottom: 3px solid var(--orange-pale);
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 16px; z-index: 100;
+    }
+    .t-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .t-logo-icon {
+      width: 36px; height: 36px; background: var(--orange); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; box-shadow: 2px 3px 0 var(--orange-dk);
+      transition: transform .2s;
+    }
+    .t-logo-icon:hover { transform: rotate(-12deg); }
+    .t-logo-text { font-family: var(--font-d); font-size: 20px; font-weight: 800; color: var(--orange); }
+    .t-logo-text em { color: var(--teal); font-style: normal; }
+    .t-divider { width: 2px; height: 28px; background: var(--orange-pale); border-radius: 1px; flex-shrink: 0; }
+    .t-project {
+      font-family: var(--font-d); font-weight: 800; font-size: 15px;
+      background: transparent; border: 2px solid var(--orange-pale);
+      color: var(--dark); padding: 5px 10px; border-radius: var(--r-sm);
+      min-width: 160px; outline: none;
+    }
+    .t-spacer { flex: 1; }
+    .t-run-stop { display: flex; gap: 8px; }
+    .btn-run {
+      font-family: var(--font-b); font-weight: 800; font-size: 15px;
+      padding: 9px 22px; border-radius: 100px; border: none; cursor: pointer;
+      background: #22C55E; color: #fff; box-shadow: 2px 4px 0 #16A34A;
+      display: flex; align-items: center; gap: 6px; transition: all .15s;
+    }
+    .btn-run:hover { transform: translateY(-2px); box-shadow: 2px 6px 0 #16A34A; }
+    .btn-stop {
+      font-family: var(--font-b); font-weight: 800; font-size: 15px;
+      padding: 9px 18px; border-radius: 100px; cursor: pointer;
+      background: #fff; color: #EF4444; border: 2.5px solid #FECACA; transition: all .15s;
+    }
+    .btn-stop:hover { background: #FEF2F2; border-color: #EF4444; }
+    .t-actions { display: flex; gap: 8px; }
+    .btn-toolbar {
+      font-family: var(--font-b); font-weight: 700; font-size: 13px;
+      padding: 8px 16px; border-radius: 100px; border: none; cursor: pointer;
+      display: flex; align-items: center; gap: 5px; transition: all .2s;
+    }
+    .btn-save  { background: var(--orange-pale); color: var(--orange); }
+    .btn-save:hover { background: var(--orange); color: #fff; }
+    .btn-share { background: var(--teal); color: #fff; box-shadow: 2px 3px 0 var(--teal-dk); }
+    .btn-share:hover { transform: translateY(-1px); box-shadow: 2px 5px 0 var(--teal-dk); }
+    .t-avatar {
+      width: 34px; height: 34px; border-radius: 50%; background: var(--orange-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; border: 2px solid var(--orange-pale); cursor: pointer; transition: border-color .2s;
+    }
+    .t-avatar:hover { border-color: var(--orange); }
+
+    /* 에디터 바디 */
+    .editor-body { flex: 1; display: flex; overflow: hidden; }
+
+    /* 워크스페이스 */
+    .workspace { flex: 1; background: #F5F0EC; position: relative; overflow: hidden; }
+    .workspace::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,107,53,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,107,53,.08) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    .ws-hint {
+      position: absolute; bottom: 20px; right: 20px;
+      background: rgba(255,255,255,.88); backdrop-filter: blur(8px);
+      border: 2px solid var(--orange-pale); border-radius: 14px;
+      padding: 10px 16px; font-size: 12px; font-weight: 700; color: var(--mid);
+    }
+
+    /* 가짜 블록들 */
+    .fake-blocks { position: absolute; top: 40px; left: 44px; display: flex; flex-direction: column; }
+    .fb {
+      border-radius: 10px; padding: 10px 16px;
+      font-family: var(--font-b); font-weight: 800; font-size: 13px;
+      color: #fff; display: flex; align-items: center; gap: 10px;
+      box-shadow: 3px 4px 0 rgba(0,0,0,.15);
+      margin-bottom: -2px; position: relative; user-select: none;
+    }
+    .fb:first-child { border-radius: 14px 14px 10px 10px; }
+    .fb:last-child  { border-radius: 10px 10px 14px 14px; margin-bottom: 0; }
+    .fb::after {
+      content: '';
+      position: absolute; bottom: -6px; left: 20px;
+      width: 24px; height: 7px;
+      background: inherit; border-radius: 0 0 6px 6px;
+    }
+    .fb:last-child::after { display: none; }
+    .fb-notch { width: 14px; height: 14px; background: rgba(255,255,255,.35); border-radius: 50%; flex-shrink: 0; }
+    .fb-wf     { background: var(--wf); color: var(--dark); }
+    .fb-orange { background: var(--orange); }
+    .fb-purple { background: var(--purple); }
+    .fb-teal   { background: var(--teal); }
+    .fb-yellow { background: var(--yellow); color: var(--dark); }
+    .fb-indent { margin-left: 24px; }
+
+    /* 스테이지 패널 */
+    .stage-panel {
+      width: var(--stage-w); flex-shrink: 0;
+      background: #FFF8F2;
+      border-left: 3px solid var(--orange-pale);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .stage-ctrl {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-bottom: 2px solid var(--orange-pale); flex-shrink: 0;
+    }
+    .stage-title { font-family: var(--font-d); font-size: 14px; font-weight: 800; color: var(--mid); }
+    .stage-btns { display: flex; gap: 6px; }
+    .s-btn {
+      width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+      background: var(--orange-pale); transition: all .15s;
+    }
+    .s-btn:hover { background: var(--orange); }
+    .stage-canvas-wrap {
+      margin: 12px; border-radius: 18px; overflow: hidden;
+      border: 3px solid var(--orange-pale);
+      background: linear-gradient(180deg, #87CEEB 0%, #B0E0F8 55%, #7BC8A0 80%, #5DAF84 100%);
+      aspect-ratio: 4/3; position: relative; flex-shrink: 0;
+    }
+    .s-cloud { position: absolute; border-radius: 50px; background: rgba(255,255,255,.88); }
+    .s-c1 { width: 80px; height: 28px; top: 18%; left: 8%; }
+    .s-c2 { width: 60px; height: 22px; top: 12%; right: 15%; }
+    .s-c3 { width: 48px; height: 18px; top: 30%; left: 52%; }
+    .s-ground { position: absolute; bottom: 0; left: 0; right: 0; height: 28%; background: linear-gradient(180deg, #7BC8A0, #5DAF84); }
+    .s-sprite {
+      position: absolute; bottom: 26%; left: 32%;
+      width: 72px; filter: drop-shadow(2px 5px 5px rgba(0,0,0,.2));
+      animation: sprIdle 1.8s ease-in-out infinite;
+    }
+    @keyframes sprIdle {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-6px); }
+    }
+    .stage-coords {
+      display: flex; gap: 8px; padding: 5px 14px;
+      border-bottom: 2px solid var(--orange-pale);
+    }
+    .coord-chip {
+      background: var(--orange-pale); border-radius: 8px;
+      padding: 3px 10px; font-family: var(--font-c); font-size: 12px;
+      font-weight: 500; color: var(--orange);
+    }
+    .sprite-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .sprite-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px 8px; border-bottom: 2px solid var(--orange-pale);
+    }
+    .sprite-hdr-title { font-family: var(--font-d); font-size: 13px; font-weight: 800; color: var(--mid); }
+    .add-sprite {
+      width: 26px; height: 26px; border-radius: 50%; background: var(--orange); color: #fff;
+      border: none; font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 1px 2px 0 var(--orange-dk);
+    }
+    .sprite-list { display: flex; gap: 8px; padding: 10px 14px; overflow-x: auto; }
+    .sprite-thumb {
+      flex-shrink: 0; width: 68px; border-radius: 14px; padding: 8px 6px;
+      border: 2.5px solid transparent; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      background: #fff; transition: all .2s;
+    }
+    .sprite-thumb.active { border-color: var(--orange); background: var(--orange-pale); }
+    .sprite-thumb:hover:not(.active) { border-color: var(--orange-pale); transform: translateY(-2px); }
+    .sp-icon { font-size: 26px; }
+    .sp-name { font-family: var(--font-d); font-size: 10px; font-weight: 800; color: var(--mid); }
+    .sprite-thumb.active .sp-name { color: var(--orange); }
+
+    /* 상태 바 */
+    .status-bar {
+      height: var(--status-h); flex-shrink: 0;
+      background: #fff; border-top: 2px solid var(--orange-pale);
+      display: flex; align-items: center; gap: 16px; padding: 0 14px;
+      font-size: 11px; font-weight: 700; color: var(--mid); z-index: 100;
+    }
+    .s-dot { width: 7px; height: 7px; border-radius: 50%; background: #22C55E; display: inline-block; margin-right: 4px; }
+
+    /* ═══════════════════════════════════════
+       음성 에이전트 토글 버튼
+    ═══════════════════════════════════════ */
+    .va-toggle {
+      position: fixed;
+      right: calc(var(--panel-w) + 16px);
+      bottom: calc(var(--status-h) + 20px);
+      width: 56px; height: 56px;
+      border-radius: 50%; border: none; cursor: pointer;
+      background: linear-gradient(135deg, var(--orange), var(--wf));
+      box-shadow: 3px 5px 0 var(--orange-dk), 0 0 0 4px rgba(255,107,53,.18);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; z-index: 600;
+      transition: all .25s cubic-bezier(.34,1.56,.64,1);
+      animation: togglePulse 3s ease-in-out infinite;
+    }
+    .va-toggle.panel-hidden {
+      right: 16px;
+    }
+    .va-toggle:hover {
+      transform: translateY(-3px) scale(1.08);
+      box-shadow: 3px 8px 0 var(--orange-dk), 0 0 0 8px rgba(255,107,53,.1);
+    }
+    @keyframes togglePulse {
+      0%,100% { box-shadow: 3px 5px 0 var(--orange-dk), 0 0 0 4px rgba(255,107,53,.18); }
+      50%      { box-shadow: 3px 5px 0 var(--orange-dk), 0 0 0 10px rgba(255,107,53,.06); }
+    }
+    .va-toggle-badge {
+      position: absolute; top: -4px; right: -4px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--teal); border: 2px solid #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-d); font-size: 9px; font-weight: 800; color: #fff;
+      letter-spacing: 0;
+    }
+
+    /* ═══════════════════════════════════════
+       음성 에이전트 패널
+    ═══════════════════════════════════════ */
+    .va-panel {
+      position: fixed;
+      right: 0;
+      top: var(--toolbar-h);
+      bottom: var(--status-h);
+      width: var(--panel-w);
+      background: var(--cream);
+      border-left: 3px solid var(--orange-pale);
+      display: flex; flex-direction: column;
+      z-index: 500;
+      transition: transform .38s cubic-bezier(.34,1.15,.64,1);
+      box-shadow: -8px 0 32px rgba(44,24,16,.13);
+      overflow: hidden;
+    }
+    .va-panel.hidden { transform: translateX(calc(var(--panel-w) + 6px)); }
+
+    /* ── 헤더 ── */
+    .va-header {
+      background: linear-gradient(145deg, var(--orange) 0%, #FF8C58 45%, var(--wf) 100%);
+      padding: 18px 16px 14px;
+      display: flex; flex-direction: column; align-items: center;
+      position: relative; flex-shrink: 0; overflow: hidden;
+    }
+    /* 헤더 반짝이 장식 */
+    .va-header::before {
+      content: '✦ ✧ ⋆ ✦ ✧ ⋆ ✦ ✧ ⋆ ✦ ✧';
+      position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+      font-size: 8px; color: rgba(255,255,255,.4); white-space: nowrap; letter-spacing: 8px;
+      pointer-events: none;
+    }
+    .va-close {
+      position: absolute; top: 10px; right: 10px;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(255,255,255,.22); border: none; cursor: pointer;
+      color: rgba(255,255,255,.9); font-size: 13px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center; transition: background .15s;
+    }
+    .va-close:hover { background: rgba(255,255,255,.4); }
+
+    /* 아바타 */
+    .va-avatar-wrap { position: relative; width: 88px; height: 88px; margin-bottom: 10px; }
+    .va-ring {
+      position: absolute; inset: -7px; border-radius: 50%;
+      border: 3px solid rgba(255,255,255,.45);
+      animation: ringBase 2.8s ease-in-out infinite;
+    }
+    @keyframes ringBase {
+      0%,100% { transform: scale(1);    opacity: .45; }
+      50%      { transform: scale(1.07); opacity: .8; }
+    }
+    .va-ring.listening { border-color: rgba(46,196,182,.95); animation: ringListen .8s ease-in-out infinite; }
+    @keyframes ringListen {
+      0%,100% { transform: scale(1);    box-shadow: 0 0 0  0 rgba(46,196,182,.5); }
+      50%      { transform: scale(1.13); box-shadow: 0 0 0 12px rgba(46,196,182,.0); }
+    }
+    .va-ring.thinking { border-color: rgba(255,211,63,.95); animation: ringThink 1.2s ease-in-out infinite; }
+    @keyframes ringThink {
+      0%,100% { transform: scale(1) rotate(0deg); }
+      50%      { transform: scale(1.06) rotate(8deg); }
+    }
+    .va-ring.speaking { border-color: rgba(91,198,126,.95); animation: ringSpeak .45s ease-in-out infinite; }
+    @keyframes ringSpeak {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.1); }
+    }
+    .va-avatar-bg { position: absolute; inset: 0; border-radius: 50%; background: rgba(255,255,255,.18); }
+
+    /* 와냥이 AI 얼굴 SVG */
+    .va-cat { width: 88px; height: 88px; position: relative; z-index: 1; }
+
+    /* SVG 눈 깜빡임 */
+    .eye-l { transform-origin: 50% 50%; transform-box: fill-box; animation: catBlink 4.5s ease-in-out infinite; }
+    .eye-r { transform-origin: 50% 50%; transform-box: fill-box; animation: catBlink 4.5s ease-in-out infinite .12s; }
+    @keyframes catBlink {
+      0%,40%,60%,100% { transform: scaleY(1); }
+      47%,53%         { transform: scaleY(.07); }
+    }
+    /* 귀 움직임 */
+    .ear-l { transform-origin: 12px 22px; transform-box: fill-box; animation: earWig 7s ease-in-out infinite; }
+    .ear-r { transform-origin: 76px 22px; transform-box: fill-box; animation: earWig 7s ease-in-out infinite .5s; }
+    @keyframes earWig {
+      0%,70%,100% { transform: rotate(0deg); }
+      78%  { transform: rotate(-11deg); }
+      86%  { transform: rotate(7deg); }
+      94%  { transform: rotate(-5deg); }
+    }
+    /* 앉아있는 듯한 미세 흔들림 */
+    .va-cat { animation: catBreath 3s ease-in-out infinite; }
+    @keyframes catBreath {
+      0%,100% { transform: translateY(0) scale(1); }
+      50%      { transform: translateY(-1.5px) scale(1.01); }
+    }
+
+    /* 이름 + 상태 */
+    .va-name { font-family: var(--font-d); font-size: 19px; font-weight: 800; color: #fff; text-shadow: 1px 2px 0 rgba(0,0,0,.18); margin-bottom: 7px; }
+    .va-status-badge {
+      display: flex; align-items: center; gap: 7px;
+      background: rgba(255,255,255,.2); border-radius: 100px;
+      padding: 5px 14px 5px 10px; backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(255,255,255,.3);
+    }
+    .va-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.5); transition: background .3s; }
+    .va-dot.idle      { background: rgba(255,255,255,.55); }
+    .va-dot.listening { background: var(--teal);  animation: dotPulse .8s ease-in-out infinite; }
+    .va-dot.thinking  { background: var(--yellow); animation: dotPulse 1.1s ease-in-out infinite; }
+    .va-dot.speaking  { background: var(--green);  animation: dotPulse .45s ease-in-out infinite; }
+    @keyframes dotPulse {
+      0%,100% { transform: scale(1);   opacity: 1; }
+      50%      { transform: scale(1.6); opacity: .6; }
+    }
+    .va-status-text { font-family: var(--font-b); font-size: 13px; font-weight: 700; color: rgba(255,255,255,.95); }
+
+    /* ── 데모 상태 스위처 ── */
+    .demo-bar {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 12px;
+      background: var(--orange-pale); border-bottom: 2px solid rgba(255,107,53,.15);
+      flex-shrink: 0;
+    }
+    .demo-label { font-size: 10px; font-weight: 800; color: var(--mid); white-space: nowrap; opacity: .75; }
+    .demo-btn {
+      font-family: var(--font-b); font-size: 11px; font-weight: 800;
+      padding: 4px 11px; border-radius: 100px; border: 2px solid #ddd;
+      background: #fff; color: var(--dark); cursor: pointer; transition: all .15s;
+    }
+    .demo-btn.active { background: var(--orange); border-color: var(--orange); color: #fff; box-shadow: 1px 2px 0 var(--orange-dk); }
+
+    /* ── 채팅 영역 ── */
+    .va-chat {
+      flex: 1; overflow-y: auto; padding: 14px 12px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .va-chat::-webkit-scrollbar { width: 4px; }
+    .va-chat::-webkit-scrollbar-thumb { background: var(--orange-pale); border-radius: 2px; }
+
+    .bubble { display: flex; flex-direction: column; gap: 2px; max-width: 90%; animation: bubPop .28s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes bubPop {
+      from { transform: scale(.82) translateY(10px); opacity: 0; }
+      to   { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .bubble-bot { align-self: flex-start; }
+    .bubble-usr { align-self: flex-end; align-items: flex-end; }
+
+    .bub-content {
+      padding: 10px 14px; border-radius: var(--r-md);
+      font-size: 13.5px; font-weight: 600; line-height: 1.55;
+    }
+    .bubble-bot .bub-content {
+      background: #fff; color: var(--dark);
+      border: 2px solid var(--orange-pale);
+      border-bottom-left-radius: 6px;
+      box-shadow: 2px 3px 0 var(--orange-pale);
+    }
+    .bubble-usr .bub-content {
+      background: var(--orange); color: #fff;
+      border-bottom-right-radius: 6px;
+      box-shadow: 2px 3px 0 var(--orange-dk);
+    }
+    .bub-code {
+      background: var(--dark); color: #A8E6CF;
+      font-family: var(--font-c); font-size: 12px;
+      padding: 8px 12px; border-radius: 10px; margin-top: 6px;
+      line-height: 1.65; overflow-x: auto;
+    }
+    .bub-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--teal-pale); color: var(--teal-dk);
+      border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; margin-top: 6px;
+    }
+    .bub-time { font-size: 10px; font-weight: 700; color: var(--light-mid); padding: 0 4px; }
+
+    /* 입력 중 표시 */
+    .typing-wrap .bub-content { padding: 12px 16px; }
+    .typing-dots { display: flex; gap: 5px; align-items: center; }
+    .tdot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--light-mid); animation: typBounce 1.1s ease-in-out infinite;
+    }
+    .tdot:nth-child(2) { animation-delay: .18s; }
+    .tdot:nth-child(3) { animation-delay: .36s; }
+    @keyframes typBounce {
+      0%,60%,100% { transform: translateY(0); background: var(--light-mid); }
+      30%          { transform: translateY(-7px); background: var(--orange); }
+    }
+
+    /* ── 파형 시각화 ── */
+    .va-wave {
+      padding: 10px 14px 8px;
+      background: var(--orange-pale); border-top: 2px solid rgba(255,107,53,.12);
+      border-bottom: 2px solid rgba(255,107,53,.12); flex-shrink: 0;
+    }
+    .wave-inner {
+      display: flex; align-items: center; justify-content: center; gap: 3px; height: 40px;
+    }
+    .wbar {
+      width: 4px; border-radius: 3px;
+      background: linear-gradient(to top, var(--orange), var(--teal));
+      animation: wIdle 2.4s ease-in-out infinite;
+    }
+    .wbar:nth-child(1)  { --h:  5px; animation-delay: .00s; }
+    .wbar:nth-child(2)  { --h: 10px; animation-delay: .06s; }
+    .wbar:nth-child(3)  { --h: 16px; animation-delay: .12s; }
+    .wbar:nth-child(4)  { --h: 23px; animation-delay: .18s; }
+    .wbar:nth-child(5)  { --h: 30px; animation-delay: .24s; }
+    .wbar:nth-child(6)  { --h: 35px; animation-delay: .30s; }
+    .wbar:nth-child(7)  { --h: 38px; animation-delay: .36s; }
+    .wbar:nth-child(8)  { --h: 40px; animation-delay: .42s; }
+    .wbar:nth-child(9)  { --h: 38px; animation-delay: .36s; }
+    .wbar:nth-child(10) { --h: 35px; animation-delay: .30s; }
+    .wbar:nth-child(11) { --h: 30px; animation-delay: .24s; }
+    .wbar:nth-child(12) { --h: 23px; animation-delay: .18s; }
+    .wbar:nth-child(13) { --h: 16px; animation-delay: .12s; }
+    .wbar:nth-child(14) { --h: 10px; animation-delay: .06s; }
+    .wbar:nth-child(15) { --h:  5px; animation-delay: .00s; }
+
+    @keyframes wIdle {
+      0%,100% { height: 3px; }
+      50%      { height: calc(var(--h) * .22); }
+    }
+    .va-wave.listening .wbar { background: linear-gradient(to top, var(--teal), #5CE0E6); animation: wListen .6s ease-in-out infinite; }
+    @keyframes wListen {
+      0%,100% { height: calc(var(--h) * .4); }
+      50%      { height: var(--h); }
+    }
+    .va-wave.thinking .wbar { background: linear-gradient(to top, var(--yellow), var(--wf)); animation: wThink 1.6s ease-in-out infinite; }
+    @keyframes wThink {
+      0%,100% { height: 3px; }
+      50%      { height: calc(var(--h) * .18); }
+    }
+    .va-wave.speaking .wbar { background: linear-gradient(to top, var(--green), var(--teal)); animation: wSpeak .4s ease-in-out infinite; }
+    @keyframes wSpeak {
+      0%,100% { height: calc(var(--h) * .5); }
+      50%      { height: var(--h); }
+    }
+
+    /* ── 마이크 버튼 ── */
+    .va-mic-area {
+      padding: 14px 16px 10px;
+      display: flex; flex-direction: column; align-items: center; gap: 7px; flex-shrink: 0;
+    }
+    .mic-btn {
+      width: 68px; height: 68px; border-radius: 50%; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 28px;
+      background: linear-gradient(135deg, var(--orange), var(--orange-lt));
+      box-shadow: 3px 5px 0 var(--orange-dk);
+      transition: all .2s cubic-bezier(.34,1.56,.64,1);
+    }
+    .mic-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 3px 8px 0 var(--orange-dk); }
+    .mic-btn:active:not(:disabled) { transform: translateY(1px); box-shadow: 1px 2px 0 var(--orange-dk); }
+    .mic-btn.listening {
+      background: linear-gradient(135deg, #EF4444, #F87171);
+      box-shadow: 3px 5px 0 #B91C1C;
+      animation: micPulse .9s ease-in-out infinite;
+    }
+    @keyframes micPulse {
+      0%,100% { box-shadow: 3px 5px 0 #B91C1C, 0 0 0  0 rgba(239,68,68,.5); }
+      50%      { box-shadow: 3px 5px 0 #B91C1C, 0 0 0 16px rgba(239,68,68,.0); }
+    }
+    .mic-btn:disabled { background: #E8E0D8; box-shadow: 2px 3px 0 #C8BDB5; cursor: not-allowed; opacity: .6; }
+    .mic-hint { font-family: var(--font-b); font-size: 12px; font-weight: 700; color: var(--mid); }
+
+    /* ── 빠른 제안 칩 ── */
+    .va-suggestions {
+      padding: 0 12px 14px; display: flex; flex-wrap: wrap; gap: 6px; flex-shrink: 0;
+    }
+    .chip {
+      font-family: var(--font-b); font-size: 12px; font-weight: 800;
+      padding: 6px 13px; border-radius: 100px; border: 2px solid transparent;
+      cursor: pointer; transition: all .15s; white-space: nowrap;
+    }
+    .chip:hover { transform: translateY(-1px); }
+    .chip-o  { background: var(--orange-pale); color: var(--orange);   border-color: rgba(255,107,53,.25); }
+    .chip-o:hover { background: var(--orange);   color: #fff; border-color: var(--orange); }
+    .chip-t  { background: var(--teal-pale);   color: var(--teal-dk); border-color: rgba(46,196,182,.25); }
+    .chip-t:hover { background: var(--teal);     color: #fff; border-color: var(--teal); }
+    .chip-p  { background: var(--pink-pale);   color: var(--pink-dk); border-color: rgba(255,133,161,.25); }
+    .chip-p:hover { background: var(--pink);     color: #fff; border-color: var(--pink); }
+    .chip-y  { background: var(--yellow-pale); color: var(--yellow-dk); border-color: rgba(255,211,63,.35); }
+    .chip-y:hover { background: var(--yellow);   color: var(--dark); border-color: var(--yellow); }
+    .chip-pu { background: var(--purple-pale); color: #7C3AED; border-color: rgba(168,85,247,.25); }
+    .chip-pu:hover { background: var(--purple);  color: #fff; border-color: var(--purple); }
+    .chip-wf { background: var(--wf-pale);     color: var(--wf-dk);  border-color: rgba(255,201,71,.35); }
+    .chip-wf:hover { background: var(--wf);      color: var(--dark); border-color: var(--wf); }
+
+    /* ── 반짝임 이펙트 ── */
+    .sparkle { position: fixed; pointer-events: none; z-index: 9999; animation: spkFly 1.3s ease-out forwards; }
+    @keyframes spkFly {
+      0%   { transform: translateY(0)    scale(1)   rotate(0deg);   opacity: 1; }
+      100% { transform: translateY(-55px) scale(.1) rotate(220deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ 에디터 목업 배경 ═══ -->
+<div class="page">
+
+  <!-- 툴바 -->
+  <div class="toolbar">
+    <a href="#" class="t-logo">
+      <div class="t-logo-icon">🧇</div>
+      <span class="t-logo-text">Wa<em>Cratch</em></span>
+    </a>
+    <div class="t-divider"></div>
+    <input class="t-project" value="고양이 점프 게임" type="text" spellcheck="false">
+    <div class="t-spacer"></div>
+    <div class="t-run-stop">
+      <button class="btn-run">▶ 실행하기</button>
+      <button class="btn-stop">⏹ 멈추기</button>
+    </div>
+    <div class="t-divider"></div>
+    <div class="t-actions">
+      <button class="btn-toolbar btn-save">💾 저장</button>
+      <button class="btn-toolbar btn-share">🔗 공유하기</button>
+    </div>
+    <div class="t-divider"></div>
+    <div class="t-avatar">🧇</div>
+  </div>
+
+  <!-- 에디터 바디 -->
+  <div class="editor-body">
+
+    <!-- 워크스페이스 -->
+    <div class="workspace">
+      <div class="fake-blocks">
+        <div class="fb fb-wf"><div class="fb-notch"></div>🧇 시작 버튼을 클릭했을 때</div>
+        <div class="fb fb-yellow"><div class="fb-notch"></div>🔄 10번 반복하기</div>
+        <div class="fb fb-orange fb-indent"><div class="fb-notch"></div>➡️ 10만큼 이동하기</div>
+        <div class="fb fb-teal fb-indent"><div class="fb-notch"></div>🔍 벽에 닿았는가?</div>
+        <div class="fb fb-purple fb-indent"><div class="fb-notch"></div>💬 "점프!" 1초 말하기</div>
+      </div>
+      <div class="ws-hint">📌 블록을 드래그해서 연결하세요</div>
+    </div>
+
+    <!-- 스테이지 -->
+    <div class="stage-panel">
+      <div class="stage-ctrl">
+        <span class="stage-title">🎬 스테이지</span>
+        <div class="stage-btns">
+          <button class="s-btn">⛶</button>
+          <button class="s-btn">⤢</button>
+        </div>
+      </div>
+      <div class="stage-canvas-wrap">
+        <div class="s-cloud s-c1"></div>
+        <div class="s-cloud s-c2"></div>
+        <div class="s-cloud s-c3"></div>
+        <div class="s-ground"></div>
+        <!-- 와냥이 스프라이트 (스테이지용 미니) -->
+        <svg class="s-sprite" viewBox="0 0 72 88" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="36" cy="60" rx="22" ry="20" fill="#FF9040"/>
+          <circle cx="36" cy="34" r="26" fill="#FF9040"/>
+          <polygon points="14,20 4,2 24,10" fill="#FF9040"/>
+          <polygon points="58,20 68,2 48,10" fill="#FF9040"/>
+          <polygon points="15,18 8,6 22,12" fill="#FFB8C5"/>
+          <polygon points="57,18 64,6 50,12" fill="#FFB8C5"/>
+          <ellipse cx="26" cy="32" rx="8" ry="9" fill="white"/>
+          <ellipse cx="46" cy="32" rx="8" ry="9" fill="white"/>
+          <ellipse cx="27" cy="33" rx="5.5" ry="7" fill="#2C1810"/>
+          <ellipse cx="47" cy="33" rx="5.5" ry="7" fill="#2C1810"/>
+          <circle cx="30" cy="30" r="2.5" fill="white"/>
+          <circle cx="50" cy="30" r="2.5" fill="white"/>
+          <ellipse cx="36" cy="42" rx="4" ry="3" fill="#FF85A1"/>
+          <path d="M29 47 Q36 53 43 47" stroke="#C44477" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <line x1="4" y1="40" x2="28" y2="42" stroke="#555" stroke-width="1.1" opacity="0.28"/>
+          <line x1="4" y1="45" x2="28" y2="44" stroke="#555" stroke-width="1.1" opacity="0.28"/>
+          <line x1="44" y1="42" x2="68" y2="40" stroke="#555" stroke-width="1.1" opacity="0.28"/>
+          <line x1="44" y1="44" x2="68" y2="45" stroke="#555" stroke-width="1.1" opacity="0.28"/>
+          <path d="M28 17 Q36 13 44 17" stroke="#D44E1A" stroke-width="2" fill="none" opacity="0.38" stroke-linecap="round"/>
+          <path d="M26 24 Q36 19 46 24" stroke="#D44E1A" stroke-width="1.5" fill="none" opacity="0.32" stroke-linecap="round"/>
+          <ellipse cx="18" cy="41" rx="8" ry="5" fill="#FF9BC2" opacity="0.38"/>
+          <ellipse cx="54" cy="41" rx="8" ry="5" fill="#FF9BC2" opacity="0.38"/>
+          <path d="M55 70 Q70 66 68 54 Q66 44 56 48" stroke="#FF9040" stroke-width="7" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="stage-coords">
+        <span class="coord-chip">x: 45</span>
+        <span class="coord-chip">y: −12</span>
+        <span class="coord-chip">방향: 90°</span>
+      </div>
+      <div class="sprite-section">
+        <div class="sprite-hdr">
+          <span class="sprite-hdr-title">🐾 스프라이트</span>
+          <button class="add-sprite">+</button>
+        </div>
+        <div class="sprite-list">
+          <div class="sprite-thumb active">
+            <div class="sp-icon">🐱</div>
+            <div class="sp-name">와냥이</div>
+          </div>
+          <div class="sprite-thumb">
+            <div class="sp-icon">⭐</div>
+            <div class="sp-name">별</div>
+          </div>
+          <div class="sprite-thumb">
+            <div class="sp-icon">🧇</div>
+            <div class="sp-name">와플</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 상태 바 -->
+  <div class="status-bar">
+    <span><span class="s-dot"></span>준비됨</span>
+    <span>스프라이트: 와냥이</span>
+    <span>블록: 5개</span>
+    <span style="margin-left:auto;">WaCratch v1.0 🐾</span>
+  </div>
+</div>
+
+
+<!-- ═══ 음성 에이전트 토글 버튼 ═══ -->
+<button class="va-toggle" id="vaToggle" title="AI 와냥이와 대화하기">
+  🎙️
+  <div class="va-toggle-badge">AI</div>
+</button>
+
+
+<!-- ═══ 음성 에이전트 패널 ═══ -->
+<div class="va-panel" id="vaPanel">
+
+  <!-- 헤더 / 아바타 -->
+  <div class="va-header">
+    <button class="va-close" id="vaClose" title="닫기">✕</button>
+
+    <div class="va-avatar-wrap">
+      <div class="va-ring" id="vaRing"></div>
+      <div class="va-avatar-bg"></div>
+      <!-- 와냥이 AI 얼굴 -->
+      <svg class="va-cat" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+        <!-- 귀 -->
+        <g class="ear-l">
+          <polygon points="12,32 2,8 26,16" fill="#FF9040"/>
+          <polygon points="13,30 7,12 22,18" fill="#FFB8C5"/>
+        </g>
+        <g class="ear-r">
+          <polygon points="76,32 86,8 62,16" fill="#FF9040"/>
+          <polygon points="75,30 81,12 66,18" fill="#FFB8C5"/>
+        </g>
+        <!-- 머리 -->
+        <circle cx="44" cy="50" r="34" fill="#FF9040"/>
+        <!-- 와플 무늬 이마 (WaCratch 브랜드) -->
+        <path d="M32 22 Q44 17 56 22" stroke="#D44E1A" stroke-width="2.5" fill="none" opacity="0.42" stroke-linecap="round"/>
+        <path d="M29 30 Q44 24 59 30" stroke="#D44E1A" stroke-width="2"   fill="none" opacity="0.35" stroke-linecap="round"/>
+        <!-- 눈 흰자 -->
+        <g class="eye-l"><ellipse cx="31" cy="47" rx="10.5" ry="12" fill="white"/></g>
+        <g class="eye-r"><ellipse cx="57" cy="47" rx="10.5" ry="12" fill="white"/></g>
+        <!-- 동공 -->
+        <ellipse id="pL" cx="32.5" cy="49" rx="7"   ry="9.5" fill="#2C1810"/>
+        <ellipse id="pR" cx="58.5" cy="49" rx="7"   ry="9.5" fill="#2C1810"/>
+        <!-- 눈 하이라이트 -->
+        <circle cx="36" cy="44" r="3.2" fill="white"/>
+        <circle cx="62" cy="44" r="3.2" fill="white"/>
+        <circle cx="29" cy="51" r="1.5" fill="white" opacity="0.45"/>
+        <circle cx="55" cy="51" r="1.5" fill="white" opacity="0.45"/>
+        <!-- 볼 홍조 -->
+        <ellipse cx="17" cy="57" rx="9" ry="6" fill="#FF9BC2" opacity="0.42"/>
+        <ellipse cx="71" cy="57" rx="9" ry="6" fill="#FF9BC2" opacity="0.42"/>
+        <!-- 코 -->
+        <ellipse cx="44" cy="63" rx="5" ry="3.5" fill="#FF85A1"/>
+        <ellipse cx="43" cy="62" rx="2" ry="1.5" fill="#FFAAC8" opacity="0.55"/>
+        <!-- 입 (보통) -->
+        <g id="mNormal">
+          <path d="M36 68 Q44 76 52 68" stroke="#C44477" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+          <path d="M39 68 L44 63 L49 68" stroke="#C44477" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <!-- 입 (말하는 중 - 기본 숨김) -->
+        <g id="mOpen" opacity="0">
+          <ellipse cx="44" cy="72" rx="6.5" ry="5.5" fill="#C44477"/>
+          <ellipse cx="44" cy="73" rx="4.5" ry="3.5" fill="#FF9BC2"/>
+        </g>
+        <!-- 수염 -->
+        <line x1="2"  y1="58" x2="28" y2="63" stroke="#2C1810" stroke-width="1.3" opacity="0.26"/>
+        <line x1="2"  y1="65" x2="28" y2="65" stroke="#2C1810" stroke-width="1.3" opacity="0.26"/>
+        <line x1="60" y1="63" x2="86" y2="58" stroke="#2C1810" stroke-width="1.3" opacity="0.26"/>
+        <line x1="60" y1="65" x2="86" y2="65" stroke="#2C1810" stroke-width="1.3" opacity="0.26"/>
+        <!-- 와냥이 AI 목걸이 -->
+        <rect x="30" y="79" width="28" height="8" rx="4" fill="#FFC947"/>
+        <circle cx="44" cy="83" r="4" fill="#FF6B35"/>
+        <text x="44" y="85.8" text-anchor="middle" font-size="4.5" font-weight="bold" fill="white" font-family="Nunito, sans-serif">AI</text>
+      </svg>
+    </div>
+
+    <div class="va-name">와냥이 AI</div>
+    <div class="va-status-badge">
+      <div class="va-dot idle" id="vaDot"></div>
+      <span class="va-status-text" id="vaStatusText">기다리고 있어요!</span>
+    </div>
+  </div>
+
+  <!-- 데모 상태 스위처 -->
+  <div class="demo-bar">
+    <span class="demo-label">데모 상태:</span>
+    <button class="demo-btn active" data-st="idle"      onclick="setState('idle')">😴 대기</button>
+    <button class="demo-btn"        data-st="listening" onclick="setState('listening')">🎤 듣는 중</button>
+    <button class="demo-btn"        data-st="thinking"  onclick="setState('thinking')">🤔 생각 중</button>
+    <button class="demo-btn"        data-st="speaking"  onclick="setState('speaking')">💬 말하는 중</button>
+  </div>
+
+  <!-- 채팅 -->
+  <div class="va-chat" id="vaChat">
+    <div class="bubble bubble-bot">
+      <div class="bub-content">
+        🧇 안녕! 나는 AI 와냥이야~<br>
+        코딩 도움이 필요하면 뭐든지 물어봐 냐옹! 블록 만들어 달라고 해도 돼 🐾
+      </div>
+      <div class="bub-time">방금 전</div>
+    </div>
+    <div class="bubble bubble-usr">
+      <div class="bub-content">이 블록들이 뭘 하는 건지 설명해줘!</div>
+      <div class="bub-time">방금 전</div>
+    </div>
+    <div class="bubble bubble-bot">
+      <div class="bub-content">
+        물론이지! 🎉<br><br>
+        지금 블록을 보면 말이야…<br>
+        <b>🔄 10번 반복하기</b> 블록 안에 있는 블록들이 10번 반복돼!<br><br>
+        고양이가 오른쪽으로 10칸씩 이동하면서 벽에 닿으면 감지하고, 그다음 <b>"점프!"</b>라고 말하는 거야 😸
+        <div class="bub-tag">✦ 블록 5개 감지됨</div>
+      </div>
+      <div class="bub-time">방금 전</div>
+    </div>
+  </div>
+
+  <!-- 파형 시각화 -->
+  <div class="va-wave" id="vaWave">
+    <div class="wave-inner">
+      <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+      <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+      <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+      <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+      <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+    </div>
+  </div>
+
+  <!-- 마이크 버튼 -->
+  <div class="va-mic-area">
+    <button class="mic-btn" id="micBtn" onclick="handleMic()">🎙️</button>
+    <span class="mic-hint" id="micHint">눌러서 말하기</span>
+  </div>
+
+  <!-- 빠른 제안 칩 -->
+  <div class="va-suggestions">
+    <button class="chip chip-o"  onclick="sendMsg('코드 설명해줘! 📖')">📖 코드 설명</button>
+    <button class="chip chip-t"  onclick="sendMsg('버그 고쳐줘! 🐛')">🐛 버그 수정</button>
+    <button class="chip chip-p"  onclick="sendMsg('새 블록 만들어줘! ✨')">✨ 블록 만들기</button>
+    <button class="chip chip-y"  onclick="sendMsg('어떻게 하면 돼? 💡')">💡 도움말</button>
+    <button class="chip chip-pu" onclick="sendMsg('더 재미있게 만들어줘! 🎮')">🎮 업그레이드</button>
+    <button class="chip chip-wf" onclick="sendMsg('와플 블록 추가해줘! 🧇')">🧇 와플 블록</button>
+  </div>
+
+</div>
+
+
+<script>
+  const panel   = document.getElementById('vaPanel');
+  const toggle  = document.getElementById('vaToggle');
+  const closeBtn= document.getElementById('vaClose');
+
+  // 패널 열기/닫기
+  toggle.addEventListener('click', () => {
+    const opening = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden');
+    toggle.classList.toggle('panel-hidden', !opening);
+    if (opening) spawnSparkles(toggle.getBoundingClientRect(), 8);
+  });
+  closeBtn.addEventListener('click', () => {
+    panel.classList.add('hidden');
+    toggle.classList.add('panel-hidden');
+  });
+
+  // ── 상태 머신 ──
+  let curState = 'idle';
+  const responses = [
+    "오! 좋은 질문이야 냐옹~ 🐱 그건 이렇게 하면 돼!",
+    "물론이지! ✨ 내가 블록을 자동으로 만들어줄게!",
+    "이 코드를 보면 말이야... 🔍 반복 블록 안에서 이동하고 있어!",
+    "야옹~ 버그를 찾았어! 🐛 이 부분을 이렇게 바꿔봐!",
+    "훌륭한 아이디어야! 🌟 블록을 이렇게 연결해보자!",
+    "와~ 창의적이다! 🎨 이런 방법도 있어, 한번 해볼까?",
+    "냐옹냐옹! 잠깐, 블록을 새로 만들어줄게! 😺",
+  ];
+  let respIdx = 0;
+
+  function setState(st) {
+    curState = st;
+
+    // 데모 버튼 상태
+    document.querySelectorAll('.demo-btn').forEach(b => b.classList.toggle('active', b.dataset.st === st));
+
+    const dot   = document.getElementById('vaDot');
+    const txt   = document.getElementById('vaStatusText');
+    const wave  = document.getElementById('vaWave');
+    const ring  = document.getElementById('vaRing');
+    const mic   = document.getElementById('micBtn');
+    const hint  = document.getElementById('micHint');
+    const mN    = document.getElementById('mNormal');
+    const mO    = document.getElementById('mOpen');
+
+    // 클래스 리셋
+    dot.className  = 'va-dot';
+    wave.className = 'va-wave';
+    ring.className = 'va-ring';
+    mic.disabled   = false;
+    mic.className  = 'mic-btn';
+    if (mN) mN.setAttribute('opacity', '1');
+    if (mO) mO.setAttribute('opacity', '0');
+    document.querySelectorAll('.typing-wrap').forEach(e => e.remove());
+
+    switch (st) {
+      case 'idle':
+        dot.classList.add('idle');
+        txt.textContent = '기다리고 있어요!';
+        hint.textContent = '눌러서 말하기';
+        break;
+
+      case 'listening':
+        dot.classList.add('listening');
+        txt.textContent = '듣고 있어요! 🎤';
+        ring.classList.add('listening');
+        wave.classList.add('listening');
+        mic.classList.add('listening');
+        hint.textContent = '말하고 있어요...';
+        break;
+
+      case 'thinking':
+        dot.classList.add('thinking');
+        txt.textContent = '생각 중이에요...';
+        ring.classList.add('thinking');
+        wave.classList.add('thinking');
+        mic.disabled = true;
+        hint.textContent = '잠깐만 기다려줘! 🤔';
+        addTyping();
+        break;
+
+      case 'speaking':
+        dot.classList.add('speaking');
+        txt.textContent = '말하고 있어요! 💬';
+        ring.classList.add('speaking');
+        wave.classList.add('speaking');
+        mic.disabled = true;
+        hint.textContent = '잘 들어봐! 👂';
+        if (mN) mN.setAttribute('opacity', '0');
+        if (mO) mO.setAttribute('opacity', '1');
+        addResponse();
+        break;
+    }
+  }
+
+  function addTyping() {
+    const chat = document.getElementById('vaChat');
+    if (chat.querySelector('.typing-wrap')) return;
+    const el = document.createElement('div');
+    el.className = 'bubble bubble-bot typing-wrap';
+    el.innerHTML = '<div class="bub-content"><div class="typing-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div></div>';
+    chat.appendChild(el);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function addResponse() {
+    const chat = document.getElementById('vaChat');
+    document.querySelectorAll('.typing-wrap').forEach(e => e.remove());
+    const el = document.createElement('div');
+    el.className = 'bubble bubble-bot';
+    el.innerHTML = `<div class="bub-content">${responses[respIdx++ % responses.length]}</div><div class="bub-time">방금 전</div>`;
+    chat.appendChild(el);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function sendMsg(text) {
+    const chat = document.getElementById('vaChat');
+    const el = document.createElement('div');
+    el.className = 'bubble bubble-usr';
+    el.innerHTML = `<div class="bub-content">${text}</div><div class="bub-time">방금 전</div>`;
+    chat.appendChild(el);
+    chat.scrollTop = chat.scrollHeight;
+    spawnSparkles(el.getBoundingClientRect(), 6);
+
+    setTimeout(() => setState('thinking'),  200);
+    setTimeout(() => setState('speaking'), 1900);
+    setTimeout(() => setState('idle'),     3800);
+  }
+
+  function handleMic() {
+    if (curState !== 'idle') return;
+    setState('listening');
+    setTimeout(() => setState('thinking'),  2400);
+    setTimeout(() => setState('speaking'),  4000);
+    setTimeout(() => setState('idle'),      6200);
+  }
+
+  function spawnSparkles(rect, count = 6) {
+    const emojis = ['✦', '✧', '⋆', '🌟', '🧇', '💫', '🐾', '⭐'];
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        const s = document.createElement('span');
+        s.className = 'sparkle';
+        const x = rect.left + Math.random() * Math.max(rect.width, 20);
+        const y = rect.top  + Math.random() * Math.max(rect.height, 20);
+        s.style.cssText = `left:${x}px;top:${y}px;font-size:${11 + Math.random() * 12}px;animation-delay:${Math.random() * .2}s`;
+        s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 1600);
+      }, i * 65);
+    }
+  }
+</script>
+
+</body>
+</html>
