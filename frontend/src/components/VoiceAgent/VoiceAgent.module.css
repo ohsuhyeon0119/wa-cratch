@@ -1,10 +1,88 @@
-/* ── Toggle button ── */
-.toggle {
+/* ── Floating widget ── */
+.widget {
   position: fixed;
   right: 20px;
-  bottom: 36px;
-  width: 52px;
-  height: 52px;
+  bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 600;
+}
+
+/* ── State label ── */
+.stateLabel {
+  background: rgba(30, 20, 15, 0.82);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 11px;
+  border-radius: 20px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+.stateLabelVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Button wrap (holds rings + button) ── */
+.btnWrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+}
+
+/* ── Ripple rings ── */
+.ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* listening → green rings */
+.listening .ring:nth-child(1) {
+  box-shadow: 0 0 0 2px #22C55E;
+  animation: ripple 2.2s ease-out infinite;
+}
+.listening .ring:nth-child(2) {
+  box-shadow: 0 0 0 2px #22C55E;
+  animation: ripple 2.2s ease-out 0.8s infinite;
+}
+
+/* speaking → blue rings */
+.speaking .ring:nth-child(1) {
+  box-shadow: 0 0 0 2px #3B82F6;
+  animation: ripple 1.6s ease-out infinite;
+}
+.speaking .ring:nth-child(2) {
+  box-shadow: 0 0 0 2px #3B82F6;
+  animation: ripple 1.6s ease-out 0.55s infinite;
+}
+
+/* connecting → orange slow pulse */
+.connecting .ring:nth-child(1) {
+  box-shadow: 0 0 0 2px #FF6B35;
+  animation: ripple 2s ease-out infinite;
+}
+
+@keyframes ripple {
+  0%   { transform: scale(1);   opacity: 0.65; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* ── Main button ── */
+.btn {
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
   border: none;
   cursor: pointer;
@@ -12,130 +90,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 600;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 2px 4px 0 rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease, background 0.3s ease, box-shadow 0.3s ease;
 }
-.toggle:hover { transform: translateY(-2px); }
-.toggleIdle      { background: var(--orange, #FF6B35); color: #fff; }
-.toggleConnecting{ background: #aaa; color: #fff; }
-.toggleListening { background: #22C55E; color: #fff; }
-.toggleSpeaking  { background: #3B82F6; color: #fff; }
+.btn:hover  { transform: scale(1.07); }
+.btn:active { transform: scale(0.94); }
 
-/* ── Panel ── */
-.panel {
-  position: fixed;
-  right: 0;
-  top: 58px;
-  bottom: 28px;
-  width: 300px;
-  background: var(--cream, #FFF8F2);
-  border-left: 3px solid var(--orange-pale, #FFE8DC);
-  display: flex;
-  flex-direction: column;
-  z-index: 500;
-  box-shadow: -4px 0 16px rgba(44, 24, 16, 0.1);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.panelHidden { transform: translateX(308px); }
-
-/* ── Panel header ── */
-.panelHeader {
-  padding: 12px 14px;
-  background: var(--orange, #FF6B35);
+.btnIdle {
+  background: #FF6B35;
   color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(255, 107, 53, 0.45);
 }
-.panelTitle { font-weight: 800; font-size: 15px; }
-.closeBtn {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+.btnConnecting {
+  background: #94a3b8;
   color: #fff;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 4px 14px rgba(148, 163, 184, 0.35);
 }
-.closeBtn:hover { background: rgba(255, 255, 255, 0.35); }
-
-/* ── Status area ── */
-.statusArea {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 20px;
+.btnListening {
+  background: #22C55E;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.5);
 }
-.statusIndicator {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  transition: background 0.3s;
+.btnSpeaking {
+  background: #3B82F6;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.5);
 }
-.status_idle       { background: #E0D8D4; }
-.status_connecting { background: #aaa; animation: pulse 1s infinite; }
-.status_listening  { background: #22C55E; animation: pulse 1.2s infinite; }
-.status_speaking   { background: #3B82F6; animation: pulse 0.8s infinite; }
-.statusLabel { font-size: 16px; font-weight: 700; color: #2C1810; }
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50%       { transform: scale(1.08); opacity: 0.85; }
-}
-
-/* ── Transcript toggle ── */
-.transcriptToggle {
-  flex-shrink: 0;
-  border-top: 2px solid var(--orange-pale, #FFE8DC);
-}
-.toggleBtn {
-  width: 100%;
-  padding: 10px 14px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-  color: #B0A8A4;
-  text-align: left;
-}
-.toggleBtn:hover { color: #2C1810; }
-
-.transcriptArea {
-  max-height: 200px;
-  overflow-y: auto;
-  padding: 8px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.transcriptArea::-webkit-scrollbar { width: 4px; }
-.transcriptArea::-webkit-scrollbar-thumb {
-  background: var(--orange-pale, #FFE8DC);
-  border-radius: 2px;
-}
-.emptyTranscript {
-  font-size: 12px;
-  color: #B0A8A4;
-  text-align: center;
-  padding: 8px;
-}
-.transcriptItem {
-  font-size: 12px;
-  line-height: 1.4;
-  display: flex;
-  gap: 6px;
-}
-.transcriptRole { font-weight: 700; flex-shrink: 0; }
-.transcriptUser  .transcriptRole { color: var(--orange, #FF6B35); }
-.transcriptModel .transcriptRole { color: #3B82F6; }
-.transcriptText { color: #2C1810; }

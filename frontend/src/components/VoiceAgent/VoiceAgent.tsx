@@ -4,7 +4,6 @@ import type * as Blockly from 'blockly'
 import { useRealtimeVoice } from './useRealtimeVoice'
 import { useAuth } from '../../context/AuthContext'
 import VoiceAgentToggle from './VoiceAgentToggle'
-import VoiceAgentPanel from './VoiceAgentPanel'
 
 interface Props {
   workspaceRef: RefObject<Blockly.WorkspaceSvg | null>
@@ -12,34 +11,19 @@ interface Props {
 }
 
 export default function VoiceAgent({ workspaceRef, projectTitle }: Props) {
-  const [open, setOpen] = useState(false)
+  const [active, setActive] = useState(false)
   const { user } = useAuth()
-  const { voiceState, transcripts, connect, disconnect } = useRealtimeVoice(workspaceRef, projectTitle, user?.nickname ?? '')
+  const { voiceState, connect, disconnect } = useRealtimeVoice(workspaceRef, projectTitle, user?.nickname ?? '')
 
   const handleToggle = useCallback(() => {
-    if (open) {
+    if (active) {
       disconnect()
-      setOpen(false)
+      setActive(false)
     } else {
-      setOpen(true)
+      setActive(true)
       connect().catch(console.error)
     }
-  }, [open, connect, disconnect])
+  }, [active, connect, disconnect])
 
-  const handleClose = useCallback(() => {
-    disconnect()
-    setOpen(false)
-  }, [disconnect])
-
-  return (
-    <>
-      <VoiceAgentToggle voiceState={voiceState} onClick={handleToggle} />
-      <VoiceAgentPanel
-        open={open}
-        voiceState={voiceState}
-        transcripts={transcripts}
-        onClose={handleClose}
-      />
-    </>
-  )
+  return <VoiceAgentToggle voiceState={voiceState} onClick={handleToggle} />
 }
