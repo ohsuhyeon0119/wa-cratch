@@ -47,6 +47,7 @@ export default function EditorPage() {
       scrollbars: true,
       renderer: 'zelos',
       theme: Blockly.Themes.Zelos,
+      sounds: false,
     })
     workspaceRef.current = workspace
 

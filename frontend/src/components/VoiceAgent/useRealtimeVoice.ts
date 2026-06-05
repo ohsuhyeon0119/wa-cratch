@@ -124,9 +124,10 @@ export function useRealtimeVoice(
         }
         console.log('[VoiceAgent] sending session.update:', JSON.stringify(sessionUpdatePayload, null, 2))
         dc.send(JSON.stringify(sessionUpdatePayload))
-        dc.send(JSON.stringify({ type: 'response.create' }))
+        // response.create는 session.updated 이벤트 후에 전송 (아래 onmessage에서 처리)
       }
 
+      let greetingSent = false
       dc.onmessage = (e: MessageEvent) => {
         const event = JSON.parse(e.data as string)
         console.log('[VoiceAgent] server event:', event.type, event)
@@ -134,6 +135,10 @@ export function useRealtimeVoice(
         if (event.type === 'session.updated') {
           console.log('[VoiceAgent] session.updated — instructions:', event.session?.instructions?.slice(0, 80))
           console.log('[VoiceAgent] session.updated — tools:', event.session?.tools)
+          if (!greetingSent) {
+            greetingSent = true
+            dc.send(JSON.stringify({ type: 'response.create' }))
+          }
         }
 
         if (event.type === 'error') {
