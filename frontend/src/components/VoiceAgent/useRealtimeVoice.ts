@@ -99,10 +99,17 @@ export function useRealtimeVoice(
         if (audioElRef.current) audioElRef.current.srcObject = e.streams[0]
       }
 
-      // 4. 마이크 입력
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      // 4. 마이크 입력 (에코 캔슬링 + 노이즈 억제)
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      })
       streamRef.current = stream
-      pc.addTrack(stream.getTracks()[0])
+      // stream 참조 포함해야 브라우저 에코 캔슬링이 정상 동작함
+      stream.getTracks().forEach(track => pc.addTrack(track, stream))
 
       // 5. 이벤트 채널
       const dc = pc.createDataChannel('oai-events')
