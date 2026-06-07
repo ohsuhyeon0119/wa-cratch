@@ -9,6 +9,7 @@ frontend/dist/
 __pycache__/
 *.py[cod]
 backend/.venv/
+backend/venv312/
 *.env
 
 # DB

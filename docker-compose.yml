@@ -14,6 +14,8 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
+    env_file:
+      - ./backend/.env
     environment:
       DATABASE_URL: postgresql://catcratch:catcratch@db:5432/catcratch
     depends_on:

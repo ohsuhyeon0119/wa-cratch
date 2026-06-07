@@ -1,0 +1,117 @@
+/* ── Floating widget ── */
+.widget {
+  position: fixed;
+  right: 20px;
+  bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 600;
+}
+
+/* ── State label ── */
+.stateLabel {
+  background: rgba(30, 20, 15, 0.82);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 11px;
+  border-radius: 20px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+.stateLabelVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Button wrap (holds rings + button) ── */
+.btnWrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+}
+
+/* ── Ripple rings ── */
+.ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* listening → green rings */
+.listening .ring:nth-child(1) {
+  box-shadow: 0 0 0 2px #22C55E;
+  animation: ripple 2.2s ease-out infinite;
+}
+.listening .ring:nth-child(2) {
+  box-shadow: 0 0 0 2px #22C55E;
+  animation: ripple 2.2s ease-out 0.8s infinite;
+}
+
+/* speaking → blue rings */
+.speaking .ring:nth-child(1) {
+  box-shadow: 0 0 0 2px #3B82F6;
+  animation: ripple 1.6s ease-out infinite;
+}
+.speaking .ring:nth-child(2) {
+  box-shadow: 0 0 0 2px #3B82F6;
+  animation: ripple 1.6s ease-out 0.55s infinite;
+}
+
+/* connecting → orange slow pulse */
+.connecting .ring:nth-child(1) {
+  box-shadow: 0 0 0 2px #FF6B35;
+  animation: ripple 2s ease-out infinite;
+}
+
+@keyframes ripple {
+  0%   { transform: scale(1);   opacity: 0.65; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* ── Main button ── */
+.btn {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+.btn:hover  { transform: scale(1.07); }
+.btn:active { transform: scale(0.94); }
+
+.btnIdle {
+  background: #FF6B35;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(255, 107, 53, 0.45);
+}
+.btnConnecting {
+  background: #94a3b8;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(148, 163, 184, 0.35);
+}
+.btnListening {
+  background: #22C55E;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.5);
+}
+.btnSpeaking {
+  background: #3B82F6;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.5);
+}
