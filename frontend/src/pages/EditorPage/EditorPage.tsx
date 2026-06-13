@@ -11,7 +11,7 @@ import { SpriteRuntime, defaultSpriteState, SPRITE_LIBRARY } from './spriteRunti
 import type { SpriteState, Background } from './spriteRuntime'
 import { getProject, createProject, updateProject } from '../../api/projects'
 import axios from 'axios'
-import VoiceAgent from '../../components/VoiceAgent/VoiceAgent'
+import TextAgent from '../../components/TextAgent/TextAgent'
 
 registerBlocks()
 
@@ -291,7 +291,7 @@ export default function EditorPage() {
         <span style={{ marginLeft: 'auto' }}>WaCratch v1.0 🐾</span>
       </div>
 
-      <VoiceAgent workspaceRef={workspaceRef} projectTitle={projectTitle} />
+      <TextAgent workspaceRef={workspaceRef} projectTitle={projectTitle} />
       <Toast visible={toastVisible} message={toastMessage} type={toastType} />
     </div>
   )
