@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, get_db, Base
 from app.models import user, project  # noqa: F401 — registers models before create_all
 from app.models import like  # noqa: F401 — registers Like model before create_all
+from app.models import conversation  # noqa: F401 — registers ConversationSession before create_all
 from app.routers import agent, auth, projects, activity, users, likes, voice
 from app.services import auth_service
 

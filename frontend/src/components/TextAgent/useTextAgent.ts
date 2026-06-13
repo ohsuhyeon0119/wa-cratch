@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import type { RefObject } from 'react'
 import * as Blockly from 'blockly'
 
@@ -10,6 +10,14 @@ export interface Message {
 
 const API_BASE = 'http://localhost:8000'
 
+function authHeaders(): HeadersInit {
+  const token = localStorage.getItem('token') ?? ''
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  }
+}
+
 export function useTextAgent(
   workspaceRef: RefObject<Blockly.WorkspaceSvg | null>,
   projectTitle: string,
@@ -18,6 +26,26 @@ export function useTextAgent(
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
+
+  // 마운트 시 서버에서 대화 히스토리 불러오기
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    fetch(`${API_BASE}/agent/history`, { headers: authHeaders() })
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { messages: Array<{ role: string; content: string }> } | null) => {
+        if (!data?.messages?.length) return
+        setMessages(
+          data.messages.map(m => ({
+            id: crypto.randomUUID(),
+            role: m.role as 'user' | 'assistant',
+            content: m.content,
+          }))
+        )
+      })
+      .catch(() => {/* 히스토리 로드 실패는 조용히 무시 */})
+  }, [])
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return
@@ -33,30 +61,21 @@ export function useTextAgent(
       ? Blockly.serialization.workspaces.save(workspace)
       : {}
 
-    const history = messages.map(m => ({ role: m.role, content: m.content }))
-
     abortRef.current = new AbortController()
 
     try {
-      const token = localStorage.getItem('token') ?? ''
       const res = await fetch(`${API_BASE}/agent/chat`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: authHeaders(),
         body: JSON.stringify({
           message: text,
-          history,
           project_context: { title: projectTitle, blocks_json: blocksJson },
           nickname,
         }),
         signal: abortRef.current.signal,
       })
 
-      if (!res.ok || !res.body) {
-        throw new Error(`HTTP ${res.status}`)
-      }
+      if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`)
 
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
@@ -68,7 +87,7 @@ export function useTextAgent(
         const lines = decoder.decode(value, { stream: true }).split('\n')
         for (const line of lines) {
           if (!line.startsWith('data:')) continue
-          // "data: " — SSE 프로토콜 공백 1개만 제거, 내용 leading space 보존, \r 제거
+          // SSE 프로토콜 공백 1개만 제거, 내용의 leading space 보존, \r 제거
           const raw = line.slice(5)
           const chunk = (raw.startsWith(' ') ? raw.slice(1) : raw).trimEnd()
           if (chunk === '[DONE]') break
@@ -97,7 +116,7 @@ export function useTextAgent(
       setIsLoading(false)
       abortRef.current = null
     }
-  }, [isLoading, messages, workspaceRef, projectTitle, nickname])
+  }, [isLoading, workspaceRef, projectTitle, nickname])
 
   return { messages, isLoading, sendMessage }
 }
