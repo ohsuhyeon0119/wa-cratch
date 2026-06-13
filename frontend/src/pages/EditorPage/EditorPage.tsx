@@ -218,6 +218,21 @@ export default function EditorPage() {
     }
   }, [id, navigate, showToast, projectTitle])
 
+  // 5초마다 자동 저장 (기존 프로젝트만, /editor/new 제외)
+  useEffect(() => {
+    if (!id || id === 'new') return
+    const timer = setInterval(async () => {
+      if (!workspaceRef.current) return
+      try {
+        const blocks_json = Blockly.serialization.workspaces.save(workspaceRef.current)
+        await updateProject(id, { blocks_json, title: projectTitle || '새 프로젝트' })
+      } catch {
+        // 자동 저장 실패는 조용히 무시
+      }
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [id, projectTitle])
+
   return (
     <div className={s.page}>
       {/* TOOLBAR */}

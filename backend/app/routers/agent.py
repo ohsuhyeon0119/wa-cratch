@@ -4,6 +4,7 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
 from sse_starlette.sse import EventSourceResponse
 
 from app.core.security import get_current_user
@@ -65,6 +66,7 @@ async def agent_chat(
         if record:
             record.messages = new_messages
             record.updated_at = datetime.utcnow()
+            flag_modified(record, "messages")  # JSON 컬럼 변경 명시적 알림
         else:
             db.add(ConversationSession(username=username, messages=new_messages))
         db.commit()
