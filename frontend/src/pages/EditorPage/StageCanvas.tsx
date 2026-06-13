@@ -12,6 +12,7 @@ interface Props {
 }
 
 const BG_OPTIONS: { key: Background; label: string }[] = [
+  { key: 'white', label: '흰색' },
   { key: 'sky', label: '하늘' },
   { key: 'night', label: '밤' },
   { key: 'ocean', label: '바다' },

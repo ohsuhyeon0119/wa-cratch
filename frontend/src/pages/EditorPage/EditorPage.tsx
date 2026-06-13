@@ -22,7 +22,7 @@ export default function EditorPage() {
   const { user } = useAuth()
   const [isRunning, setIsRunning] = useState(false)
   const [spriteState, setSpriteState] = useState<SpriteState>(defaultSpriteState())
-  const [selectedBg, setSelectedBg] = useState<Background>('sky')
+  const [selectedBg, setSelectedBg] = useState<Background>('white')
   const [blockCount, setBlockCount] = useState(0)
   const [projectTitle, setProjectTitle] = useState('새 프로젝트')
   const [flyoutOpen, setFlyoutOpen] = useState(false)

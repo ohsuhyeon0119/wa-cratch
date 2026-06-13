@@ -8,7 +8,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from sse_starlette.sse import EventSourceResponse
 
 from app.core.security import get_current_user
-from app.database import get_db
+from app.database import SessionLocal, get_db
 from app.models.conversation import ConversationSession
 from app.services.agent_service import ToolContext, stream_agent_response
 
@@ -58,18 +58,24 @@ async def agent_chat(
             accumulated.append(chunk)
             yield {"data": chunk}
 
-        # 스트림 완료 후 DB에 저장
+        # Depends(get_db) 세션은 이 generator가 실행될 때 이미 닫혀 있으므로
+        # 새 세션을 직접 열어서 커밋한다
         new_messages = history + [
             {"role": "user", "content": body.message},
             {"role": "assistant", "content": "".join(accumulated)},
         ]
-        if record:
-            record.messages = new_messages
-            record.updated_at = datetime.utcnow()
-            flag_modified(record, "messages")  # JSON 컬럼 변경 명시적 알림
-        else:
-            db.add(ConversationSession(username=username, messages=new_messages))
-        db.commit()
+        commit_db = SessionLocal()
+        try:
+            commit_record = commit_db.query(ConversationSession).filter_by(username=username).first()
+            if commit_record:
+                commit_record.messages = new_messages
+                commit_record.updated_at = datetime.utcnow()
+                flag_modified(commit_record, "messages")
+            else:
+                commit_db.add(ConversationSession(username=username, messages=new_messages))
+            commit_db.commit()
+        finally:
+            commit_db.close()
 
         yield {"data": "[DONE]"}
 

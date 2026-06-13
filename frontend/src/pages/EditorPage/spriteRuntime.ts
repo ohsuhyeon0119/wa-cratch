@@ -1,6 +1,6 @@
 import type * as BlocklyType from 'blockly'
 
-export type Background = 'sky' | 'night' | 'ocean' | 'space' | 'forest'
+export type Background = 'white' | 'sky' | 'night' | 'ocean' | 'space' | 'forest'
 
 export interface SpriteState {
   x: number
@@ -17,7 +17,7 @@ const STAGE_W = 480
 const STAGE_H = 360
 
 export function defaultSpriteState(): SpriteState {
-  return { x: 0, y: -35, direction: 90, visible: true, size: 100, speech: null, bg: 'sky', spriteId: 'cat' }
+  return { x: 0, y: -35, direction: 90, visible: true, size: 100, speech: null, bg: 'white', spriteId: 'cat' }
 }
 
 // ── Canvas rendering ──────────────────────────────────────────────
@@ -151,6 +151,10 @@ function getSpriteImage(id = 'cat'): Promise<HTMLImageElement> {
 }
 
 const BG_DRAWS: Record<Background, (ctx: CanvasRenderingContext2D) => void> = {
+  white: (ctx) => {
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, STAGE_W, STAGE_H)
+  },
   sky: (ctx) => {
     const g = ctx.createLinearGradient(0, 0, 0, STAGE_H)
     g.addColorStop(0, '#87CEEB')
