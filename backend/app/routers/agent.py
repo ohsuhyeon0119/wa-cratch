@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from typing import Any
 
@@ -57,6 +58,10 @@ async def agent_chat(
         async for chunk in stream_agent_response(body.message, history, ctx):
             accumulated.append(chunk)
             yield {"data": chunk}
+
+        # write tool이 pending_action을 설정했으면 ACTION 이벤트 전송 (히스토리 저장 전)
+        if ctx.pending_action:
+            yield {"data": f"ACTION:{json.dumps(ctx.pending_action, ensure_ascii=False)}"}
 
         # Depends(get_db) 세션은 이 generator가 실행될 때 이미 닫혀 있으므로
         # 새 세션을 직접 열어서 커밋한다
