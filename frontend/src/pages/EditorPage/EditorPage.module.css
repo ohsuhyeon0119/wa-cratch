@@ -380,3 +380,19 @@
   font-size: 11px; font-weight: 700; color: var(--mid);
 }
 .statusDot { width: 7px; height: 7px; border-radius: 50%; background: #22C55E; display: inline-block; }
+
+/* AI 블록 적용 대기 중 블러 오버레이 */
+.workspaceOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  pointer-events: none;
+  animation: overlayFadeIn 0.25s ease-out;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

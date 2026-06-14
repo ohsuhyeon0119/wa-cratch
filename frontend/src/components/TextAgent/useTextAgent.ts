@@ -8,6 +8,12 @@ export interface Message {
   content: string
 }
 
+export interface BlockAction {
+  type: 'set_blocks' | 'append_blocks' | 'clear_workspace'
+  xml: string | null
+  sprite_name: string | null
+}
+
 const API_BASE = 'http://localhost:8000'
 
 function authHeaders(): HeadersInit {
@@ -25,6 +31,7 @@ export function useTextAgent(
 ) {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [pendingAction, setPendingAction] = useState<BlockAction | null>(null)
   const abortRef = useRef<AbortController | null>(null)
 
   // 마운트 시 서버에서 대화 히스토리 불러오기
@@ -47,6 +54,35 @@ export function useTextAgent(
       .catch(() => {/* 히스토리 로드 실패는 조용히 무시 */})
   }, [])
 
+  const applyPendingAction = useCallback(() => {
+    const workspace = workspaceRef.current
+    if (!pendingAction || !workspace) return
+
+    try {
+      if (pendingAction.type === 'set_blocks' && pendingAction.xml) {
+        workspace.clear()
+        Blockly.Xml.domToWorkspace(
+          Blockly.utils.xml.textToDom(pendingAction.xml),
+          workspace,
+        )
+      } else if (pendingAction.type === 'append_blocks' && pendingAction.xml) {
+        Blockly.Xml.domToWorkspace(
+          Blockly.utils.xml.textToDom(pendingAction.xml),
+          workspace,
+        )
+      } else if (pendingAction.type === 'clear_workspace') {
+        workspace.clear()
+      }
+    } catch (err) {
+      console.error('[TextAgent] 블록 적용 실패:', err)
+    }
+    setPendingAction(null)
+  }, [pendingAction, workspaceRef])
+
+  const rejectPendingAction = useCallback(() => {
+    setPendingAction(null)
+  }, [])
+
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return
 
@@ -55,6 +91,7 @@ export function useTextAgent(
 
     setMessages(prev => [...prev, userMsg, assistantMsg])
     setIsLoading(true)
+    setPendingAction(null)
 
     const workspace = workspaceRef.current
     const blocksJson = workspace
@@ -91,6 +128,18 @@ export function useTextAgent(
           const raw = line.slice(5)
           const chunk = (raw.startsWith(' ') ? raw.slice(1) : raw).trimEnd()
           if (chunk === '[DONE]') break
+
+          // ACTION 이벤트: 텍스트에 추가하지 않고 pendingAction 상태로 저장
+          if (chunk.startsWith('ACTION:')) {
+            try {
+              const action = JSON.parse(chunk.slice(7)) as BlockAction
+              setPendingAction(action)
+            } catch {
+              console.error('[TextAgent] ACTION 파싱 실패:', chunk)
+            }
+            continue
+          }
+
           if (chunk) {
             setMessages(prev =>
               prev.map(m =>
@@ -118,5 +167,5 @@ export function useTextAgent(
     }
   }, [isLoading, workspaceRef, projectTitle, nickname])
 
-  return { messages, isLoading, sendMessage }
+  return { messages, isLoading, pendingAction, sendMessage, applyPendingAction, rejectPendingAction }
 }
