@@ -19,6 +19,7 @@ import type { SpriteEntity, Background } from './spriteRuntime'
 import { getProject, createProject, updateProject } from '../../api/projects'
 import axios from 'axios'
 import TextAgent from '../../components/TextAgent/TextAgent'
+import type { BlockAction } from '../../components/TextAgent/useTextAgent'
 
 registerBlocks()
 
@@ -36,6 +37,7 @@ export default function EditorPage() {
   const [projectTitle, setProjectTitle] = useState('새 프로젝트')
   const [flyoutOpen, setFlyoutOpen] = useState(false)
   const [flyoutBtnLeft, setFlyoutBtnLeft] = useState(164)
+  const [pendingBlockAction, setPendingBlockAction] = useState<BlockAction | null>(null)
 
   const workspaceDivRef = useRef<HTMLDivElement>(null)
   const workspaceRef = useRef<Blockly.WorkspaceSvg | null>(null)
@@ -398,6 +400,8 @@ export default function EditorPage() {
               «
             </button>
           )}
+          {/* AI 블록 적용 대기 중 블러 오버레이 */}
+          {pendingBlockAction && <div className={s.workspaceOverlay} />}
         </div>
 
         {/* STAGE PANEL */}
@@ -425,7 +429,12 @@ export default function EditorPage() {
         <span style={{ marginLeft: 'auto' }}>WaCratch v1.0 🐾</span>
       </div>
 
-      <TextAgent workspaceRef={workspaceRef} projectTitle={projectTitle} />
+      <TextAgent
+        workspaceRef={workspaceRef}
+        projectTitle={projectTitle}
+        projectId={id ?? '__new__'}
+        onPendingActionChange={setPendingBlockAction}
+      />
       <Toast visible={toastVisible} message={toastMessage} type={toastType} />
     </div>
   )

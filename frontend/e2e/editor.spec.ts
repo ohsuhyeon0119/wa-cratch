@@ -5,12 +5,25 @@ const fakeUserBody = JSON.stringify({
   projectCount: 0, totalLikes: 0,
 });
 
+const fakeProjectBody = JSON.stringify({
+  id: 'test-project-uuid', title: '새 프로젝트', author: '테스터', authorId: 'test',
+  emoji: '🐱', likes: 0, description: '', tags: [], blocks_json: {},
+});
+
 test.describe('에디터 (인증 상태)', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem('token', 'test-token'));
     await page.route('**/users/me', route =>
       route.fulfill({ status: 200, contentType: 'application/json', body: fakeUserBody })
     );
+    // /editor/new → NewProjectPage가 POST /projects를 호출해 UUID로 리다이렉트
+    await page.route('**/projects', route => {
+      if (route.request().method() === 'POST') {
+        route.fulfill({ status: 201, contentType: 'application/json', body: fakeProjectBody });
+      } else {
+        route.continue();
+      }
+    });
   });
 
   test('툴바에 실행/멈추기 버튼이 렌더링된다', async ({ page }) => {
