@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage/LoginPage'
 import ExplorePage from './pages/ExplorePage/ExplorePage'
 import DashboardPage from './pages/DashboardPage/DashboardPage'
 import EditorPage from './pages/EditorPage/EditorPage'
+import NewProjectPage from './pages/NewProjectPage/NewProjectPage'
 import PlayPage from './pages/PlayPage/PlayPage'
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
 import NotFoundPage from './pages/NotFoundPage/NotFoundPage'
@@ -26,7 +27,7 @@ function App() {
         path="/editor/new"
         element={
           <ProtectedRoute>
-            <EditorPage />
+            <NewProjectPage />
           </ProtectedRoute>
         }
       />

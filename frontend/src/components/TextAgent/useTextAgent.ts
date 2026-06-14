@@ -28,18 +28,20 @@ export function useTextAgent(
   workspaceRef: RefObject<Blockly.WorkspaceSvg | null>,
   projectTitle: string,
   nickname: string,
+  projectId: string,
 ) {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [pendingAction, setPendingAction] = useState<BlockAction | null>(null)
   const abortRef = useRef<AbortController | null>(null)
 
-  // 마운트 시 서버에서 대화 히스토리 불러오기
+  // 저장된 프로젝트(실제 UUID)의 대화 히스토리만 불러오기
   useEffect(() => {
+    setMessages([])
     const token = localStorage.getItem('token')
-    if (!token) return
+    if (!token || projectId === 'new') return
 
-    fetch(`${API_BASE}/agent/history`, { headers: authHeaders() })
+    fetch(`${API_BASE}/agent/history?project_id=${encodeURIComponent(projectId)}`, { headers: authHeaders() })
       .then(r => r.ok ? r.json() : null)
       .then((data: { messages: Array<{ role: string; content: string }> } | null) => {
         if (!data?.messages?.length) return
@@ -51,8 +53,8 @@ export function useTextAgent(
           }))
         )
       })
-      .catch(() => {/* 히스토리 로드 실패는 조용히 무시 */})
-  }, [])
+      .catch(() => {})
+  }, [projectId])
 
   const applyPendingAction = useCallback(() => {
     const workspace = workspaceRef.current
@@ -108,6 +110,7 @@ export function useTextAgent(
           message: text,
           project_context: { title: projectTitle, blocks_json: blocksJson },
           nickname,
+          project_id: projectId,
         }),
         signal: abortRef.current.signal,
       })
@@ -124,7 +127,6 @@ export function useTextAgent(
         const lines = decoder.decode(value, { stream: true }).split('\n')
         for (const line of lines) {
           if (!line.startsWith('data:')) continue
-          // SSE 프로토콜 공백 1개만 제거, 내용의 leading space 보존, \r 제거
           const raw = line.slice(5)
           const chunk = (raw.startsWith(' ') ? raw.slice(1) : raw).trimEnd()
           if (chunk === '[DONE]') break
@@ -165,7 +167,7 @@ export function useTextAgent(
       setIsLoading(false)
       abortRef.current = null
     }
-  }, [isLoading, workspaceRef, projectTitle, nickname])
+  }, [isLoading, workspaceRef, projectTitle, nickname, projectId])
 
   return { messages, isLoading, pendingAction, sendMessage, applyPendingAction, rejectPendingAction }
 }

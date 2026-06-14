@@ -25,15 +25,17 @@ class AgentChatRequest(BaseModel):
     message: str
     project_context: ProjectContext
     nickname: str
+    project_id: str = "__new__"
 
 
 @router.get("/history")
 def get_history(
+    project_id: str = "__new__",
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     username = current_user["sub"]
-    record = db.query(ConversationSession).filter_by(username=username).first()
+    record = db.query(ConversationSession).filter_by(username=username, project_id=project_id).first()
     return {"messages": record.messages if record else []}
 
 
@@ -44,7 +46,8 @@ async def agent_chat(
     current_user: dict = Depends(get_current_user),
 ):
     username = current_user["sub"]
-    record = db.query(ConversationSession).filter_by(username=username).first()
+    project_id = body.project_id
+    record = db.query(ConversationSession).filter_by(username=username, project_id=project_id).first()
     history: list[dict] = list(record.messages) if record else []
 
     ctx = ToolContext(
@@ -71,13 +74,13 @@ async def agent_chat(
         ]
         commit_db = SessionLocal()
         try:
-            commit_record = commit_db.query(ConversationSession).filter_by(username=username).first()
+            commit_record = commit_db.query(ConversationSession).filter_by(username=username, project_id=project_id).first()
             if commit_record:
                 commit_record.messages = new_messages
                 commit_record.updated_at = datetime.utcnow()
                 flag_modified(commit_record, "messages")
             else:
-                commit_db.add(ConversationSession(username=username, messages=new_messages))
+                commit_db.add(ConversationSession(username=username, project_id=project_id, messages=new_messages))
             commit_db.commit()
         finally:
             commit_db.close()

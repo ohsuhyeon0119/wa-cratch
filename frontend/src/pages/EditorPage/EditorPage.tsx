@@ -432,6 +432,7 @@ export default function EditorPage() {
       <TextAgent
         workspaceRef={workspaceRef}
         projectTitle={projectTitle}
+        projectId={id ?? '__new__'}
         onPendingActionChange={setPendingBlockAction}
       />
       <Toast visible={toastVisible} message={toastMessage} type={toastType} />

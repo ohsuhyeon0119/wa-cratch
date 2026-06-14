@@ -10,16 +10,18 @@ import s from './TextAgent.module.css'
 interface Props {
   workspaceRef: RefObject<Blockly.WorkspaceSvg | null>
   projectTitle: string
+  projectId: string
   onPendingActionChange: (action: BlockAction | null) => void
 }
 
-export default function TextAgent({ workspaceRef, projectTitle, onPendingActionChange }: Props) {
+export default function TextAgent({ workspaceRef, projectTitle, projectId, onPendingActionChange }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const { user } = useAuth()
   const { messages, isLoading, pendingAction, sendMessage, applyPendingAction, rejectPendingAction } = useTextAgent(
     workspaceRef,
     projectTitle,
     user?.nickname ?? '',
+    projectId,
   )
 
   useEffect(() => {
