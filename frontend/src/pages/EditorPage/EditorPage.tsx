@@ -157,6 +157,40 @@ export default function EditorPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // dev-only API for programmatic block assembly
+  useEffect(() => {
+    ;(window as Record<string, unknown>)['_wc_api'] = {
+      getEntities: () => entitiesRef.current.map((e) => ({ id: e.id, name: e.name })),
+      loadWorkspace: (entityId: string, data: object) => {
+        const entity = entitiesRef.current.find((e) => e.id === entityId)
+        if (!entity) return false
+        entity.workspaceData = data
+        if (activeEntityIdRef.current === entityId && workspaceRef.current) {
+          Blockly.serialization.workspaces.load(
+            data as Parameters<typeof Blockly.serialization.workspaces.load>[0],
+            workspaceRef.current,
+          )
+        }
+        return true
+      },
+      switchTo: (entityId: string) => {
+        const currentEntity = entitiesRef.current.find((e) => e.id === activeEntityIdRef.current)
+        if (currentEntity && workspaceRef.current) {
+          currentEntity.workspaceData = Blockly.serialization.workspaces.save(workspaceRef.current)
+        }
+        activeEntityIdRef.current = entityId
+        const newEntity = entitiesRef.current.find((e) => e.id === entityId)
+        if (newEntity && workspaceRef.current) {
+          Blockly.serialization.workspaces.load(
+            newEntity.workspaceData as Parameters<typeof Blockly.serialization.workspaces.load>[0],
+            workspaceRef.current,
+          )
+        }
+      },
+    }
+    return () => { delete (window as Record<string, unknown>)['_wc_api'] }
+  }, [])
+
   // 윈도우 리사이즈 시 Blockly 재조정
   useEffect(() => {
     const handleResize = () => {

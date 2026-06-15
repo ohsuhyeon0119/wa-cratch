@@ -352,6 +352,8 @@ export function renderStage(
   entities: SpriteEntity[],
   images: Map<string, HTMLImageElement>,
   bg: Background,
+  score?: number,
+  lives?: number,
 ): void {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
@@ -420,6 +422,23 @@ export function renderStage(
     ctx.fillText(`x: ${Math.round(first.state.x)}  y: ${Math.round(first.state.y)}`, 8, STAGE_H - 6)
     ctx.restore()
   }
+
+  // HUD: score (top-right) + lives (top-left)
+  ctx.save()
+  ctx.font = 'bold 18px Nunito, sans-serif'
+  ctx.shadowColor = 'rgba(0,0,0,0.6)'
+  ctx.shadowBlur = 4
+  if (score !== undefined) {
+    ctx.fillStyle = '#fff'
+    ctx.textAlign = 'right'
+    ctx.fillText(`점수: ${score}`, STAGE_W - 10, 28)
+  }
+  if (lives !== undefined) {
+    ctx.fillStyle = '#FF4444'
+    ctx.textAlign = 'left'
+    ctx.fillText('♥'.repeat(Math.max(0, lives)), 10, 28)
+  }
+  ctx.restore()
 }
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -698,7 +717,8 @@ export class SpriteRuntime {
         break
       }
       case 'wc_set_direction': {
-        this.state.direction = Number(block.getFieldValue('DIR'))
+        const valBlock = block.getInputTargetBlock('VALUE') as Block | null
+        this.state.direction = ((valBlock ? await this.evalNumber(valBlock) : 90) % 360 + 360) % 360
         this.render()
         await sleep(16)
         break
@@ -708,10 +728,10 @@ export class SpriteRuntime {
         const bwHW = (bwEntry.naturalW / 2) * (this.state.size / 100)
         const bwHH = (bwEntry.naturalH / 2) * (this.state.size / 100)
         if (Math.abs(this.state.x) + bwHW >= STAGE_W / 2) {
-          this.state.direction = 180 - this.state.direction
+          this.state.direction = 360 - this.state.direction
         }
         if (Math.abs(this.state.y) + bwHH >= STAGE_H / 2) {
-          this.state.direction = -this.state.direction
+          this.state.direction = 180 - this.state.direction
         }
         this.state.direction = ((this.state.direction % 360) + 360) % 360
         this.render()
@@ -794,6 +814,44 @@ export class SpriteRuntime {
         this.variables.set(name, (this.variables.get(name) ?? 0) + delta)
         break
       }
+
+      // ── BOUNCE SIDES ONLY (no bottom) ──
+      case 'wc_bounce_sides': {
+        const bsEntry = SPRITE_LIBRARY[this.state.spriteId] ?? SPRITE_LIBRARY.cat
+        const bsHW = (bsEntry.naturalW / 2) * (this.state.size / 100)
+        const bsHH = (bsEntry.naturalH / 2) * (this.state.size / 100)
+        if (this.state.x - bsHW < -STAGE_W / 2 || this.state.x + bsHW > STAGE_W / 2) {
+          this.state.direction = 360 - this.state.direction
+          this.state.x = Math.max(-STAGE_W / 2 + bsHW, Math.min(STAGE_W / 2 - bsHW, this.state.x))
+        }
+        if (this.state.y + bsHH > STAGE_H / 2) {
+          this.state.direction = 180 - this.state.direction
+          this.state.y = Math.min(STAGE_H / 2 - bsHH, this.state.y)
+        }
+        this.render()
+        await sleep(16)
+        break
+      }
+
+      // ── SCORE ──
+      case 'wc_score_add': {
+        const valBlock = block.getInputTargetBlock('VALUE') as Block | null
+        this.engine.score += valBlock ? await this.evalNumber(valBlock) : 1
+        this.render()
+        break
+      }
+      case 'wc_score_reset':
+        this.engine.score = 0
+        this.render()
+        break
+      case 'wc_lives_set':
+        this.engine.lives = Number(block.getFieldValue('VALUE') ?? 3)
+        this.render()
+        break
+      case 'wc_lives_change':
+        this.engine.lives += Number(block.getFieldValue('DELTA') ?? -1)
+        this.render()
+        break
 
       // ── MOUSE SENSING ──
       case 'wc_set_x_to_mouse': {
@@ -904,6 +962,10 @@ export class SpriteRuntime {
         return this.state.vx
       case 'wc_get_vy':
         return this.state.vy
+      case 'wc_get_direction':
+        return this.state.direction
+      case 'wc_lives_get':
+        return this.engine.lives
       case 'wc_sprite_x_of': {
         const name = block.getFieldValue('SPRITE') as string
         return this.engine.getSpriteState(name)?.x ?? 0
@@ -977,6 +1039,8 @@ export class SpriteRuntime {
 export class GameEngine {
   entities: SpriteEntity[]
   keysDown: Set<string>  // public so SpriteRuntime can read it
+  score = 0
+  lives = 3
   private canvas: HTMLCanvasElement
   private runtimes: Map<string, SpriteRuntime>
   private onEntitiesChange: (e: SpriteEntity[]) => void
@@ -1029,7 +1093,7 @@ export class GameEngine {
 
   render(): void {
     const bg = this.entities[0]?.state.bg ?? 'sky'
-    renderStage(this.canvas, this.entities, this.images, bg)
+    renderStage(this.canvas, this.entities, this.images, bg, this.score, this.lives)
   }
 
   attachKeyListeners(): () => void {

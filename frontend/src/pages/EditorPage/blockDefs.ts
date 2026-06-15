@@ -176,7 +176,7 @@ export function registerBlocks() {
     {
       type: 'wc_set_direction',
       message0: '방향을 %1 도로 정하기',
-      args0: [{ type: 'field_number', name: 'DIR', value: 90 }],
+      args0: [{ type: 'input_value', name: 'VALUE', check: 'Number' }],
       previousStatement: null,
       nextStatement: null,
       colour: '#FF6B35',
@@ -189,6 +189,14 @@ export function registerBlocks() {
       nextStatement: null,
       colour: '#FF6B35',
       tooltip: '벽에 닿으면 반대 방향으로 튕깁니다',
+    },
+    {
+      type: 'wc_bounce_sides',
+      message0: '3면에서 튕기기 (바닥 통과)',
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#FF6B35',
+      tooltip: '왼쪽/오른쪽/위 벽에서만 튕기고 바닥은 통과합니다 (벽돌깨기 전용)',
     },
     {
       type: 'wc_glide_to',
@@ -516,6 +524,51 @@ export function registerBlocks() {
       tooltip: '스프라이트의 x 좌표를 마우스 x 위치로 이동합니다 (패들 제어에 유용)',
     },
 
+    // ── SCORE / LIVES ──
+    {
+      type: 'wc_lives_set',
+      message0: '목숨을 %1 개로 설정',
+      args0: [{ type: 'field_number', name: 'VALUE', value: 3, min: 0 }],
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#F59E0B',
+      tooltip: '목숨 수를 설정합니다',
+    },
+    {
+      type: 'wc_lives_change',
+      message0: '목숨 %1 개 바꾸기',
+      args0: [{ type: 'field_number', name: 'DELTA', value: -1 }],
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#F59E0B',
+      tooltip: '목숨 수를 변경합니다',
+    },
+    {
+      type: 'wc_lives_get',
+      message0: '현재 목숨',
+      output: 'Number',
+      colour: '#F59E0B',
+      tooltip: '현재 목숨 수를 반환합니다',
+    },
+    {
+      type: 'wc_score_add',
+      message0: '점수 %1 추가',
+      args0: [{ type: 'input_value', name: 'VALUE', check: 'Number' }],
+      inputsInline: true,
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#F59E0B',
+      tooltip: '게임 점수를 지정한 값만큼 올립니다',
+    },
+    {
+      type: 'wc_score_reset',
+      message0: '점수 초기화',
+      previousStatement: null,
+      nextStatement: null,
+      colour: '#F59E0B',
+      tooltip: '게임 점수를 0으로 초기화합니다',
+    },
+
     // ── CLONE ──
     {
       type: 'wc_when_clone_start',
@@ -620,6 +673,13 @@ export function registerBlocks() {
       tooltip: '현재 y 방향 속도를 반환합니다',
     },
     {
+      type: 'wc_get_direction',
+      message0: '현재 방향',
+      output: 'Number',
+      colour: '#059669',
+      tooltip: '현재 방향을 도(°) 단위로 반환합니다',
+    },
+    {
       type: 'wc_on_floor',
       message0: '바닥에 닿았는가?',
       output: 'Boolean',
@@ -702,8 +762,12 @@ export const TOOLBOX_CONFIG = {
         { kind: 'block', type: 'wc_change_y' },
         { kind: 'block', type: 'wc_glide_to' },
         { kind: 'block', type: 'wc_rotate' },
-        { kind: 'block', type: 'wc_set_direction' },
+        {
+          kind: 'block', type: 'wc_set_direction',
+          inputs: { VALUE: { shadow: { type: 'wc_num_literal', fields: { NUM: 90 } } } },
+        },
         { kind: 'block', type: 'wc_bounce_wall' },
+        { kind: 'block', type: 'wc_bounce_sides' },
         { kind: 'block', type: 'wc_reset_pos' },
       ],
     },
@@ -771,6 +835,21 @@ export const TOOLBOX_CONFIG = {
     },
     {
       kind: 'category',
+      name: '🏆 점수',
+      colour: '#F59E0B',
+      contents: [
+        {
+          kind: 'block',
+          type: 'wc_score_add',
+          inputs: { VALUE: { shadow: { type: 'wc_num_literal', fields: { NUM: 1 } } } },
+        },
+        { kind: 'block', type: 'wc_score_reset' },
+        { kind: 'block', type: 'wc_lives_set' },
+        { kind: 'block', type: 'wc_lives_change' },
+      ],
+    },
+    {
+      kind: 'category',
       name: '🔢 연산',
       colour: '#8B5CF6',
       contents: [
@@ -798,6 +877,7 @@ export const TOOLBOX_CONFIG = {
         { kind: 'block', type: 'wc_apply_gravity' },
         { kind: 'block', type: 'wc_get_vx' },
         { kind: 'block', type: 'wc_get_vy' },
+        { kind: 'block', type: 'wc_get_direction' },
         { kind: 'block', type: 'wc_on_floor' },
       ],
     },
