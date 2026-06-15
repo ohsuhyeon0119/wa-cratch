@@ -10,7 +10,10 @@ from sse_starlette.sse import EventSourceResponse
 
 from app.core.security import get_current_user
 from app.database import SessionLocal, get_db
+from app.ifc.labels import DataSource
 from app.models.conversation import ConversationSession
+from app.models.project import Project
+from app.services import auth_service
 from app.services.agent_service import ToolContext, stream_agent_response
 
 router = APIRouter()
@@ -50,6 +53,15 @@ async def agent_chat(
     record = db.query(ConversationSession).filter_by(username=username, project_id=project_id).first()
     history: list[dict] = list(record.messages) if record else []
 
+    # 프로젝트 소유권으로 DataSource 레이블 결정
+    project_data_source = DataSource.OWN_PROJECT
+    if project_id != "__new__":
+        user = auth_service.get_user_by_username(db, username)
+        if user:
+            project = db.query(Project).filter_by(id=project_id).first()
+            if project and project.user_id != user.id:
+                project_data_source = DataSource.SHARED_PROJECT
+
     ctx = ToolContext(
         project_context=body.project_context.model_dump(),
         nickname=body.nickname,
@@ -58,7 +70,7 @@ async def agent_chat(
     accumulated: list[str] = []
 
     async def event_generator():
-        async for chunk in stream_agent_response(body.message, history, ctx):
+        async for chunk in stream_agent_response(body.message, history, ctx, project_data_source):
             accumulated.append(chunk)
             yield {"data": chunk}
 

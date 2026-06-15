@@ -45,12 +45,14 @@ def build_ifc_graph(
     system_prompt: str,
     policy_engine: PolicyEngine | None = None,
     default_tool_label: IFCLabel | None = None,
+    tool_sources: dict[str, DataSource] | None = None,
 ):
     """
     FIDES StateGraph 빌드 (Algorithm 7).
 
-    default_tool_label: tool 결과에 부착할 기본 레이블.
+    default_tool_label: tool 결과에 부착할 기본 레이블 (tool_sources에 없는 경우).
                         None이면 DataSource.INTERNAL (T,L)을 사용한다.
+    tool_sources: 툴별 DataSource 매핑. hide_node에서 결과 레이블 결정에 사용.
     """
     if policy_engine is None:
         policy_engine = PolicyEngine()
@@ -115,10 +117,16 @@ def build_ifc_graph(
 
     def hide_node(state: IFCState) -> dict:
         tc = state["pending_tool_call"]
+        tool_name = tc["name"]
+        result_label = (
+            get_source_label(tool_sources[tool_name])
+            if tool_sources and tool_name in tool_sources
+            else default_tool_label
+        )
         content, new_ctx = hide(
-            tool_name=tc["name"],
+            tool_name=tool_name,
             tool_result=tc["result"],
-            result_label=default_tool_label,
+            result_label=result_label,
             context_label=state["context_label"],
             memory=state["memory"],
         )
