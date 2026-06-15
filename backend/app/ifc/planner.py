@@ -60,15 +60,18 @@ def build_ifc_graph(
         default_tool_label = get_source_label(DataSource.INTERNAL)
 
     tool_map: dict[str, Any] = {t.__name__: t for t in tools}
-    llm_with_tools = model.bind_tools(tools)
+    # parallel_tool_calls=False: OpenAI의 multi_tool_use.parallel이 정책 체크를 우회하는 것을 방지
+    llm_with_tools = model.bind_tools(tools, parallel_tool_calls=False)
 
     def llm_node(state: IFCState) -> dict:
         sys_msgs = [SystemMessage(content=system_prompt)]
         stripped = _to_lc_messages(state["messages"])
         response = llm_with_tools.invoke(sys_msgs + stripped)
 
-        if response.tool_calls:
-            tc = response.tool_calls[0]
+        # multi_tool_use.parallel는 OpenAI 병렬 툴 호출 래퍼로, 정책 체크를 우회하므로 무시
+        valid_calls = [tc for tc in response.tool_calls if tc["name"] != "multi_tool_use.parallel"]
+        if valid_calls:
+            tc = valid_calls[0]
             return {
                 "pending_tool_call": {
                     "name": tc["name"],
