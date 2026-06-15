@@ -45,12 +45,14 @@ def build_ifc_graph(
     system_prompt: str,
     policy_engine: PolicyEngine | None = None,
     default_tool_label: IFCLabel | None = None,
+    tool_sources: dict[str, DataSource] | None = None,
 ):
     """
     FIDES StateGraph 빌드 (Algorithm 7).
 
-    default_tool_label: tool 결과에 부착할 기본 레이블.
+    default_tool_label: tool 결과에 부착할 기본 레이블 (tool_sources에 없는 경우).
                         None이면 DataSource.INTERNAL (T,L)을 사용한다.
+    tool_sources: 툴별 DataSource 매핑. hide_node에서 결과 레이블 결정에 사용.
     """
     if policy_engine is None:
         policy_engine = PolicyEngine()
@@ -58,15 +60,18 @@ def build_ifc_graph(
         default_tool_label = get_source_label(DataSource.INTERNAL)
 
     tool_map: dict[str, Any] = {t.__name__: t for t in tools}
-    llm_with_tools = model.bind_tools(tools)
+    # parallel_tool_calls=False: OpenAI의 multi_tool_use.parallel이 정책 체크를 우회하는 것을 방지
+    llm_with_tools = model.bind_tools(tools, parallel_tool_calls=False)
 
     def llm_node(state: IFCState) -> dict:
         sys_msgs = [SystemMessage(content=system_prompt)]
         stripped = _to_lc_messages(state["messages"])
         response = llm_with_tools.invoke(sys_msgs + stripped)
 
-        if response.tool_calls:
-            tc = response.tool_calls[0]
+        # multi_tool_use.parallel는 OpenAI 병렬 툴 호출 래퍼로, 정책 체크를 우회하므로 무시
+        valid_calls = [tc for tc in response.tool_calls if tc["name"] != "multi_tool_use.parallel"]
+        if valid_calls:
+            tc = valid_calls[0]
             return {
                 "pending_tool_call": {
                     "name": tc["name"],
@@ -115,10 +120,16 @@ def build_ifc_graph(
 
     def hide_node(state: IFCState) -> dict:
         tc = state["pending_tool_call"]
+        tool_name = tc["name"]
+        result_label = (
+            get_source_label(tool_sources[tool_name])
+            if tool_sources and tool_name in tool_sources
+            else default_tool_label
+        )
         content, new_ctx = hide(
-            tool_name=tc["name"],
+            tool_name=tool_name,
             tool_result=tc["result"],
-            result_label=default_tool_label,
+            result_label=result_label,
             context_label=state["context_label"],
             memory=state["memory"],
         )

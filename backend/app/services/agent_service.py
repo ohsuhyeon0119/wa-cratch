@@ -3,7 +3,14 @@ from dataclasses import dataclass, field
 from typing import Any, AsyncGenerator, Callable
 
 from langchain_openai import ChatOpenAI
-from langgraph.prebuilt import create_react_agent
+from app.ifc import (
+    DataSource,
+    IFCState,
+    LabeledMessage,
+    PlannerMemory,
+    build_ifc_graph,
+    get_source_label,
+)
 
 BLOCK_REFERENCE = [
     # ── CONTROL ──
@@ -267,37 +274,52 @@ def _make_tools(ctx: ToolContext) -> list[Callable]:
     return [get_project_context, get_user_info, get_block_reference, set_blocks, append_blocks, clear_workspace]
 
 
-def _build_graph(ctx: ToolContext):
+def _build_graph(ctx: ToolContext, project_data_source: DataSource = DataSource.OWN_PROJECT):
     model = ChatOpenAI(
         model="gpt-4o",
         api_key=os.getenv("OPENAI_API_KEY"),
-        streaming=True,
     )
     tools = _make_tools(ctx)
-    return create_react_agent(model, tools, prompt=SYSTEM_PROMPT)
+    return build_ifc_graph(
+        model=model,
+        tools=tools,
+        system_prompt=SYSTEM_PROMPT,
+        tool_sources={
+            "get_project_context": project_data_source,
+            "get_block_reference": DataSource.INTERNAL,
+            "get_user_info": DataSource.INTERNAL,
+        },
+    )
 
 
 async def stream_agent_response(
     message: str,
     history: list[dict[str, str]],
     ctx: ToolContext,
+    project_data_source: DataSource = DataSource.OWN_PROJECT,
 ) -> AsyncGenerator[str, None]:
-    graph = _build_graph(ctx)
+    graph = _build_graph(ctx, project_data_source)
 
-    messages = [
-        {"role": m["role"], "content": m["content"]}
+    user_label = get_source_label(DataSource.USER_INPUT)
+    context_label = get_source_label(project_data_source)
+
+    labeled_history: list[LabeledMessage] = [
+        LabeledMessage(role=m["role"], content=m["content"], label=user_label)
         for m in history
-    ] + [{"role": "user", "content": message}]
+    ] + [LabeledMessage(role="user", content=message, label=user_label)]
 
-    async for event in graph.astream_events(
-        {"messages": messages},
-        version="v2",
-    ):
-        if (
-            event["event"] == "on_chat_model_stream"
-            and event.get("data", {}).get("chunk")
-        ):
-            chunk = event["data"]["chunk"]
-            text = chunk.content if hasattr(chunk, "content") else ""
-            if text:
-                yield text
+    initial_state = IFCState(
+        messages=labeled_history,
+        memory=PlannerMemory(),
+        context_label=context_label,
+        pending_tool_call=None,
+        policy_violation=None,
+    )
+
+    final_state = await graph.ainvoke(initial_state)
+
+    # 마지막 어시스턴트 텍스트 응답 추출 (tool 결과 메시지 "[tool] →" 제외)
+    for msg in reversed(final_state["messages"]):
+        if msg["role"] == "assistant" and not msg["content"].startswith("["):
+            yield msg["content"]
+            break
