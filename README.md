@@ -130,32 +130,7 @@ cd frontend && npx playwright test
 
 
 ## 아키텍처
-
-```
-┌──────────────────────────┐        ┌──────────────────────────┐
-│          Frontend          │ HTTP/SSE │           Backend            │
-│   React + TS (Vite)        │◄───────►│        FastAPI               │
-│                            │        │                              │
-│  pages/                    │        │  routers/                    │
-│   EditorPage (Blockly +    │        │   auth, users, projects,     │
-│   Canvas 스테이지)          │        │   follows, likes, activity,  │
-│   DashboardPage,            │        │   agent, voice                │
-│   ExplorePage, PlayPage 등 │        │                              │
-│                            │        │  services/                   │
-│  components/                │        │   auth_service,               │
-│   TextAgent, VoiceAgent,    │        │   project_service,            │
-│   ShareModal, Toast 등     │        │   agent_service (LangGraph)   │
-│                            │        │                              │
-│  api/ — axios 클라이언트    │        │  ifc/ — AI 에이전트 격리/      │
-│                            │        │   정책 모듈 (FIDES)            │
-└──────────────────────────┘        └──────────┬───────────────────┘
-                                                  │ SQLAlchemy
-                                                  ▼
-                                          ┌───────────────┐
-                                          │  PostgreSQL    │
-                                          │ (Docker Compose)│
-                                          └───────────────┘
-```
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/1113504e-2cf6-4f8f-85df-3904221e47ac" />
 
 - **블록 코딩 실행 흐름**: Blockly 워크스페이스의 블록 트리를 `spriteRuntime.ts`의 `GameEngine`/`SpriteRuntime`이 순회하며 Canvas에 직접 렌더링한다. 스프라이트별로 독립된 런타임을 두어 멀티 스프라이트 동시 실행을 지원한다.
 - **AI 에이전트**: `agent_service.py`에서 LangGraph 기반 에이전트가 블록 스펙(`BLOCK_REFERENCE`)을 tool로 활용해 블록 XML을 조립하고, SSE로 응답을 스트리밍한다.
