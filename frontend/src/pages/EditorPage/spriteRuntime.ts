@@ -49,7 +49,7 @@ const STAGE_W = 480
 const STAGE_H = 360
 
 export function defaultSpriteState(): SpriteState {
-  return { x: 0, y: -35, direction: 90, visible: true, size: 100, speech: null, bg: 'sky', spriteId: 'cat', vx: 0, vy: 0 }
+  return { x: 0, y: -35, direction: 90, visible: true, size: 35, speech: null, bg: 'sky', spriteId: 'cat', vx: 0, vy: 0 }
 }
 
 export function defaultSpriteEntity(id = 'sprite_1', name = '와냥이', spriteId = 'cat'): SpriteEntity {
@@ -849,7 +849,7 @@ export class SpriteRuntime {
         this.render()
         break
       case 'wc_lives_change':
-        this.engine.lives += Number(block.getFieldValue('DELTA') ?? -1)
+        this.engine.lives = (this.engine.lives ?? 3) + Number(block.getFieldValue('DELTA') ?? -1)
         this.render()
         break
 
@@ -965,7 +965,7 @@ export class SpriteRuntime {
       case 'wc_get_direction':
         return this.state.direction
       case 'wc_lives_get':
-        return this.engine.lives
+        return this.engine.lives ?? 3
       case 'wc_sprite_x_of': {
         const name = block.getFieldValue('SPRITE') as string
         return this.engine.getSpriteState(name)?.x ?? 0
@@ -1040,7 +1040,7 @@ export class GameEngine {
   entities: SpriteEntity[]
   keysDown: Set<string>  // public so SpriteRuntime can read it
   score = 0
-  lives = 3
+  lives: number | undefined = undefined
   private canvas: HTMLCanvasElement
   private runtimes: Map<string, SpriteRuntime>
   private onEntitiesChange: (e: SpriteEntity[]) => void
